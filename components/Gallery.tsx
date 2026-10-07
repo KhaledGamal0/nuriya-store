@@ -64,13 +64,16 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
             aria-label={`Open photo ${i + 1} of ${total} full screen`}
           >
             {/* All product photos load straight away: the first at top priority, the rest just behind it.
-                Lazy loading inside a sideways gallery is unreliable on iPhone (photos could stay blank). */}
+                Lazy loading inside a sideways gallery is unreliable on iPhone (photos could stay blank).
+                decoding="sync": a photo already downloaded is painted together with its frame, never one
+                frame later (async decoding showed the colour frame for a moment, mostly on iPhones). */}
             <Image
               src={img.src}
               alt={img.alt}
               fill
               quality={65}
               sizes={`(min-width: 900px) 30vw, ${PHONE_FULL}`}
+              decoding="sync"
               {...(i === 0 ? { priority: true } : { loading: "eager" as const, fetchPriority: "low" as const })}
             />
           </button>
@@ -111,7 +114,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
           {images.map((img) => (
             <div className="vw-i" key={img.src} style={preview(img.src)}>
               {/* Same size and quality as the gallery, so on phones the photo is already downloaded: opens instantly. */}
-              {open && <Image src={img.src} alt={img.alt} fill sizes={PHONE_FULL} quality={65} loading="eager" />}
+              {open && <Image src={img.src} alt={img.alt} fill sizes={PHONE_FULL} quality={65} loading="eager" decoding="sync" />}
             </div>
           ))}
         </div>

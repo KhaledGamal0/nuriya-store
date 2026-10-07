@@ -51,7 +51,7 @@ export default async function Home() {
             return (
               <Link className="pc" href={productPath(c)} key={c}>
                 <div className="pc-ph" style={preview(first.src)}>
-                  <Image src={first.src} alt={first.alt} fill quality={65} sizes="(min-width: 900px) 600px, 50vw" loading="eager" fetchPriority="low" />
+                  <Image src={first.src} alt={first.alt} fill quality={65} sizes="(min-width: 900px) 600px, 50vw" loading="eager" fetchPriority="low" decoding="sync" />
                   <Image src={second.src} alt="" fill quality={65} sizes="(min-width: 900px) 600px, 50vw" />
                 </div>
                 <div className="pc-t">
