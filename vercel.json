@@ -6,7 +6,8 @@
   "git": {
     "deploymentEnabled": {
       "ci-logs": false,
-      "ui-report": false
+      "ui-report": false,
+      "live-photos": false
     }
   }
 }
