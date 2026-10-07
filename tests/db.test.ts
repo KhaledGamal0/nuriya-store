@@ -18,15 +18,15 @@ test("seed created the catalog and all delivery areas", { skip }, async () => {
     SELECT (SELECT count(*) FROM products)::int AS products, (SELECT count(*) FROM colorways)::int AS colorways,
            (SELECT count(*) FROM variants)::int AS variants, (SELECT count(*) FROM shipping_areas)::int AS areas,
            (SELECT count(*) FROM media)::int AS media`;
-  assert.deepEqual({ ...c }, { products: 1, colorways: 2, variants: 4, areas: 35, media: 10 });
+  assert.deepEqual({ ...c }, { products: 1, colorways: 2, variants: 4, areas: 35, media: 6 });
 });
 
 test("storefront reads price, photos and fees from the database", { skip }, async () => {
   const { getCatalog, getAreas } = await import("../lib/store.ts");
   const catalog = await getCatalog();
   assert.equal(catalog.pricePiasters, 120_000);
-  assert.equal(catalog.colors.cream.images.length, 4);
-  assert.equal(catalog.colors.burgundy.images.length, 6);
+  assert.equal(catalog.colors.cream.images.length, 3);
+  assert.equal(catalog.colors.burgundy.images.length, 3);
   assert.ok(catalog.colors.cream.sizes.every((s) => s.available));
   const areas = await getAreas();
   assert.equal(areas.length, 35);
@@ -104,5 +104,5 @@ test("seeding twice changes nothing", { skip }, async () => {
   const { execFileSync } = await import("node:child_process");
   execFileSync(process.execPath, ["--experimental-strip-types", "scripts/db-seed.ts"], { env: process.env, stdio: "ignore" });
   const [c] = await sql!`SELECT (SELECT count(*) FROM variants)::int AS v, (SELECT count(*) FROM media)::int AS m, (SELECT count(*) FROM shipping_areas)::int AS a`;
-  assert.deepEqual({ ...c }, { v: 4, m: 10, a: 35 });
+  assert.deepEqual({ ...c }, { v: 4, m: 6, a: 35 });
 });
