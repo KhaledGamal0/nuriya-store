@@ -79,7 +79,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .btn-light:hover { background: var(--pink); }
 
 /* Header */
-.hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--paper) 94%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: transform 0.4s var(--ease), border-color 0.3s; }
+.hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid transparent; transition: transform 0.4s var(--ease), border-color 0.3s; }
 .hdr[data-scrolled="true"] { border-bottom-color: var(--line); }
 .hdr[data-hidden="true"] { transform: translateY(-100%); }
 
@@ -210,7 +210,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .also-img img { object-fit: cover; }
 .also b { font-weight: 500; font-size: 14px; display: block; }
 .also span { font-size: 13px; color: var(--ink-2); }
-.buybar { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; padding: var(--s1) var(--g) calc(var(--s1) + env(safe-area-inset-bottom, 0px)); background: color-mix(in srgb, var(--paper) 94%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); display: flex; gap: var(--s2); align-items: center; transform: translateY(110%); visibility: hidden; transition: transform 0.35s var(--ease), visibility 0s 0.35s; }
+.buybar { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; padding: var(--s1) var(--g) calc(var(--s1) + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(20, 16, 17, 0.06); display: flex; gap: var(--s2); align-items: center; transform: translateY(110%); visibility: hidden; transition: transform 0.35s var(--ease), visibility 0s 0.35s; }
 .buybar[data-on="true"] { transform: none; visibility: visible; transition: transform 0.35s var(--ease); }
 .buybar-t { display: grid; font-size: 13px; line-height: 1.3; flex: none; }
 .buybar-t b { font-weight: 500; font-variant-numeric: tabular-nums; }

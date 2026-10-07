@@ -27,14 +27,16 @@ export function ProductPurchase({ color }: { color: ColorId }) {
     } catch {}
   };
 
-  // Phones: once the main button has scrolled up out of view, show a slim buy bar.
+  // Phones: show a slim buy bar while reading the product (main button scrolled away), hide it at the footer.
   // A scroll check (not IntersectionObserver) so fast swipes that jump past the button still work.
   useEffect(() => {
     let frame = 0;
     const update = () => {
       frame = 0;
       const btn = addRef.current;
-      if (btn) setShowBar(btn.getBoundingClientRect().bottom < 0);
+      const footer = document.querySelector("footer");
+      const footerInView = footer ? footer.getBoundingClientRect().top < window.innerHeight : false;
+      if (btn) setShowBar(btn.getBoundingClientRect().bottom < 0 && !footerInView);
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);

@@ -190,6 +190,9 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     const box = await page.locator(".buybar").boundingBox();
     if (box && Math.abs(box.y + box.height - 844) > 1) add(vp, where, "flow", `buy bar is not sitting on the bottom edge of the screen (bottom=${Math.round(box.y + box.height)})`);
     await page.screenshot({ path: `${OUT}/shots/${vp}-buy-bar.png` });
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(700);
+    if ((await page.locator(".buybar").getAttribute("data-on")) === "true") add(vp, where, "flow", "buy bar still covers the footer at the bottom of the page");
   });
 
   await step(vp, "add-without-size", async () => {
