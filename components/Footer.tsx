@@ -46,6 +46,17 @@ export function Footer() {
         <div className="ft-b">
           <span>© {new Date().getFullYear()} Nuriya · Cairo, Egypt</span>
           <span>{cardPaymentsEnabled() ? "Cash on delivery · Visa · Mastercard" : "Cash on delivery across Egypt"}</span>
+          {/* Credit for the site's builder: quiet, one line, opens in a new tab. */}
+          <span className="ft-credit">
+            Designed and built by{" "}
+            <a href="https://khaledgamal0.github.io/khaledgamal-portfolio/" target="_blank" rel="noopener">
+              Khaled Gamal
+            </a>
+            {" · "}
+            <a href="https://www.linkedin.com/in/khaled-gamal-4232801b3" target="_blank" rel="noopener">
+              LinkedIn
+            </a>
+          </span>
         </div>
       </div>
     </footer>

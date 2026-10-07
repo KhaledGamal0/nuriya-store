@@ -171,6 +171,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .ft li a { min-height: 40px; display: inline-flex; align-items: center; }
 .ft li a.line-link::after { bottom: 9px; }
 .ft h2 { font: 500 12px/1 var(--body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); margin-bottom: var(--s1); }
+.ft-credit a { display: inline-block; padding-block: 12px; margin-block: -12px; color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .ft-b { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s1) var(--s3); padding-top: var(--s3); border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
 
 /* Product page */
