@@ -37,17 +37,27 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
     <div className="wrap ok">
       <ClearBag />
       <header className="ok-head">
+        <div className="ok-status">
+          <span className="ok-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
+              <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" pathLength="1" />
+            </svg>
+          </span>
+          <p>Order placed successfully</p>
+        </div>
+        <h1>{first ? `Thank you, ${first}.` : "Thank you."}</h1>
         {number && (
           <div className="ok-no">
-            <p>Order {number}</p>
-            <button type="button" className="ok-copy" onClick={copy} aria-live="polite">
+            <div>
+              <span>Order number</span>
+              <strong>{number}</strong>
+            </div>
+            <button type="button" className="ok-copy" onClick={copy} aria-live="polite" aria-label={copied ? "Order number copied" : `Copy order number ${number}`}>
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
         )}
-        <h1>{first ? `Thank you, ${first}.` : "Thank you."}</h1>
         <p className="ok-lead">
-          Your order is placed.{" "}
           {receipt ? (
             <>
               We&apos;ll message you on WhatsApp at <b>{prettyPhone(receipt.phone)}</b> to confirm it before it ships.

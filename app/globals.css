@@ -418,9 +418,17 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 .ok-head h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1; }
 .ok-lead { font-size: 15px; color: var(--ink-2); }
 .ok-lead b { color: var(--ink); font-weight: 500; white-space: nowrap; }
-.ok-no { display: flex; align-items: center; gap: var(--s2); font-size: 13px; color: var(--ink-2); }
-.ok-no p { margin: 0; letter-spacing: 0.04em; }
-.ok-copy { min-height: 44px; padding: 0 var(--s2); border: 0; border-radius: var(--r); background: none; color: var(--ink); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ok-status { display: flex; align-items: center; gap: var(--s2); }
+.ok-status p { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); }
+.ok-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: var(--r); background: var(--pink); color: var(--ink); }
+.ok-icon path { stroke-dasharray: 1; stroke-dashoffset: 0; animation: ok-draw 0.45s 0.15s var(--ease) both; }
+@keyframes ok-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .ok-icon path { animation: none; } }
+.ok-no { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); max-width: 400px; padding: var(--s2) var(--s2) var(--s2) var(--s3); border: 1px solid var(--line); border-radius: var(--r); }
+.ok-no > div { display: grid; gap: 4px; }
+.ok-no span { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); }
+.ok-no strong { font-size: 22px; font-weight: 500; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.ok-copy { min-height: 44px; padding: 0 var(--s2); border: 0; border-radius: var(--r); background: none; color: var(--ink); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .ok-grid { display: grid; gap: var(--s5); }
 @media (min-width: 900px) { .ok-grid { grid-template-columns: 1.1fr 1fr; gap: var(--s6); align-items: start; } }
 .ok-next { display: grid; gap: var(--s3); }

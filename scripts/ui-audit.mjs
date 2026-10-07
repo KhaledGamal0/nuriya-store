@@ -352,7 +352,8 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   await step(vp, "order-saved", async () => {
     where = "order-saved";
     orderNo = new URL(page.url()).searchParams.get("o");
-    if (!orderNo || !(await page.getByText(`Order ${orderNo}`).isVisible())) add(vp, where, "flow", "confirmation page does not show the order number");
+    if (!orderNo || !(await page.locator(".ok-no strong").getByText(orderNo, { exact: true }).isVisible())) add(vp, where, "flow", "confirmation page does not show the order number");
+    if (!(await page.getByText("Order placed successfully").isVisible())) add(vp, where, "flow", "confirmation page does not say the order was placed");
     const shown = await page.evaluate(() => document.body.innerText);
     for (const [what, text] of [["greeting", "Thank you, Nour."], ["total", "1,290 EGP"], ["area", "Alexandria"], ["next steps", "What happens next"], ["phone", PHONES[vp]]]) {
       if (!shown.includes(text)) add(vp, where, "flow", `confirmation page does not show the ${what} ("${text}")`);
