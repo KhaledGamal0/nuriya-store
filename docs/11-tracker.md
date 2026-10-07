@@ -11,6 +11,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Product copy, details, size chart | DONE | `lib/catalog.ts` |
 | Fabric composition, weight, care instructions | KHALED | Shown as "coming soon" until provided |
 | Original full-quality photos (or a shoot) | KHALED | Current photos are compressed; shot list in `07-roadmap.md` |
+| AI styling images received Oct 7 | NOT USED | 7 of 8 misspell the logo (Nariya, Nsriya, Nautiga, Nauljpa) or invent the sleeve embroidery; none is sharper than the HD boards already used. Usable for Instagram only after fixing the logo. |
 | Stock count per color and size | KHALED | Needed for P2 |
 | Exact Canva display font name | KHALED | Using Instrument Serif meanwhile |
 | About / story page | P6 | Copy exists in brand book |
