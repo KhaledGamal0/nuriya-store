@@ -9,6 +9,7 @@ import { minFee } from "@/lib/shipping";
 import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
+import { blur } from "@/lib/blur";
 
 type Params = { params: Promise<{ color: string }> };
 
@@ -98,7 +99,7 @@ export default async function ProductPage({ params }: Params) {
           return (
             <Link key={x} className="also" href={productPath(x)}>
               <span className="also-img">
-                <Image src={o.images[0]!.src} alt="" fill sizes="64px" />
+                <Image src={o.images[0]!.src} alt="" fill sizes="64px" {...blur(o.images[0]!.src)} />
               </span>
               <span>
                 <b>Also in {o.name.toLowerCase()}</b>

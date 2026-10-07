@@ -96,7 +96,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .hdr-in > .logo-link { justify-self: center; }
 .hdr-side { display: flex; align-items: center; gap: var(--s3); }
 .hdr-side-r { justify-self: end; }
-.hdr-link { display: none; font-size: 13px; min-height: 44px; align-items: center; transition: opacity 0.2s; }
+.hdr-link { display: none; font-size: 13px; min-height: 44px; min-width: 44px; justify-content: center; align-items: center; transition: opacity 0.2s; }
 
 @media (min-width: 900px) {
   .hdr-link { display: inline-flex; }

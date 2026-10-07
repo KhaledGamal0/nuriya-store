@@ -5,6 +5,7 @@ import { useStore } from "./StoreProvider";
 import { formatEgp } from "@/lib/money";
 import { MAX_QTY_PER_LINE } from "@/lib/checkout";
 import type { BagLine } from "./BagProvider";
+import { blur } from "@/lib/blur";
 
 type Props = {
   line: BagLine;
@@ -20,7 +21,7 @@ export function BagLineItem({ line, onQty, onRemove }: Props) {
   return (
     <div className="ln">
       <div className="ln-img">
-        <Image src={image.src} alt="" fill sizes="72px" />
+        <Image src={image.src} alt="" fill sizes="72px" {...blur(image.src)} />
       </div>
       <div className="ln-m">
         <b>{catalog.name}</b>
