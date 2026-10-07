@@ -29,7 +29,8 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 - **Everything business-related editable in admin** (prices, stock, shipping fees, content, policy text).
 
 ## Running it
-`npm install` · `npm run dev` · `npm test` (business rules) · `npm run build` · `npm run typecheck`. CI (`.github/workflows/ci.yml`) runs all of them on every push.
+`npm ci` · `npm run dev` · `npm test` (business rules + database tests when `DATABASE_URL` is set) · `npm run db:migrate` · `npm run db:seed` · `npm run build` · `npm run typecheck`. CI (`.github/workflows/ci.yml`) starts a real Postgres and runs all of them on every push; its logs are on the `ci-logs` branch. Env vars: see `.env.example`.
+- Schema changes = a NEW file `db/migrations/000N_name.sql` (never edit an applied one) + matching `lib/db/schema.ts` columns. After any data change call `refreshStorefront()`.
 
 ## Stack
 Next.js 16.x App Router + TypeScript (strict) · PostgreSQL (Neon) + Drizzle · Better Auth (admin) · Tailwind v4 with Nuriya tokens only (or CSS modules) · Paymob · image CDN (Cloudinary or R2 + transforms) · Resend · Vercel · Sentry · Vitest + Playwright.

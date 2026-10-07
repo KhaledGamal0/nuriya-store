@@ -27,3 +27,9 @@
 - COD on all governorates or limit for far zones?
 - Photo originals: the photos received are WhatsApp-compressed (≤1280 px, 20–260 KB). Site needs camera originals ≥2000×2500 → send originals (AirDrop/Drive "original quality") or plan a shoot
 - Next products / colorways
+
+## Phase 2 decisions (Oct 7 2026)
+- Neon Postgres, region Frankfurt; connection strings only in Vercel / GitHub secrets, never in chat or code.
+- Stock tracking off per size until Khaled gives counts (all sizes available meanwhile).
+- No size pre-selected on product pages (Khaled).
+- Pages static + on-demand refresh (not timed refresh).

@@ -18,12 +18,12 @@ What Khaled must provide is marked 🟣.
 **Accept:** 🟣 Khaled approves look & feel on his phone · nothing looks like a template · Lighthouse mobile ≥ 95 · logo always SVG.
 
 ## Phase 2 — Data + storefront live data (3–4 days)
-- [ ] DB schema (products, variants, media, shipping zones/areas, customers, orders, order_items, payments, order_events, discount codes, content blocks, admin users, audit log) + migrations
-- [ ] Seed: Quiet Confidence quarter-zip, Cream/Burgundy × S/M, L/XL, 1200 EGP; shipping zones from `data/shipping-zones.json`; policy text
+- [x] DB schema (products, variants, media, shipping zones/areas, customers, orders, order_items, payments, order_events, discount codes, content blocks, audit log) + migrations. Admin users come from Better Auth in P5
+- [x] Seed: Quiet Confidence quarter-zip, Cream/Burgundy × S/M, L/XL, 1200 EGP; shipping zones from `data/shipping-zones.json`; policy text
 - [ ] 🟣 stock per variant, fabric/care text, original photos
-- [ ] Pages render from DB with ISR; image pipeline (AVIF/WebP, sizes, blur placeholder)
-- [ ] Find my size (weight → size), size guide, policy, about, contact (IG DM)
-**Accept:** changing a price/stock in DB shows on site after revalidation · sold-out variant can't be added · all images < budget.
+- [x] Pages render from DB (static + on-demand refresh instead of timed ISR); image pipeline (AVIF/WebP, sizes)
+- [x] Find my size (weight → size), size guide, policy, contact (IG DM). About page → P6
+**Accept:** ✅ price change in DB shows after refresh (UI audit) · ✅ sold-out variant can't be added (DB test) · ⏳ production Neon connected (Khaled) · ⏳ stock counts (Khaled).
 
 ## Phase 3 — Cart + checkout + COD (3 days)
 - [ ] Bag (server-validated), one-page checkout: phone → name → governorate/area (fee instantly) → address → payment
@@ -65,3 +65,4 @@ Arabic RTL storefront (if not done), referral, reviews/UGC, waitlist/drops, aban
 | 2026-10-07 | Planning | Done | Brand, decisions, shipping, policy, architecture, admin, design direction, review saved |
 | 2026-10-07 | Design | Prototype v1 | Working storefront prototype (home, PDP, bag drawer, fit finder, checkout with Direction fees, confirmation) — `prototype/storefront-template.html`. Direction approved by Khaled: white editorial, plum ink, pink as small accent, full-bleed real photos. Blocked here: npm registry + GitHub push (403) — real Next.js build needs GitHub App install or local Claude Code |
 | 2026-10-07 | 0–1 | Built, CI green | Next.js 16 app: home, product pages (cream/burgundy), bag dialog, menu dialog, find-my-size sheet, checkout (server action, server-side pricing, Direction fees), confirmation, size guide, returns EN/AR, 404, sitemap, robots, security headers, JSON-LD. 8 unit tests on pricing/validation. GitHub Actions: install, test, build, typecheck all pass. Next: connect Vercel for preview links; commit package-lock; Phase 2 (DB). |
+| 2026-10-07 | 2 | Built, CI green | Postgres schema + seed, storefront and checkout read from DB, sold-out sizes, on-demand refresh, DB deploy workflow. 18 tests (7 on a real database). Waiting on Neon + stock counts. |

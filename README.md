@@ -10,6 +10,9 @@ npm run build
 Custom e-commerce website + admin dashboard for **Nuriya** (Cairo women's clothing, @nuriya.eg).
 Owner: Khaled Gamal. Live: https://nuriya-store.vercel.app. Status and next steps: `docs/11-tracker.md`.
 
+## Environment
+See `.env.example`. Production database: Neon (set `DATABASE_URL` in Vercel and as a GitHub secret, then run the **Database deploy** workflow with "seed").
+
 ## Read in this order
 | File | What it holds |
 |---|---|

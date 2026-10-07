@@ -31,7 +31,7 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install
-        run: mkdir -p ci-logs && npm install --no-audit --no-fund 2>&1 | tee ci-logs/1-install.log; exit ${PIPESTATUS[0]}
+        run: mkdir -p ci-logs && npm ci --no-audit --no-fund 2>&1 | tee ci-logs/1-install.log; exit ${PIPESTATUS[0]}
       - name: Database migrations and seed (run twice to prove they are repeatable)
         run: (npm run db:migrate && npm run db:seed && npm run db:migrate && npm run db:seed) 2>&1 | tee ci-logs/2-db.log; exit ${PIPESTATUS[0]}
       - name: Unit and database tests

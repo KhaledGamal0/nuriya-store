@@ -1,0 +1,44 @@
+name: Database deploy
+
+# Applies new migrations to the production database (Neon) whenever db/migrations changes on main,
+# and can be run by hand from the Actions tab (with "seed" ticked the first time).
+# Needs the repository secret DATABASE_URL = Neon's DIRECT (unpooled) connection string.
+on:
+  push:
+    branches: [main]
+    paths: ["db/migrations/**"]
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Also add the starting product, photos and delivery areas (safe to repeat)"
+        type: boolean
+        default: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Check the secret is set
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::Repository secret DATABASE_URL is not set yet. Nothing to do."
+            echo "NO_DB=1" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/checkout@v5
+        if: env.NO_DB != '1'
+      - uses: actions/setup-node@v5
+        if: env.NO_DB != '1'
+        with:
+          node-version: 22
+          cache: npm
+      - if: env.NO_DB != '1'
+        run: npm ci --no-audit --no-fund
+      - name: Apply migrations
+        if: env.NO_DB != '1'
+        run: npm run db:migrate
+      - name: Seed starting data
+        if: env.NO_DB != '1' && inputs.seed
+        run: npm run db:seed

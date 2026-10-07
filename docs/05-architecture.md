@@ -72,3 +72,11 @@ Paymob specifics (API names, intention/HMAC fields, onboarding docs) to be check
 ## SEO & sharing
 - Server-rendered pages, Product + Organization structured data (price in EGP, availability), OG image from kit, sitemap, clean URLs `/p/quiet-confidence-quarter-zip?c=burgundy`
 - `hreflang` en / ar
+
+## Data flow (built in Phase 2)
+- Schema: `db/migrations/*.sql` (plain SQL, applied in order by `scripts/db-migrate.ts`, recorded in `schema_migrations`). Drizzle table definitions in `lib/db/schema.ts` are for typed queries only.
+- Reads: `lib/store.ts` → `getCatalog()` and `getAreas()`. Without `DATABASE_URL` they return the built-in data (`lib/catalog.ts`, `data/shipping-zones.json`).
+- Pages are static. They are rebuilt only when data changes: `refreshStorefront()` (server code) or `POST /api/revalidate` with `Authorization: Bearer $REVALIDATE_SECRET`. Timed ISR (`revalidate = 60`) was tried and removed: it left Next.js router prefetches hanging in the browser.
+- Checkout always re-reads the database at the moment of ordering, so a stale page can never sell a wrong price or a sold-out size.
+- Stock: `variants.track_inventory` is false until real counts exist; then available = `stock_on_hand − stock_reserved > 0`.
+- Environment: `DATABASE_URL` (Neon pooled, on Vercel), `REVALIDATE_SECRET` (Vercel), repository secret `DATABASE_URL` (Neon direct) for `.github/workflows/db-deploy.yml`.

@@ -14,7 +14,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Burgundy sleeve close-up taken from the embroidery reel (1264×1580) | DONE | |
 | Real model photos for both colours, cut clean from Khaled's Instagram screenshots (1290×1612) | DONE | Cream 5 photos, burgundy 6; new hero; originals still sharper |
 | AI styling images received Oct 7 | NOT USED | 7 of 8 misspell the logo (Nariya, Nsriya, Nautiga, Nauljpa) or invent the sleeve embroidery; none is sharper than the HD boards already used. Usable for Instagram only after fixing the logo. |
-| Stock count per color and size | KHALED | Needed for P2 |
+| Stock count per color and size | KHALED | Until given, stock tracking is off and every size shows available |
 | Exact Canva display font name | KHALED | Using Instrument Serif meanwhile |
 | About / story page | P6 | Copy exists in brand book |
 | Arabic storefront (real RTL) | LATER | Data model ready for AR from P2 |
@@ -43,7 +43,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | No size pre-selected (Khaled, Oct 7); "Also in …" card | DONE | |
 | Every page opens at the top | DONE | Audit check |
 | Delivery and returns page: policy cards, EN/AR switch with real RTL, readable fees | DONE | |
-| Sold-out state and "notify me" | P2 / LATER | Sold out in P2, notify me later |
+| Sold-out sizes (disabled button, refused at checkout) | DONE | Turns on per size when stock tracking is enabled |
+| "Notify me" when back in stock | LATER | |
 | Reviews / customer photos | LATER | |
 | Wishlist, search, filters | LATER | Not needed with one product |
 
@@ -127,5 +128,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | GitHub repo, CI (install, tests, build, typecheck) | DONE | |
 | Vercel hosting with live link | DONE | nuriya-store.vercel.app |
 | Lockfile committed | DONE | Next.js 16.4.0, React 19.3.0 |
-| Database (Neon) | P2 + KHALED | Needs a free Neon account |
+| Database schema, migrations, seed, storefront reads from DB | DONE | `db/migrations`, `lib/store.ts`; 7 database tests in CI |
+| Pages static, refreshed on data change (`refreshStorefront`, `POST /api/revalidate`) | DONE | Replaced 60 s ISR, which left prefetches hanging |
+| Production database on Neon | KHALED | Create Neon project, set Vercel + GitHub secrets, run "Database deploy" |
 | Real-phone test, test orders, courier dry run | P7 | |
