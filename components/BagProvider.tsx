@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { isColor, isSize, type ColorId, type SizeId } from "@/lib/catalog";
 import { useStore } from "./StoreProvider";
-import { MAX_QTY_PER_LINE } from "@/lib/checkout";
+import { MAX_LINES, MAX_QTY_PER_LINE } from "@/lib/checkout";
 
 export type BagLine = { color: ColorId; size: SizeId; qty: number };
 
@@ -32,7 +32,7 @@ function load(): BagLine[] {
     return data.filter(
       (l): l is BagLine =>
         typeof l === "object" && l !== null && isColor(l.color) && isSize(l.size) && Number.isInteger(l.qty) && l.qty > 0,
-    );
+    ).slice(0, MAX_LINES).map((l) => ({ color: l.color, size: l.size, qty: Math.min(MAX_QTY_PER_LINE, l.qty) })); // a tampered bag can't show a wrong total
   } catch {
     return [];
   }

@@ -4,8 +4,16 @@ import { startTransition, useActionState, useEffect, useRef } from "react";
 import { trackOrder, type TrackState } from "@/app/track/actions";
 import { formatEgp } from "@/lib/money";
 
+async function lookUp(prev: TrackState, form: FormData): Promise<TrackState> {
+  try {
+    return await trackOrder(prev, form);
+  } catch {
+    return { notice: "We couldn't reach the shop. Check your internet and try again." };
+  }
+}
+
 export function TrackForm() {
-  const [state, action, pending] = useActionState<TrackState, FormData>(trackOrder, null);
+  const [state, action, pending] = useActionState<TrackState, FormData>(lookUp, null);
   const numberRef = useRef<HTMLInputElement>(null);
 
   // Prefill the order number when arriving from the confirmation page (?o=NUR-…).

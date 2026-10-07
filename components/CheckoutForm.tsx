@@ -56,12 +56,25 @@ function Summary({ feePiasters }: { feePiasters?: number }) {
   );
 }
 
+const NO_CONNECTION =
+  "We couldn't reach the shop. Check your internet and tap Place order again. Your order will not be placed twice.";
+
+/** The internet can drop mid-order on 4G. Never show an error page: keep the form and let the shopper
+ * tap again. The same order key is sent again, so if the first try did reach us, the same order comes back. */
+async function submitOrder(prev: CheckoutState, form: FormData): Promise<CheckoutState> {
+  try {
+    return await placeOrder(prev, form);
+  } catch {
+    return { errors: {}, notice: NO_CONNECTION };
+  }
+}
+
 export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean }) {
   const bag = useBag();
   const router = useRouter();
   const { areas } = useStore();
   const groups = areasByFee(areas);
-  const [state, action, pending] = useActionState<CheckoutState, FormData>(placeOrder, null);
+  const [state, action, pending] = useActionState<CheckoutState, FormData>(submitOrder, null);
   const [areaId, setAreaId] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const formRef = useRef<HTMLFormElement>(null);

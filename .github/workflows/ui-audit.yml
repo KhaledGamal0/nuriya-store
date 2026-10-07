@@ -27,7 +27,7 @@ jobs:
           --health-cmd "pg_isready -U nuriya" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgresql://nuriya:nuriya@localhost:5432/nuriya
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -53,7 +53,11 @@ jobs:
         run: node scripts/ui-audit.mjs
       - name: Lighthouse (mobile, simulated 4G)
         run: node scripts/lighthouse.mjs
+      - name: Stress and chaos (30 buyers at once, lost connections, bots, tampering)
+        if: ${{ !cancelled() }}
+        run: node scripts/stress.mjs
       - name: Database-down drill
+        if: ${{ !cancelled() }}
         # A second copy of the same build on port 3001, pointed at a port where no database listens.
         env:
           BASE_URL: http://localhost:3001

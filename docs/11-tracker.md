@@ -65,6 +65,9 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | WhatsApp confirmation link for each COD order | DONE | In the order e-mail (pre-written message). Automatic sending later |
 | Order e-mail to the shop | PARTIAL + KHALED | Code done and tested; needs Resend key (`RESEND_API_KEY`, `ORDER_ALERT_EMAIL` secrets). Hourly Order watch alerts if any order is not e-mailed |
 | Thank-you page render loop (blocked taps after ordering) | FIXED | Oct 7: bag `clear()` was re-created and re-ran forever; audit now detects render loops |
+| Aggressive pre-launch testing: fuzz (5,000 random checkouts), crowd (30 browsers, 200 DB orders at once), chaos (offline, lost answer, tampering, bots, slow 3G, 320 px) | DONE | `tests/fuzz.test.ts`, `tests/load.test.ts`, `scripts/stress.mjs` — every push |
+| Arabic numerals in phone numbers accepted | FIXED | Oct 7: ٠١٠… was refused before |
+| Internet drop mid-order shows a calm message and keeps the form | FIXED | Oct 7: used to show the error page |
 | Order tracking page for customers | DONE | `/track` — needs order number + phone; never shows the address |
 | Order emails / SMS | P6 | Email optional (phone-first) |
 | Referral 10% code | LATER + KHALED | How to track it is undecided |

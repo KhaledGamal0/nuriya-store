@@ -41,9 +41,14 @@ export type FieldErrors = Partial<Record<"phone" | "name" | "area" | "address" |
 export type CheckoutResult = { ok: true; order: ValidOrder } | { ok: false; errors: FieldErrors };
 
 /** Egyptian mobile: 010, 011, 012 or 015 + 8 digits. Accepts spaces, dashes and +20 / 0020. */
+/** Arabic-Indic (٠١٢…) and Persian (۰۱۲…) digits → 0-9. Many Egyptian phones type these. */
+export function toLatinDigits(s: string): string {
+  return s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (d) => String((d.charCodeAt(0) & 0xf) % 10));
+}
+
 export function normalizePhone(raw: unknown): string | null {
-  if (typeof raw !== "string") return null;
-  let digits = raw.replace(/[\s\-().]/g, "");
+  if (typeof raw !== "string" || raw.length > 40) return null;
+  let digits = toLatinDigits(raw).replace(/[\s\-().\u200e\u200f\u202a-\u202e]/g, "");
   if (digits.startsWith("+20")) digits = "0" + digits.slice(3);
   else if (digits.startsWith("0020")) digits = "0" + digits.slice(4);
   else if (digits.startsWith("20") && digits.length === 12) digits = "0" + digits.slice(2);
@@ -74,8 +79,16 @@ export function parseCart(raw: unknown): CartLine[] | null {
   return [...merged.values()];
 }
 
-function cleanText(raw: unknown, max: number): string {
-  return typeof raw === "string" ? raw.replace(/\s+/g, " ").trim().slice(0, max) : "";
+/** Removes control characters (incl. NUL, which Postgres refuses), invisible direction overrides
+ * and zero-width characters, collapses spaces, trims, and caps the length. */
+export function cleanText(raw: unknown, max: number): string {
+  if (typeof raw !== "string") return "";
+  return raw
+    .slice(0, max * 4)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200D\u2028\u2029\u202A-\u202E\u2066-\u2069\uFEFF]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
 }
 
 export const MESSAGES = {
