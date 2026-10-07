@@ -43,7 +43,7 @@ Check current docs before using any API (Next.js, Paymob, Better Auth change oft
 - End of every phase: run tests, lint, typecheck, build, Lighthouse on mobile; tick the acceptance checklist in `docs/10-build-plan.md`; deploy a preview; give Khaled the preview link + what to check on his phone.
 - Every push runs `.github/workflows/ui-audit.yml`: real browser on phone and desktop, screenshots, axe accessibility, tap targets, sideways scroll, console errors and the full buy flow. Read `report.md` and the screenshots on the `ui-report` branch (`git fetch origin ui-report`) and fix findings before calling work done.
 - **"Live" means Vercel deployed it.** After a push, check the Vercel status on the commit (`gh api repos/{owner}/{repo}/commits/<sha>/statuses`) is success before telling Khaled it's live. CI and the UI audit passing is not the same as deployed.
-- **Vercel Hobby = 100 deployments per 24 h.** Batch work into few pushes. Docs/tests/workflow-only commits are skipped by `ignoreCommand` in `vercel.json`; the `ci-logs` and `ui-report` branches never deploy.
+- **Vercel Pro (since Oct 7): 6,000 deployments/day.** Every push to `main` deploys (no skip rule: it once skipped a real change). The `ci-logs` and `ui-report` branches never deploy (`vercel.json` + a `vercel.json` written into those branches).
 - Update `docs/02-decisions.md` whenever Khaled decides something. Update `docs/10-build-plan.md` progress. Commit small, clear commits.
 - Never invent product facts (fabric, care, stock). Use `TODO(khaled)` placeholders and list them.
 - When Khaled sends existing files for a fix: give each change as **FROM / TO** blocks he can copy-replace, keep fixes small and don't affect screens that already work.

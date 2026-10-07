@@ -8,6 +8,5 @@
       "ci-logs": false,
       "ui-report": false
     }
-  },
-  "ignoreCommand": "bash scripts/vercel-ignore.sh"
+  }
 }
