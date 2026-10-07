@@ -35,7 +35,17 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  useEffect(() => setHidden(false), [pathname]);
+  // Every new page opens at the very top with the header showing.
+  // Switching colour on the product page keeps your place (same product).
+  const prevPath = useRef(pathname);
+  useEffect(() => {
+    const was = prevPath.current;
+    prevPath.current = pathname;
+    setHidden(false);
+    if (was === pathname) return;
+    const sameProduct = was.startsWith("/quiet-confidence/") && pathname.startsWith("/quiet-confidence/");
+    if (!sameProduct && !window.location.hash) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
 
   return (
     <>

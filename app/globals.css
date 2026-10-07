@@ -36,7 +36,7 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (prefers-reduced-motion: no-preference) { html[data-scroll-behavior="smooth"] { scroll-behavior: smooth; } }
 body {
   margin: 0;
   background: var(--paper);

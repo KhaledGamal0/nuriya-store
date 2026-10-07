@@ -121,6 +121,22 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     if ((await page.locator(".hdr").getAttribute("data-hidden")) !== "false") add(vp, where, "flow", "header did not come back when scrolling up");
   });
 
+  // Opening a page from far down the previous one must land at the very top
+  await step(vp, "navigate-to-top", async () => {
+    where = "navigate-to-top";
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    await page.locator("#shop").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 400);
+    await page.waitForTimeout(400);
+    await page.locator(".pc").first().click();
+    await page.waitForURL(/quiet-confidence/);
+    await page.waitForTimeout(700);
+    const y = await page.evaluate(() => window.scrollY);
+    if (y > 1) add(vp, where, "flow", `product page opened ${Math.round(y)}px down instead of at the top`);
+    if ((await page.locator(".hdr").getAttribute("data-hidden")) === "true") add(vp, where, "flow", "header hidden after opening a new page");
+    await page.screenshot({ path: `${OUT}/shots/${vp}-navigate-to-top.png` });
+  });
+
   // Interactions
   await step(vp, "menu-open", async () => {
     where = "menu-open";
