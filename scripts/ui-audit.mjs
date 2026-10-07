@@ -81,11 +81,13 @@ async function checks(page, vp, where) {
   for (const v of axe.violations) add(vp, where, `a11y:${v.id}`, `${v.impact} · ${v.help} · ${v.nodes.length}× e.g. ${v.nodes[0]?.target.join(" ")}`);
 }
 
+const pending = new Map();
 async function step(vp, name, fn) {
   try {
     await fn();
   } catch (e) {
-    add(vp, name, "audit-step-failed", String(e.message).split("\n")[0].slice(0, 200));
+    const open = [...pending.entries()].map(([u, t0]) => `${u.replace(BASE, "")} (${Math.round((Date.now() - t0) / 1000)}s)`).slice(0, 6);
+    add(vp, name, "audit-step-failed", `${String(e.message).split("\n")[0].slice(0, 120)} · still loading: ${open.join(", ") || "nothing"}`);
   }
 }
 
@@ -101,6 +103,9 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   let where = "";
   page.on("console", (m) => m.type() === "error" && !(where === "not-found" && m.text().includes("404")) && add(vp, where, "console-error", m.text().slice(0, 160)));
   page.on("pageerror", (e) => add(vp, where, "page-error", e.message.slice(0, 160)));
+  page.on("request", (r) => pending.set(r.url(), Date.now()));
+  page.on("requestfinished", (r) => pending.delete(r.url()));
+  page.on("requestfailed", (r) => pending.delete(r.url()));
 
   for (const [name, path] of PAGES) {
     where = name;
