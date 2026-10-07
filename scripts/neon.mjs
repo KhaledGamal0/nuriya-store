@@ -4,7 +4,7 @@
 //   node scripts/neon.mjs setup                 find or create the Frankfurt project + "preview" branch,
 //                                               export DATABASE_URL (direct) and *_POOLED / PREVIEW_* values
 //   node scripts/neon.mjs env production|preview export DATABASE_URL (direct) for that branch
-import { appendFileSync } from "node:fs";
+import { appendFileSync, writeFileSync } from "node:fs";
 
 const API = "https://console.neon.tech/api/v2";
 const REGION = "aws-eu-central-1"; // Frankfurt — closest Neon region to Cairo; cannot be changed later
@@ -150,8 +150,22 @@ try {
     const branch = which === "preview" ? (await branches(project.id)).find((b) => b.name === "preview") : prod;
     if (!branch) fail(`Neon branch "${which}" not found`);
     exportSecret("DATABASE_URL", await uri(project.id, branch.id, false));
+  } else if (cmd === "usage") {
+    // Numbers only (no secrets): this month's compute use and stored data, for the health report.
+    const { project } = await locate(false);
+    const { project: p } = await neon(`/projects/${project.id}`);
+    const all = await branches(project.id);
+    const usage = {
+      computeHours: typeof p.compute_time_seconds === "number" ? p.compute_time_seconds / 3600 : null,
+      activeHours: typeof p.active_time_seconds === "number" ? p.active_time_seconds / 3600 : typeof p.active_time === "number" ? p.active_time / 3600 : null,
+      storageBytes: all.reduce((n, b) => n + (Number(b.logical_size) || 0), 0) || (typeof p.synthetic_storage_size === "number" ? p.synthetic_storage_size : null),
+      periodStart: p.consumption_period_start ?? null,
+      branches: all.length,
+    };
+    writeFileSync("neon-usage.json", JSON.stringify(usage));
+    console.log(JSON.stringify(usage));
   } else {
-    fail("usage: neon.mjs setup | env production|preview");
+    fail("usage: neon.mjs setup | env production|preview | usage");
   }
 } catch (e) {
   fail(String(e.message ?? e));

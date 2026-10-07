@@ -1,0 +1,70 @@
+name: Health report
+
+# Watches every service the shop depends on (website, Vercel, Neon, Resend, GitHub backups and checks)
+# and e-mails ORDER_ALERT_EMAIL:
+#   - every day at 08:00 Cairo, ONLY if something is close to a limit or wrong (early warning)
+#   - every Sunday at 09:00 Cairo, the full weekly status, even when all is well
+# Something to act on also opens a GitHub issue labelled "alert" (phone notification), closed by itself when fixed.
+# When Neon is upgraded to the Launch plan, set the repository VARIABLE NEON_PLAN=launch.
+on:
+  schedule:
+    - cron: "0 5 * * *" # daily early warning, 08:00 Cairo
+    - cron: "0 6 * * 0" # weekly report, Sunday 09:00 Cairo
+  workflow_dispatch:
+    inputs:
+      weekly:
+        description: "Send the full weekly report now"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
+      NEON_PLAN: ${{ vars.NEON_PLAN || 'free' }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ORDER_ALERT_EMAIL: ${{ secrets.ORDER_ALERT_EMAIL }}
+      GH_TOKEN: ${{ github.token }}
+      WEEKLY: ${{ (github.event_name == 'workflow_dispatch' && inputs.weekly) && '1' || (github.event.schedule == '0 6 * * 0' && '1' || '0') }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        continue-on-error: true
+        run: node scripts/neon.mjs env production
+      - name: Neon usage (numbers only)
+        continue-on-error: true
+        run: node scripts/neon.mjs usage
+      - name: Shop numbers (counts and stock, no customer data)
+        continue-on-error: true
+        run: |
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "
+            SELECT json_build_object(
+              'week',      (SELECT count(*) FROM orders WHERE created_at > now() - interval '7 days'),
+              'waiting',   (SELECT count(*) FROM orders WHERE status = 'CONFIRMATION_NEEDED'),
+              'unmailed',  (SELECT count(*) FROM orders WHERE notified_at IS NULL AND created_at < now() - interval '10 minutes'),
+              'mailsMonth',(SELECT count(*) FROM orders WHERE notified_at >= date_trunc('month', now())),
+              'mailsToday',(SELECT count(*) FROM orders WHERE notified_at >= date_trunc('day', now())),
+              'stock', (SELECT coalesce(json_agg(s), '[]') FROM (
+                 SELECT c.name_en AS color, v.size, v.track_inventory AS tracked, (v.stock_on_hand - v.stock_reserved) AS available
+                 FROM variants v JOIN colorways c ON c.id = v.colorway_id
+                 WHERE v.is_active AND c.is_active ORDER BY c.position, v.size DESC) s))" > db.json
+      - name: Check everything and e-mail
+        run: node scripts/health-report.mjs
+      - name: Alert on the phone if something needs action
+        if: env.PROBLEMS != '0' && env.PROBLEMS != ''
+        run: scripts/alert.sh open "Early warning" "$(cat report-summary.txt)"
+      - name: Clear the alert when all is well
+        if: env.PROBLEMS == '0'
+        run: scripts/alert.sh close "Early warning" "All services are healthy again."

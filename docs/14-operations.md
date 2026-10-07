@@ -72,3 +72,10 @@ Sentry error alerts, CSP, and a status line in the admin dashboard showing the l
 
 ## Database changes refresh the site by themselves
 Every migration pushed to `main` runs `db-deploy.yml`: it applies the change, waits until Vercel has deployed the same commit, then refreshes the live pages from the updated database (one-time token, 3 attempts). Admin tasks (stock, reset) already refresh after their change. If a refresh ever fails, an error shows on the run: use Admin tasks → refresh-site.
+
+## Health e-mails (early warning + weekly report)
+`health-report.yml` checks the website, the https certificate, Vercel (live version, domain expiry and auto-renew), Neon (running time and storage against the free limits), Resend (order e-mails against the free limits), GitHub (last backup, uptime checks, days since the last code change: scheduled jobs pause at 60) and the shop (orders, stock).
+- **Every day 08:00 Cairo:** e-mail to ORDER_ALERT_EMAIL **only** when something is close to a limit or wrong, plus a GitHub "Early warning" issue (phone notification) that closes by itself.
+- **Every Sunday 09:00 Cairo:** the full weekly status, even when all is well.
+- Warning levels: Neon ≥ 70% of free running time or storage; domain < 30 days (or auto-renew off and < 60 days); certificate < 14 days; backup older than 36 h; 45+ days without a code change; any stock ≤ 3; Resend ≥ 80% of the free monthly e-mails.
+- After upgrading Neon to Launch, set the repository variable `NEON_PLAN=launch` (the free limits then no longer apply).
