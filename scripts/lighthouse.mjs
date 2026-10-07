@@ -11,15 +11,40 @@ const chrome = chromium.executablePath();
 const rows = [];
 const findings = [];
 
+/** Lighthouse scores wobble on shared machines: run 3 times and keep the median run (Lighthouse CI practice). */
+async function medianRun(path) {
+  const runs = [];
+  for (let i = 0; i < 3; i++) {
+    const out = `/tmp/lh-${path.replace(/\W+/g, "_") || "home"}-${i}.json`;
+    execFileSync(
+      "npx",
+      ["lighthouse", BASE + path, "--quiet", "--output=json", `--output-path=${out}`, "--form-factor=mobile",
+       "--only-categories=performance,accessibility,best-practices,seo", "--chrome-flags=--headless=new --no-sandbox"],
+      { env: { ...process.env, CHROME_PATH: chrome }, stdio: "inherit" },
+    );
+    runs.push(JSON.parse(await fs.readFile(out, "utf8")));
+  }
+  runs.sort((x, y) => (x.categories.performance?.score ?? 0) - (y.categories.performance?.score ?? 0));
+  return runs[1];
+}
+
+/** Find the LCP element and its time breakdown wherever this Lighthouse version keeps them. */
+function lcpInfo(a) {
+  let snippet = "";
+  const parts = [];
+  const walk = (x) => {
+    if (!x || typeof x !== "object") return;
+    if (!snippet && x.node?.snippet) snippet = x.node.snippet;
+    if ((x.subpart || x.phase || x.label) && typeof (x.duration ?? x.timing) === "number") parts.push(`${x.label ?? x.subpart ?? x.phase} ${Math.round(x.duration ?? x.timing)}ms`);
+    for (const v of Object.values(x)) walk(v);
+  };
+  for (const [id, audit] of Object.entries(a)) if (/lcp|largest-contentful-paint-element/.test(id)) walk(audit.details);
+  return { snippet, phases: [...new Set(parts)].join(", ") };
+}
+
 for (const path of PAGES) {
-  const out = `/tmp/lh-${path.replace(/\W+/g, "_") || "home"}.json`;
-  execFileSync(
-    "npx",
-    ["lighthouse", BASE + path, "--quiet", "--output=json", `--output-path=${out}`, "--form-factor=mobile",
-     "--only-categories=performance,accessibility,best-practices,seo", "--chrome-flags=--headless=new --no-sandbox"],
-    { env: { ...process.env, CHROME_PATH: chrome }, stdio: "inherit" },
-  );
-  const r = JSON.parse(await fs.readFile(out, "utf8"));
+  const r = await medianRun(path);
+  if (path === "/quiet-confidence/white") await fs.writeFile("ui-report/lhr-product.json", JSON.stringify({ audits: r.audits }, null, 1));
   const score = (k) => Math.round((r.categories[k]?.score ?? 0) * 100);
   const a = r.audits;
   const row = {
@@ -47,8 +72,7 @@ for (const path of PAGES) {
     .filter((x) => x.details?.type === "opportunity" && (x.details.overallSavingsMs ?? 0) > 100)
     .map((x) => `${x.title} (~${Math.round(x.details.overallSavingsMs)} ms)`);
   row.tips = opportunities.slice(0, 4).join("; ");
-  const lcpEl = a["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node?.snippet ?? "";
-  const phases = (a["largest-contentful-paint-element"]?.details?.items?.[1]?.items ?? []).map((p) => `${p.phase} ${Math.round(p.timing)}ms`).join(", ");
+  const { snippet: lcpEl, phases } = lcpInfo(a);
   const blocking = (a["render-blocking-resources"]?.details?.items ?? []).map((i) => `${i.url.replace(BASE, "")} ${Math.round(i.wastedMs)}ms`).join(", ");
   const scripts = (a["network-requests"]?.details?.items ?? [])
     .filter((i) => i.resourceType === "Script")
@@ -61,7 +85,7 @@ for (const path of PAGES) {
   row.detail = `LCP element: ${lcpEl.slice(0, 90)} | phases: ${phases} | render-blocking: ${blocking || "none"} | biggest scripts: ${scripts} | fonts: ${fonts} | first image: ${lcpImg ? Math.round(lcpImg.transferSize / 1024) + "KB" : "-"}`;
 }
 
-let md = "# Lighthouse (mobile, simulated 4G)\n\n| Page | Perf | A11y | Best pr. | SEO | LCP | CLS | TBT | JS |\n|---|---|---|---|---|---|---|---|---|\n";
+let md = "# Lighthouse (mobile, simulated 4G, median of 3 runs)\n\n| Page | Perf | A11y | Best pr. | SEO | LCP | CLS | TBT | JS |\n|---|---|---|---|---|---|---|---|---|\n";
 for (const r of rows) md += `| ${r.path} | ${r.perf} | ${r.a11y} | ${r.bp} | ${r.seo} | ${r.lcp.toFixed(2)}s | ${r.cls.toFixed(3)} | ${Math.round(r.tbt)}ms | ${r.jsKb} KB |\n`;
 md += "\n" + rows.filter((r) => r.tips).map((r) => `- ${r.path}: ${r.tips}`).join("\n") + "\n";
 md += "\n### Details\n" + rows.map((r) => `- ${r.path}: ${r.detail}`).join("\n") + "\n";
