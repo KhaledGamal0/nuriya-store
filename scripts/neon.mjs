@@ -9,7 +9,7 @@ import { appendFileSync } from "node:fs";
 const API = "https://console.neon.tech/api/v2";
 const REGION = "aws-eu-central-1"; // Frankfurt — closest Neon region to Cairo; cannot be changed later
 const NEW_NAME = "nuriya-store";
-const KEY = process.env.NEON_API_KEY;
+const KEY = process.env.NEON_API_KEY?.trim();
 
 const note = (msg) => console.log(`::notice::${msg}`);
 const fail = (msg) => {
@@ -30,6 +30,7 @@ async function neon(path, init = {}, tries = 6) {
       continue;
     }
     const body = await res.json().catch(() => ({}));
+    if (res.status === 401) fail("Neon refused NEON_API_KEY (401). The key is revoked, incomplete, or not the one shown when it was created. Create a new key in Neon → Account settings → API keys and update the GitHub secret.");
     if (!res.ok) {
       const err = new Error(`Neon ${init.method ?? "GET"} ${path.split("?")[0]} → ${res.status} ${body.message ?? ""}`.trim());
       err.status = res.status;

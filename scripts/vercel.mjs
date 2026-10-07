@@ -3,7 +3,7 @@
 // starts a production deployment from main, waits for it, then checks /api/health on the live site.
 import { randomBytes } from "node:crypto";
 
-const TOKEN = process.env.VERCEL_TOKEN;
+const TOKEN = process.env.VERCEL_TOKEN?.trim();
 const PROJECT = process.env.VERCEL_PROJECT || "nuriya-store";
 const SITE = process.env.SITE_URL || "https://nuriya-store.vercel.app";
 const note = (m) => console.log(`::notice::${m}`);
@@ -22,6 +22,7 @@ async function vercel(path, init = {}) {
     headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
   });
   const body = await res.json().catch(() => ({}));
+  if (res.status === 401) fail("Vercel refused VERCEL_TOKEN (401). Create a new token in Vercel → Account settings → Tokens and update the GitHub secret.");
   if (!res.ok) {
     const err = new Error(`Vercel ${init.method ?? "GET"} ${path.split("?")[0]} → ${res.status} ${body.error?.message ?? ""}`.trim());
     err.status = res.status;
