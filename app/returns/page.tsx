@@ -1,40 +1,64 @@
 import type { Metadata } from "next";
-import { areasByFee } from "@/lib/shipping";
+import { ReturnsPolicy } from "@/components/ReturnsPolicy";
+import { areasByFee, MIN_FEE_PIASTERS } from "@/lib/shipping";
 import { formatEgp } from "@/lib/money";
 
-export const metadata: Metadata = { title: "Delivery and returns" };
+export const metadata: Metadata = {
+  title: "Delivery and returns",
+  description: "Delivery fees across Egypt, payment options, and how returns work at Nuriya.",
+};
 
 export default function ReturnsPage() {
   return (
-    <div className="wrap done">
-      <h1>Delivery and returns</h1>
+    <div className="wrap page">
+      <header className="page-h">
+        <p className="label">Customer care</p>
+        <h1>Delivery and returns</h1>
+        <p>We deliver across Egypt by courier. You can open your order and check it before you pay or accept.</p>
+      </header>
 
-      <section style={{ display: "grid", gap: "var(--s1)" }} aria-labelledby="ret-en">
-        <h2 id="ret-en" style={{ fontSize: 28 }}>Returns and exchanges</h2>
-        <p><b style={{ fontWeight: 500 }}>Before you accept.</b> Open your parcel and check the size and the item while the courier is still with you.</p>
-        <p><b style={{ fontWeight: 500 }}>After the courier leaves.</b> Once the order is accepted and the courier has left, returns and exchanges are closed.</p>
-        <p className="small">Please check your size and item before accepting.</p>
+      <ReturnsPolicy />
+
+      <section className="page-sec" aria-labelledby="fees-title">
+        <h2 id="fees-title">Delivery fees</h2>
+        <ul className="fees">
+          {areasByFee().map((g) => (
+            <li key={g.feePiasters}>
+              <div>
+                <b>{g.label}</b>
+                <small>{g.areas.map((a) => a.nameEn).join(" · ")}</small>
+              </div>
+              <span className="fee">{formatEgp(g.feePiasters)}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="small">The exact fee for your area shows at checkout, from {formatEgp(MIN_FEE_PIASTERS)}.</p>
       </section>
 
-      <section lang="ar" dir="rtl" style={{ display: "grid", gap: "var(--s1)", width: "100%" }} aria-labelledby="ret-ar">
-        <h2 id="ret-ar" style={{ fontSize: 26, fontFamily: "var(--body)", fontWeight: 500 }}>سياسة الاسترجاع والاستبدال</h2>
-        <p><b style={{ fontWeight: 500 }}>قبل الاستلام.</b> يمكنك فتح الطلب والتأكد من المقاس والمنتج أثناء وجود مندوب الشحن معك.</p>
-        <p><b style={{ fontWeight: 500 }}>بعد مغادرة المندوب.</b> بعد قبول الطلب ومغادرة المندوب، لا يمكننا قبول الاسترجاع أو الاستبدال.</p>
-        <p className="small">نرجو التأكد من المقاس والمنتج قبل استلام الطلب.</p>
+      <section className="page-sec" aria-labelledby="pay-title">
+        <h2 id="pay-title">Payment</h2>
+        <ul className="fees">
+          <li>
+            <div>
+              <b>Cash on delivery</b>
+              <small>Pay the courier when your order arrives.</small>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Card</b>
+              <small>Visa or Mastercard on a secure Paymob page. Your card details never reach our website.</small>
+            </div>
+          </li>
+        </ul>
       </section>
 
-      <section style={{ display: "grid", gap: "var(--s1)", width: "100%" }} aria-labelledby="del">
-        <h2 id="del" style={{ fontSize: 28 }}>Delivery fees</h2>
-        <table className="tbl">
-          <tbody>
-            {areasByFee().map((g) => (
-              <tr key={g.feePiasters}>
-                <td>{g.areas.map((a) => a.nameEn).join(", ")}</td>
-                <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>{formatEgp(g.feePiasters)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <section className="page-sec" aria-labelledby="help-title">
+        <h2 id="help-title">Questions?</h2>
+        <p style={{ color: "var(--ink-2)" }}>Message us on Instagram and we will help with sizing, orders and delivery.</p>
+        <a className="btn btn-line" href="https://www.instagram.com/nuriya.eg" target="_blank" rel="noopener noreferrer">
+          Message @nuriya.eg
+        </a>
       </section>
     </div>
   );

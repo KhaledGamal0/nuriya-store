@@ -150,6 +150,24 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     await page.screenshot({ path: `${OUT}/shots/${vp}-bag-open.png` });
   });
 
+  await step(vp, "bag-close", async () => {
+    where = "bag-close";
+    await page.getByRole("button", { name: "Close bag" }).click();
+    await page.waitForTimeout(500);
+    if (await page.locator("dialog[open]").count()) add(vp, where, "flow", "bag panel is still open after closing");
+  });
+
+  await step(vp, "returns-arabic", async () => {
+    where = "returns-arabic";
+    await page.goto(BASE + "/returns", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "العربية" }).click();
+    if (!(await page.getByText("قبل الاستلام").isVisible())) add(vp, where, "flow", "Arabic policy did not show");
+    const dir = await page.locator('[lang="ar"][dir="rtl"]').count();
+    if (!dir) add(vp, where, "flow", "Arabic policy is not right-to-left");
+    await checks(page, vp, where);
+    await shot(page, `${vp}-returns-arabic`);
+  });
+
   await step(vp, "checkout-errors", async () => {
     where = "checkout-errors";
     await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });

@@ -10,15 +10,35 @@ type Props = {
   children: ReactNode;
 };
 
-/** Native <dialog>: traps focus, closes on Escape, makes the page behind inert. Clicking the backdrop closes it. */
+const CLOSE_MS = 260;
+
+/**
+ * Native <dialog>: traps focus, Escape closes, the page behind is inert, tapping the backdrop closes.
+ * Closing plays a short slide-out before the dialog is removed, on every browser (including iOS Safari).
+ */
 export function Dialog({ open, onClose, variant, labelledBy, children }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
+    if (open) {
+      dialog.removeAttribute("data-closing");
+      if (!dialog.open) dialog.showModal();
+      return;
+    }
+    if (!dialog.open) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      dialog.close();
+      return;
+    }
+    dialog.setAttribute("data-closing", "true");
+    const t = window.setTimeout(() => {
+      dialog.close();
+      dialog.removeAttribute("data-closing");
+    }, CLOSE_MS);
+    return () => window.clearTimeout(t);
   }, [open]);
 
   useEffect(() => {
@@ -33,7 +53,11 @@ export function Dialog({ open, onClose, variant, labelledBy, children }: Props) 
       ref={ref}
       className={`dlg dlg-${variant === "sheet" ? "sheet" : `panel dlg-${variant}`}`}
       aria-labelledby={labelledBy}
-      onClose={onClose}
+      onCancel={(e) => {
+        // Escape key: animate out instead of closing instantly.
+        e.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
