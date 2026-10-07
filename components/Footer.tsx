@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
+import { cardPaymentsEnabled } from "@/lib/orders";
 
 const INSTAGRAM = "https://www.instagram.com/nuriya.eg";
 
@@ -45,7 +46,7 @@ export function Footer() {
 
         <div className="ft-b">
           <span>© {new Date().getFullYear()} Nuriya · Cairo, Egypt</span>
-          <span>Cash on delivery · Visa · Mastercard</span>
+          <span>{cardPaymentsEnabled() ? "Cash on delivery · Visa · Mastercard" : "Cash on delivery across Egypt"}</span>
         </div>
       </div>
     </footer>

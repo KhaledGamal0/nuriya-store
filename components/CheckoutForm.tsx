@@ -239,7 +239,6 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               </label>
             )}
           </div>
-          {!cardEnabled && <p className="small">Card payment is coming soon.</p>}
           {errors.payment && (
             <p className="form-err" role="alert">
               {errors.payment}

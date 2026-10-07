@@ -84,7 +84,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 |---|---|---|
 | Cash on delivery | DONE | Saved as CONFIRMATION_NEEDED; refused where the zone has COD off |
 | Card option hidden until Paymob is live | DONE | `PAYMOB_ENABLED`; server refuses card meanwhile |
-| Card via Paymob hosted page | P4 + KHALED | Needs Paymob merchant account and test keys |
+| Card via Paymob hosted page | DEFERRED | Oct 7: needs business documents. COD only; card hidden and refused |
 | Paid only after verified Paymob webhook | P4 | |
 | Refund rule when a card order is refused at the door | KHALED | Full refund, or keep delivery fee? |
 | Damaged or wrong item rule | KHALED | |

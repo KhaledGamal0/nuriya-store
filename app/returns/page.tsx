@@ -3,6 +3,7 @@ import { ReturnsPolicy } from "@/components/ReturnsPolicy";
 import { areasByFee, minFee } from "@/lib/shipping";
 import { getAreas } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
+import { cardPaymentsEnabled } from "@/lib/orders";
 
 export const metadata: Metadata = {
   title: "Delivery and returns",
@@ -46,12 +47,14 @@ export default async function ReturnsPage() {
               <small>Pay the courier when your order arrives.</small>
             </div>
           </li>
-          <li>
-            <div>
-              <b>Card</b>
-              <small>Visa or Mastercard on a secure Paymob page. Your card details never reach our website.</small>
-            </div>
-          </li>
+          {cardPaymentsEnabled() && (
+            <li>
+              <div>
+                <b>Card</b>
+                <small>Visa or Mastercard on a secure Paymob page. Your card details never reach our website.</small>
+              </div>
+            </li>
+          )}
         </ul>
       </section>
 

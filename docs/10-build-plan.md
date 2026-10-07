@@ -34,7 +34,7 @@ What Khaled must provide is marked 🟣.
 - [ ] Khaled: Resend key for the order e-mail; full COD order on his phone in < 60 s
 **Accept:** tampered price in request is ignored (test) · two buyers can't buy the last item (test) · full COD order works on phone in < 60 s.
 
-## Phase 4 — Paymob card payments (2–3 days)
+## Phase 4 — Paymob card payments (2–3 days) — DEFERRED (Oct 7, Khaled: no business documents yet; cash on delivery only)
 - [ ] 🟣 Paymob merchant account + test keys (integration id, secret, public key, HMAC secret)
 - [ ] Intention API → hosted Unified Checkout redirect
 - [ ] Webhook: HMAC verify, amount/currency/order match, idempotent, payments table stores raw callback

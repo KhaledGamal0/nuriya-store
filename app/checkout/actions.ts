@@ -30,7 +30,7 @@ const REFUSALS: Record<RefusalReason, CheckoutState> = {
   price_changed: { errors: { cart: "A price or delivery fee just changed. Please refresh the page, check your total, and place the order again." } },
   area_unavailable: { errors: { area: "Delivery to this area isn't available right now. Please choose another area or message us." } },
   cod_unavailable: { errors: { payment: "Cash on delivery isn't available for this area." } },
-  card_unavailable: { errors: { payment: "Card payment is coming soon. Please choose cash on delivery." } },
+  card_unavailable: { errors: { payment: "Please choose cash on delivery." } },
   bad_key: { errors: {}, notice: UNAVAILABLE },
 };
 
@@ -85,7 +85,7 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
   // E-mail the shop after the response is sent, so the customer never waits for it (and retry older misses).
   after(() => sendPendingOrderEmails(getSql()).catch((e) => console.error("order.email.batch_failed", e)));
 
-  // TODO(phase 4): card → create a Paymob intention for the saved total and send the shopper to Paymob's hosted page.
+  // Card payments (Paymob) are deferred until Nuriya has business documents (Khaled, Oct 7 2026); card stays hidden and refused.
   // Returned, not redirect(): a server-action redirect left the page's transition pending, so the next
   // link tap did nothing and the title never updated. A normal client navigation is reliable.
   // The saved order's totals equal result.order's: the transaction refuses any difference.
