@@ -17,7 +17,7 @@ type OrderForEmail = {
   subtotal_piasters: number;
   shipping_piasters: number;
   total_piasters: number;
-  created_at: Date;
+  created_at: Date | string;
   items: { product_name: string; color_name: string; size: string; qty: number; line_piasters: number }[];
 };
 
@@ -25,7 +25,8 @@ export function emailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.ORDER_ALERT_EMAIL);
 }
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+const ENTITIES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ENTITIES[c] ?? c);
 
 /** WhatsApp link that opens a chat with the customer, confirmation message already typed. */
 export function whatsappLink(o: Pick<OrderForEmail, "number" | "customer_name" | "customer_phone" | "total_piasters" | "area_name" | "payment_method">): string {
@@ -40,7 +41,7 @@ export function orderEmail(o: OrderForEmail): { subject: string; text: string; h
   const subject = `New order ${o.number} · ${formatEgp(o.total_piasters)} · ${pay} · ${o.area_name}`;
   const lines = o.items.map((i) => `${i.qty} × ${i.product_name}, ${i.color_name}, ${i.size} — ${formatEgp(i.line_piasters)}`);
   const wa = whatsappLink(o);
-  const placed = o.created_at.toLocaleString("en-GB", { timeZone: "Africa/Cairo", dateStyle: "medium", timeStyle: "short" });
+  const placed = new Date(o.created_at).toLocaleString("en-GB", { timeZone: "Africa/Cairo", dateStyle: "medium", timeStyle: "short" });
   const text = [
     `New order ${o.number} — ${placed} (Cairo)`,
     "",

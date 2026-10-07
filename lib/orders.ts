@@ -42,6 +42,11 @@ class Refusal extends Error {
   }
 }
 
+/** Used as a destructuring default: a query that must return a row but didn't is a bug, not a refusal. */
+function noRow(what: string): never {
+  throw new Error(`Expected a database row: ${what}`);
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** One-way hash of the buyer's IP: enough to spot abuse, useless to anyone who reads the database. */
@@ -53,7 +58,7 @@ export function hashIp(ip: string | null | undefined): string | null {
 
 /** Fixed-window counter. Returns true while under the limit. */
 export async function allow(sql: Sql, key: string, max: number, windowSec: number): Promise<boolean> {
-  const [row] = await sql<{ count: number }[]>`
+  const [row = noRow("rate limit")] = await sql<{ count: number }[]>`
     INSERT INTO rate_limits (key, window_start, count)
     VALUES (${key}, to_timestamp(floor(extract(epoch FROM now()) / ${windowSec}) * ${windowSec}), 1)
     ON CONFLICT (key, window_start) DO UPDATE SET count = rate_limits.count + 1
@@ -102,13 +107,13 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
       return await sql.begin(async (tx) => {
         // Customer row: created or updated, and LOCKED until commit, so two orders from the same phone
         // queue behind each other and the per-phone limit below is exact.
-        const [customer] = await tx<{ id: number; is_blocked: boolean }[]>`
+        const [customer = noRow("customer")] = await tx<{ id: number; is_blocked: boolean }[]>`
           INSERT INTO customers (phone, name) VALUES (${order.phone}, ${order.name})
           ON CONFLICT (phone) DO UPDATE SET name = EXCLUDED.name
           RETURNING id, is_blocked`;
         if (customer.is_blocked) throw new Refusal("blocked");
 
-        const [{ recent }] = await tx<{ recent: number }[]>`
+        const [{ recent } = noRow("recent orders")] = await tx<{ recent: number }[]>`
           SELECT count(*)::int AS recent FROM orders
           WHERE customer_id = ${customer.id} AND created_at > now() - interval '24 hours'`;
         if (recent >= LIMITS.ordersPerPhonePerDay) throw new Refusal("phone_limit");
@@ -155,7 +160,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
 
         const status = order.payment === "cod" ? "CONFIRMATION_NEEDED" : "PENDING_PAYMENT";
         const number = newOrderNumber();
-        const [saved] = await tx<{ id: number }[]>`
+        const [saved = noRow("new order")] = await tx<{ id: number }[]>`
           INSERT INTO orders (number, customer_id, status, payment_method, area_id, address,
                               subtotal_piasters, shipping_piasters, discount_piasters, total_piasters,
                               idempotency_key, customer_name, customer_phone, area_name, ip_hash)
@@ -231,7 +236,7 @@ export async function findOrder(sql: Sql, rawNumber: unknown, rawPhone: unknown)
       status: string;
       payment_method: "cod" | "card";
       area_name: string;
-      created_at: Date;
+      created_at: Date | string;
       subtotal_piasters: number;
       shipping_piasters: number;
       total_piasters: number;
@@ -248,7 +253,7 @@ export async function findOrder(sql: Sql, rawNumber: unknown, rawPhone: unknown)
     statusText: STATUS_TEXT[o.status] ?? o.status,
     payment: o.payment_method,
     area: o.area_name,
-    placedAt: o.created_at.toISOString(),
+    placedAt: new Date(o.created_at).toISOString(), // drizzle on the shared pool returns timestamps as text
     subtotalPiasters: o.subtotal_piasters,
     shippingPiasters: o.shipping_piasters,
     totalPiasters: o.total_piasters,

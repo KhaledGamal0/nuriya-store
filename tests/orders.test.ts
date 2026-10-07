@@ -35,6 +35,11 @@ after(async () => {
   await getSql().end();
 });
 
+/** Destructuring default for rows a test expects to exist. */
+function noRow(): never {
+  throw new Error("expected a database row");
+}
+
 type Cart = { color: string; size: string; qty: number; price?: number }[];
 
 async function valid(phone: string, cart: Cart = [{ color: "cream", size: "S/M", qty: 1 }], areaId = "alexandria", payment = "cod") {
@@ -60,7 +65,7 @@ test("a COD order is saved with items, customer and history, priced from the dat
   assert.ok(r.ok);
   if (!r.ok) return;
   assert.match(r.number, /^NUR-[2-9A-HJ-NP-Z]{6}$/);
-  const [o] = await sql!`SELECT * FROM orders WHERE number = ${r.number}`;
+  const [o = noRow()] = await sql!`SELECT * FROM orders WHERE number = ${r.number}`;
   assert.equal(o.status, "CONFIRMATION_NEEDED");
   assert.equal(o.payment_method, "cod");
   assert.equal(o.payment_status, "UNPAID");
@@ -72,10 +77,11 @@ test("a COD order is saved with items, customer and history, priced from the dat
   assert.equal(o.notified_at, null);
   const items = await sql!`SELECT * FROM order_items WHERE order_id = ${o.id}`;
   assert.equal(items.length, 1);
-  assert.deepEqual([items[0].color_name, items[0].size, items[0].qty, items[0].unit_piasters], ["Burgundy", "L/XL", 2, 120_000]);
+  const [item = noRow()] = items;
+  assert.deepEqual([item.color_name, item.size, item.qty, item.unit_piasters], ["Burgundy", "L/XL", 2, 120_000]);
   const events = await sql!`SELECT type FROM order_events WHERE order_id = ${o.id}`;
   assert.deepEqual(events.map((e) => e.type), ["created"]);
-  const [c] = await sql!`SELECT name FROM customers WHERE phone = ${phone}`;
+  const [c = noRow()] = await sql!`SELECT name FROM customers WHERE phone = ${phone}`;
   assert.equal(c.name, "Nour Ahmed");
 });
 
@@ -83,7 +89,7 @@ test("a price sent by the browser never reaches the database", { skip }, async (
   const r = await place(await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 1, price: 1 }]));
   assert.ok(r.ok);
   if (!r.ok) return;
-  const [o] = await sql!`SELECT total_piasters FROM orders WHERE number = ${r.number}`;
+  const [o = noRow()] = await sql!`SELECT total_piasters FROM orders WHERE number = ${r.number}`;
   assert.equal(o.total_piasters, 120_000 + 9_000);
 });
 
@@ -97,7 +103,7 @@ test("the same checkout sent twice creates one order", { skip }, async () => {
   if (!a.ok || !b.ok) return;
   assert.equal(a.number, b.number);
   assert.equal(b.existing, true);
-  const [{ n }] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
+  const [{ n } = noRow()] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
   assert.equal(n, 1);
 });
 
@@ -109,7 +115,7 @@ test("two taps at the same moment create one order", { skip }, async () => {
   assert.ok(results.every((r) => r.ok));
   const numbers = new Set(results.map((r) => (r.ok ? r.number : "")));
   assert.equal(numbers.size, 1);
-  const [{ n }] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
+  const [{ n } = noRow()] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
   assert.equal(n, 1);
 });
 
@@ -128,8 +134,9 @@ test("two buyers cannot both get the last piece", { skip }, async () => {
   const lost = results.filter((r) => !r.ok);
   assert.equal(won.length, 1);
   assert.deepEqual(lost, [{ ok: false, reason: "sold_out" }]);
-  assert.equal(won[0].ok && won[0].soldOutNow, true);
-  const [v] = await sql!`SELECT stock_on_hand, stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
+  const [winner = noRow()] = won;
+  assert.equal(winner.ok && winner.soldOutNow, true);
+  const [v = noRow()] = await sql!`SELECT stock_on_hand, stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
   assert.deepEqual({ ...v }, { stock_on_hand: 1, stock_reserved: 1 });
 });
 
@@ -150,9 +157,9 @@ test("a refused order leaves no trace: no order, no reservation", { skip }, asyn
   await sql!`UPDATE variants SET stock_on_hand = 0 WHERE sku = 'NUR-QC-BRG-LXL'`;
   const r = await place(r0.order);
   assert.deepEqual(r, { ok: false, reason: "sold_out" });
-  const [v] = await sql!`SELECT stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
+  const [v = noRow()] = await sql!`SELECT stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
   assert.equal(v.stock_reserved, 0, "the cream reservation must be rolled back");
-  const [{ n }] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
+  const [{ n } = noRow()] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
   assert.equal(n, 0);
 });
 
@@ -161,7 +168,7 @@ test("a price change between viewing and ordering is refused, never charged sile
   const order = await valid(phone); // priced at 1,200
   await sql!`UPDATE products SET price_piasters = 125000 WHERE slug = 'quiet-confidence'`;
   assert.deepEqual(await place(order), { ok: false, reason: "price_changed" });
-  const [{ n }] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
+  const [{ n } = noRow()] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
   assert.equal(n, 0);
 });
 
@@ -253,14 +260,15 @@ test("order e-mail: sent once, retried after a failure, and never blocks or lose
     }) as unknown as typeof fetch;
 
     assert.deepEqual(await sendPendingOrderEmails(getSql(), { fetcher: down }), { sent: 0, failed: 1 });
-    let [o] = await sql!`SELECT notified_at, notify_attempts FROM orders WHERE number = ${r.number}`;
+    let [o = noRow()] = await sql!`SELECT notified_at, notify_attempts FROM orders WHERE number = ${r.number}`;
     assert.equal(o.notified_at, null);
     assert.equal(o.notify_attempts, 1);
 
     assert.deepEqual(await sendPendingOrderEmails(getSql(), { fetcher: upAndRecord }), { sent: 1, failed: 0 });
-    [o] = await sql!`SELECT notified_at FROM orders WHERE number = ${r.number}`;
+    [o = noRow()] = await sql!`SELECT notified_at FROM orders WHERE number = ${r.number}`;
     assert.ok(o.notified_at);
-    const mail = JSON.parse(calls[0].body);
+    const [call = noRow()] = calls;
+    const mail = JSON.parse(call.body);
     assert.match(mail.subject, new RegExp(r.number));
     assert.match(mail.text, /1,290 EGP/);
     assert.match(mail.text, /wa\.me\/20109/);
@@ -276,8 +284,8 @@ test("order e-mail: sent once, retried after a failure, and never blocks or lose
 
 test("the database refuses an order whose total doesn't add up or a reservation above stock", { skip }, async () => {
   const phone = nextPhone();
-  const [c] = await sql!`INSERT INTO customers (phone, name) VALUES (${phone}, 'Check Constraint') RETURNING id`;
-  const [a] = await sql!`SELECT id FROM shipping_areas WHERE slug = 'cairo'`;
+  const [c = noRow()] = await sql!`INSERT INTO customers (phone, name) VALUES (${phone}, 'Check Constraint') RETURNING id`;
+  const [a = noRow()] = await sql!`SELECT id FROM shipping_areas WHERE slug = 'cairo'`;
   await assert.rejects(sql!`
     INSERT INTO orders (number, customer_id, status, payment_method, area_id, address, subtotal_piasters, shipping_piasters, total_piasters, customer_phone)
     VALUES ('NUR-TEST22', ${c.id}, 'CONFIRMATION_NEEDED', 'cod', ${a.id}, 'x', 120000, 7500, 1, ${phone})`);
