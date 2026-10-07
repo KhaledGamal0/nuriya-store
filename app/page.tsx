@@ -10,27 +10,16 @@ export default async function Home() {
   return (
     <>
       <section className="hero" aria-label="Quiet Confidence">
-        <div className="hero-imgs">
-          <div>
-            <Image
-              className="hero-img"
-              src="/images/hero-cream.jpg"
-              alt="A girl wearing the cream Quiet Confidence quarter-zip with wide-leg jeans"
-              fill
-              priority
-              quality={70}
-              sizes="(min-width: 900px) 50vw, 100vw"
-            />
-          </div>
-          <div>
-            <Image
-              className="hero-img"
-              src="/images/hero-burgundy.jpg"
-              alt="A girl wearing the burgundy Quiet Confidence quarter-zip"
-              fill
-              sizes="50vw"
-            />
-          </div>
+        <div className="hero-ph">
+          <Image
+            className="hero-img"
+            src="/images/hero-pair.jpg"
+            alt="Two girls in the Quiet Confidence quarter-zip, one in cream with a burgundy collar and one in burgundy with a cream collar"
+            fill
+            priority
+            quality={75}
+            sizes="(min-width: 900px) 50vw, 100vw"
+          />
         </div>
         <div className="wrap hero-c">
           <h1>

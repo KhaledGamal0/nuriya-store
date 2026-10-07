@@ -35,6 +35,9 @@
 - Server functions pinned to Frankfurt (`vercel.json` regions fra1), next to the database.
 - Phase 3 (Oct 7, Khaled: "orders sent to my mail khaledgamaldeveloper@gmail.com"): every new order is e-mailed to the shop (Resend), with a WhatsApp confirm link. The address is kept only in GitHub/Vercel secrets, never in code (public repo).
 - Phase 3 defaults (announced to Khaled Oct 7, change any time): max 3 orders per phone per 24 h; 30 checkout attempts per device (IP) per 10 min — raised from 10 after the stress test showed shared mobile-carrier addresses (CGNAT) would block real customers during a drop; 20 order lookups per device per 10 min.
+- Oct 7 (Khaled): starting stock Cream S/M 16, Cream L/XL 15, Burgundy S/M 17, Burgundy L/XL 15. Stock tracking on. All test orders deleted (backup kept 90 days).
+- Oct 7 (Khaled): order e-mails go to nuriya.egy@gmail.com (Resend account under that address) and show stock left after each order.
+- Oct 7 (Khaled): homepage first screen = his two-colour photo (cream + burgundy), replacing the previous two photos.
 - Card payment hidden and refused until Paymob is connected (Phase 4), so no unpaid card order can exist.
 - Order lookup shows status, items, area and totals — never the address or full name.
 - Failures of uptime, backup, migration or setup open a GitHub issue labelled "alert" (phone notification through the GitHub app) and close it when fixed.

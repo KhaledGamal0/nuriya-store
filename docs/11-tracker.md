@@ -14,7 +14,11 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Burgundy sleeve close-up taken from the embroidery reel (1264×1580) | DONE | |
 | Real model photos for both colours, cut clean from Khaled's Instagram screenshots (1290×1612) | DONE | Cream 5 photos, burgundy 6; new hero; originals still sharper |
 | AI styling images received Oct 7 | NOT USED | 7 of 8 misspell the logo (Nariya, Nsriya, Nautiga, Nauljpa) or invent the sleeve embroidery; none is sharper than the HD boards already used. Usable for Instagram only after fixing the logo. |
-| Stock count per color and size | KHALED | Until given, stock tracking is off and every size shows available |
+| Stock count per color and size | DONE | Oct 7: Cream S/M 16, L/XL 15; Burgundy S/M 17, L/XL 15. Change any time: Actions → Admin tasks → set-stock |
+| Stock left shown in every order e-mail (low ≤ 3 and sold-out flagged) | DONE | `lib/notify.ts` |
+| Redesigned order e-mail (logo, order number, WhatsApp + Call buttons, deliver-to card, items with photos, cash to collect) | DONE | |
+| Admin tasks from the phone: set stock, reset test orders (backup first, all-or-nothing, live refresh) | DONE | `.github/workflows/admin-tasks.yml` |
+| Homepage hero: Khaled's two-colour photo (enhanced), phone full-bleed, desktop editorial split | DONE | `public/images/hero-pair.jpg` |
 | Exact Canva display font name | KHALED | Using Instrument Serif meanwhile |
 | About / story page | P6 | Copy exists in brand book |
 | Arabic storefront (real RTL) | LATER | Data model ready for AR from P2 |

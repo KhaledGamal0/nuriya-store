@@ -145,3 +145,36 @@ test("order e-mail and WhatsApp link: hostile names and addresses cannot inject 
   const link = whatsappLink({ number: "NUR-TEST22", customer_name: "Nour & <Co> #1", customer_phone: "01012345678", total_piasters: 127500, area_name: "Cairo", payment_method: "cod" });
   assert.match(link, /^https:\/\/wa\.me\/201012345678\?text=[^\s<>&#]*$/);
 });
+
+test("order e-mail shows stock left, flags low and sold-out sizes, and says what to collect in cash", () => {
+  const mail = orderEmail(
+    {
+      id: 1,
+      number: "NUR-ABC234",
+      payment_method: "cod",
+      customer_name: "Nour Ahmed",
+      customer_phone: "01012345678",
+      area_name: "Alexandria",
+      address: "12 El Horreya Rd",
+      subtotal_piasters: 120000,
+      shipping_piasters: 9000,
+      total_piasters: 129000,
+      created_at: new Date(),
+      items: [{ product_name: "Quiet Confidence", color_name: "Cream", size: "S/M", qty: 1, line_piasters: 120000, color_code: "cream" }],
+    },
+    [
+      { color: "Cream", size: "S/M", tracked: true, available: 15 },
+      { color: "Cream", size: "L/XL", tracked: true, available: 2 },
+      { color: "Burgundy", size: "S/M", tracked: true, available: 0 },
+      { color: "Burgundy", size: "L/XL", tracked: false, available: 0 },
+    ],
+  );
+  assert.match(mail.html, /15 left/);
+  assert.match(mail.html, /2 left · low/);
+  assert.match(mail.html, /SOLD OUT/);
+  assert.match(mail.html, /2 sizes low or sold out/);
+  assert.match(mail.html, /Collect 1,290 EGP in cash/);
+  assert.match(mail.html, /email\/thumb-cream\.jpg/);
+  assert.match(mail.text, /STOCK NOW[\s\S]*Cream L\/XL: 2 left · low/);
+  assert.equal(mail.subject, "New order NUR-ABC234 · 1,290 EGP · Alexandria");
+});
