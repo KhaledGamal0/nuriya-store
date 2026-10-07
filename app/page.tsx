@@ -62,12 +62,12 @@ export default async function Home() {
       <section className="ed" aria-label="Craft">
         <Image
           className="ed-tall"
-          src="/images/burgundy-hd-flatlay.jpg"
-          alt="Embroidery up close: Nuriya label, QUIET CONFIDENCE on the chest, do what you love, love what you do on the sleeve"
+          src="/images/craft-sleeve-tall.jpg"
+          alt="Cream cuff embroidered in burgundy: do what you love, love what you do"
           fill
           sizes="(min-width: 900px) 1px, 100vw"
         />
-        <Image className="ed-wide" src="/images/craft-wide.jpg" alt="" fill sizes="(min-width: 900px) 100vw, 1px" />
+        <Image className="ed-wide" src="/images/craft-sleeve-wide.jpg" alt="" fill sizes="(min-width: 900px) 100vw, 1px" />
         <p className="reveal">
           Every stitch,
           <br />
