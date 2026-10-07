@@ -53,7 +53,7 @@ async function valid(phone: string, cart: Cart = [{ color: "cream", size: "S/M",
   return r.order;
 }
 
-async function place(order: Awaited<ReturnType<typeof valid>>, key = randomUUID(), ipHash: string | null = null) {
+async function place(order: Awaited<ReturnType<typeof valid>>, key: string = randomUUID(), ipHash: string | null = null) {
   const { placeOrder } = await import("../lib/orders.ts");
   const { getSql } = await import("../lib/db/index.ts");
   return placeOrder(getSql(), order, { key, ipHash });
