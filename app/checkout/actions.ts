@@ -2,7 +2,6 @@
 
 import { after } from "next/server";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { MESSAGES, validateCheckout, type FieldErrors } from "@/lib/checkout";
 import { getAreas, getCatalog } from "@/lib/store";
 import { getSql, hasDatabase } from "@/lib/db";
@@ -11,7 +10,13 @@ import { sendPendingOrderEmails } from "@/lib/notify";
 import { refreshStorefront } from "@/lib/refresh";
 
 /** `notice` is a message for the whole form (not one field); the bag and every typed field are kept. */
-export type CheckoutState = { errors: FieldErrors; message?: string; notice?: string } | null;
+export type CheckoutState = {
+  errors: FieldErrors;
+  message?: string;
+  notice?: string;
+  /** Set only after the order is saved in the database. The browser then opens the thank-you page. */
+  saved?: { number: string; payment: "cod" | "card" };
+} | null;
 
 const UNAVAILABLE =
   "We couldn't place your order just now. Nothing was charged. Please try again in a minute, or message us on Instagram @nuriya.eg.";
@@ -79,6 +84,8 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
   // E-mail the shop after the response is sent, so the customer never waits for it (and retry older misses).
   after(() => sendPendingOrderEmails(getSql()).catch((e) => console.error("order.email.batch_failed", e)));
 
-  // TODO(phase 4): card → create a Paymob intention for the saved total and redirect to Paymob's hosted page.
-  redirect(`/checkout/done?o=${saved.number}&p=${saved.payment}`);
+  // TODO(phase 4): card → create a Paymob intention for the saved total and send the shopper to Paymob's hosted page.
+  // Returned, not redirect(): a server-action redirect left the page's transition pending, so the next
+  // link tap did nothing and the title never updated. A normal client navigation is reliable.
+  return { errors: {}, saved: { number: saved.number, payment: saved.payment } };
 }

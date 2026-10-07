@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
@@ -56,6 +57,7 @@ function Summary({ feePiasters }: { feePiasters?: number }) {
 
 export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean }) {
   const bag = useBag();
+  const router = useRouter();
   const { areas } = useStore();
   const groups = areasByFee(areas);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(placeOrder, null);
@@ -72,12 +74,17 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
 
   // Server errors replace local ones after each submit.
   useEffect(() => {
-    sendingRef.current = false; // the server answered without redirecting: allow another try
+    if (state?.saved) {
+      // Saved in the database: open the thank-you page (replace, so Back doesn't return to a filled form).
+      router.replace(`/checkout/done?o=${state.saved.number}&p=${state.saved.payment}`);
+      return; // keep the button locked while the page changes
+    }
+    sendingRef.current = false; // the server answered with a problem: allow another try
     if (state?.errors) {
       setErrors(state.errors);
       focusFirst(state.errors);
     }
-  }, [state]);
+  }, [state, router]);
 
   function focusFirst(errs: FieldErrors) {
     const first = FIELDS.find((f) => errs[f]);
@@ -237,8 +244,8 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
           </p>
         )}
 
-        <button className="btn" type="submit" disabled={pending} style={{ marginTop: "var(--s4)" }}>
-          {pending ? "Placing your order…" : `Place order · ${total}`}
+        <button className="btn" type="submit" disabled={pending || Boolean(state?.saved)} style={{ marginTop: "var(--s4)" }}>
+          {pending || state?.saved ? "Placing your order…" : `Place order · ${total}`}
         </button>
         <p className="small" style={{ marginTop: "var(--s2)" }}>
           Check your order with the courier before you accept. After the courier leaves, returns and exchanges are closed.
