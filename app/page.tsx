@@ -4,6 +4,7 @@ import { getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 import { productPath } from "@/lib/catalog";
 import { preview } from "@/lib/blur";
+import { FadeImage } from "@/components/FadeImage";
 
 export default async function Home() {
   const catalog = await getCatalog();
@@ -17,7 +18,7 @@ export default async function Home() {
             alt="Two girls in the Quiet Confidence quarter-zip, one in white with a burgundy collar and one in burgundy with a white collar"
             fill
             priority
-            quality={75}
+            quality={65}
             sizes="(min-width: 900px) 50vw, 100vw"
           />
         </div>
@@ -46,8 +47,8 @@ export default async function Home() {
             return (
               <Link className="pc" href={productPath(c)} key={c}>
                 <div className="pc-ph" style={preview(first.src)}>
-                  <Image src={first.src} alt={first.alt} fill sizes="(min-width: 900px) 600px, 50vw" />
-                  <Image src={second.src} alt="" fill sizes="(min-width: 900px) 600px, 50vw" />
+                  <FadeImage src={first.src} alt={first.alt} fill quality={65} sizes="(min-width: 900px) 600px, 50vw" />
+                  <Image src={second.src} alt="" fill quality={65} sizes="(min-width: 900px) 600px, 50vw" />
                 </div>
                 <div className="pc-t">
                   <b>
@@ -62,14 +63,14 @@ export default async function Home() {
       </section>
 
       <section className="ed" aria-label="Craft" style={preview("/images/craft-sleeve-tall.jpg")}>
-        <Image
+        <FadeImage
           className="ed-tall"
           src="/images/craft-sleeve-tall.jpg"
           alt="White cuff embroidered in burgundy: do what you love, love what you do"
           fill
           sizes="(min-width: 900px) 1px, 100vw"
         />
-        <Image className="ed-wide" src="/images/craft-sleeve-wide.jpg" alt="" fill sizes="(min-width: 900px) 100vw, 1px" />
+        <FadeImage className="ed-wide" src="/images/craft-sleeve-wide.jpg" alt="" fill sizes="(min-width: 900px) 100vw, 1px" />
         <p className="reveal">
           Every stitch,
           <br />

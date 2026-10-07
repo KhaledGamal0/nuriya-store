@@ -395,6 +395,30 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
 
   await ctx.close();
 }
+// Slow internet: hold every photo back 4 s and photograph the loading state (what a weak 4G connection
+// shows), then let photos arrive and check none stays invisible.
+await (async () => {
+  const ctx = await browser.newContext({ ...VIEWPORTS.mobile, reducedMotion: "no-preference" });
+  const page = await ctx.newPage();
+  await page.route("**/_next/image**", async (route) => {
+    await new Promise((r) => setTimeout(r, 4000));
+    await route.continue().catch(() => {});
+  });
+  for (const [name, path, scroll] of [["home", "/", 0], ["home-cards", "/", 760], ["product", "/quiet-confidence/white", 0]]) {
+    await page.goto(BASE + path, { waitUntil: "domcontentloaded" });
+    if (scroll) await page.evaluate((y) => window.scrollTo(0, y), scroll);
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${OUT}/shots/loading-${name}.png` });
+  }
+  await page.unroute("**/_next/image**");
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(3500);
+  // Every visible fading photo must have been marked loaded by its own load event (not only by the 3 s safety net).
+  const stuck = await page.evaluate(() => [...document.querySelectorAll("img.fade")].filter((i) => i.getBoundingClientRect().width > 0 && i.complete && !i.hasAttribute("data-loaded")).length);
+  if (stuck) add("mobile", "loading", "flow", `${stuck} loaded photo(s) were never marked loaded (fade-in broken)`);
+  await ctx.close();
+})().catch((e) => add("mobile", "loading", "audit-step-failed", String(e.message).slice(0, 160)));
 await refreshCheck(browser).catch((e) => add("mobile", "refresh", "audit-step-failed", String(e.message).slice(0, 160)));
 await browser.close();
 await db?.end();

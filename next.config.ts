@@ -18,6 +18,8 @@ const config: NextConfig = {
   images: {
     // WebP only: almost as small as AVIF, far faster for phones to decode and for the server to make.
     formats: ["image/webp"],
+    // 65: gallery/cards/hero (fabric still crisp, ~30% lighter); 75 default; 90 full-screen viewer.
+    qualities: [65, 75, 90],
     // Resized photos stay cached 30 days (Vercel edge + browser). A changed photo always gets a NEW file name.
     minimumCacheTTL: 2592000,
     deviceSizes: [390, 640, 828, 1080, 1280, 1600, 2048],

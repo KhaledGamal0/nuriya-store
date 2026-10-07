@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ProductImage } from "@/lib/catalog";
 import { Dialog, CloseButton } from "./Dialog";
 import { preview } from "@/lib/blur";
+import { FadeImage } from "./FadeImage";
 
 function Arrow({ dir }: { dir: "prev" | "next" }) {
   return (
@@ -62,7 +63,11 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
             }}
             aria-label={`Open photo ${i + 1} of ${total} full screen`}
           >
-            <Image src={img.src} alt={img.alt} fill priority={i === 0} sizes="(min-width: 900px) 30vw, 100vw" />
+            {i === 0 ? (
+              <Image src={img.src} alt={img.alt} fill priority quality={65} sizes="(min-width: 900px) 30vw, 100vw" />
+            ) : (
+              <FadeImage src={img.src} alt={img.alt} fill quality={65} sizes="(min-width: 900px) 30vw, 100vw" />
+            )}
           </button>
         ))}
       </div>
@@ -99,8 +104,8 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
           }}
         >
           {images.map((img) => (
-            <div className="vw-i" key={img.src}>
-              <Image src={img.src} alt={img.alt} fill sizes="100vw" quality={90} />
+            <div className="vw-i" key={img.src} style={preview(img.src)}>
+              <FadeImage src={img.src} alt={img.alt} fill sizes="100vw" quality={90} />
             </div>
           ))}
         </div>

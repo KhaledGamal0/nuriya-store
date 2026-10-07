@@ -457,3 +457,10 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 .ok-to { display: grid; gap: 4px; padding-top: var(--s2); border-top: 1px solid rgba(60, 14, 24, 0.12); font-size: 14px; }
 .ok-to h3 { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); font-family: inherit; margin-top: var(--s1); }
 .ok-to p { margin: 0; }
+
+/* Photos below the first screen fade in once loaded, over their frame's colour preview (lib/blur.ts).
+   Safety net: if the page's code is slow to start, the photo shows anyway after 3 s. */
+.fade { opacity: 0; transition: opacity 0.45s var(--ease); animation: fade-safety 0s 3s forwards; }
+.fade[data-loaded] { opacity: 1; animation: none; }
+@keyframes fade-safety { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fade { opacity: 1; transition: none; animation: none; } }
