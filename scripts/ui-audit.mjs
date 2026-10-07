@@ -100,6 +100,23 @@ async function step(vp, name, fn) {
 const photos = [];
 /** Scroll the whole page and swipe every gallery like a customer, then require that every photo a person
  * could see has really loaded. (The second card photo shows on mouse hover only, so it is skipped.) */
+// Everything visible on the first screen must be fully sharp and opaque on arrival (no blur, no fade still running):
+// a scroll reveal must never touch what the visitor sees first.
+async function firstScreenSharp(page, vp, where) {
+  await page.waitForTimeout(1200); // let the short hero glide finish
+  const soft = await page.evaluate(() => {
+    const out = [];
+    for (const el of document.querySelectorAll("main *, header *")) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.top >= innerHeight - 170 || r.bottom <= 0) continue; // the last 160px may still be revealing
+      const cs = getComputedStyle(el);
+      if (Number(cs.opacity) < 0.99 || (cs.filter && cs.filter !== "none")) out.push(`${el.tagName.toLowerCase()}.${String(el.className).split(" ")[0]} (opacity ${cs.opacity}, filter ${cs.filter})`);
+    }
+    return out.slice(0, 3);
+  });
+  if (soft.length) add(vp, where, "first-screen-not-sharp", soft.join("; "));
+}
+
 async function photoCheck(page, vp, where, { scroll = true, scope = "body" } = {}) {
   if (scroll) {
     const height = await page.evaluate(() => document.documentElement.scrollHeight);
@@ -229,6 +246,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     where = name;
     await page.goto(BASE + path, { waitUntil: "networkidle" });
     await checks(page, vp, name);
+    await firstScreenSharp(page, vp, name);
     await shot(page, `${vp}-${name}`);
     await photoCheck(page, vp, name);
     await page.screenshot({ path: `${OUT}/shots/${vp}-${name}-full.png`, fullPage: true });

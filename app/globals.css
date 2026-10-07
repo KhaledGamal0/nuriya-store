@@ -113,11 +113,11 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .hero { position: relative; height: min(86svh, 860px); min-height: 520px; overflow: hidden; background: var(--stone); }
 .hero-ph { position: absolute; inset: 0; }
 /* Phone: the photo fills the screen; framed on the embroidery and both colours. */
-.hero-img { object-fit: cover; object-position: 50% 28%; animation: settle 1.8s var(--ease) both; }
+.hero-img { object-fit: cover; object-position: 50% 28%; }
 .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0, 0, 0, 0) 52%, rgba(30, 8, 14, 0.5)); pointer-events: none; }
 .hero-c { position: absolute; z-index: 1; inset: auto 0 0 0; padding-bottom: var(--s4); color: var(--paper); display: grid; gap: var(--s3); justify-items: start; }
-.hero h1 { font-size: clamp(44px, 7vw, 84px); line-height: 0.95; animation: rise 0.9s 0.2s var(--ease) both; }
-.hero .btn { animation: rise 0.9s 0.35s var(--ease) both; }
+.hero h1 { font-size: clamp(44px, 7vw, 84px); line-height: 0.95; animation: glide 0.9s var(--ease) both; }
+.hero .btn { animation: glide 0.9s 0.1s var(--ease) both; }
 /* Desktop: editorial split — the whole photo on the right, words on the left. */
 @media (min-width: 900px) {
   .hero { height: min(88svh, 900px); background: var(--cream); }
@@ -129,6 +129,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 }
 @media (min-width: 900px) and (hover: hover) { .hero .btn-light:hover { background: #7a2b3c; color: var(--paper); } }
 @keyframes rise { from { transform: translateY(14px); opacity: 0.001; } }
+@keyframes glide { from { transform: translateY(14px); } }
 
 .sec { padding-block: var(--s5); }
 @media (min-width: 900px) { .sec { padding-block: var(--s6); } }
@@ -390,22 +391,18 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 .toast[data-on="true"] { transform: translate(-50%, 0); visibility: visible; transition: transform 0.4s var(--ease); }
 
 
-/* Page change: soft fade (app/template.tsx re-mounts on every navigation) */
-.page-in { animation: page-in 0.45s var(--ease) both; }
-/* Opacity only: a transform here would pin fixed elements (buy bar) to the page instead of the screen. */
-@keyframes page-in { from { opacity: 0; } }
-
 /* Scroll reveal: progressive enhancement, content is fully visible where unsupported */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     /* Content below the first screen settles gently into place as it scrolls in (driven by the scroll itself,
-       no JavaScript). It starts 50% visible, so nothing ever looks blank. Above-the-fold content is untouched. */
+       no JavaScript). It starts partly visible, so nothing ever looks blank, and finishes within its first 160px on screen,
+       so anything already on the first screen (even a tall section) is sharp from the first paint. */
     /* Words: a soft blur-in. Photos and cards: a small glide up, never blurred (always sharp, light on phones). */
     .reveal, .page-sec, .ok-next, .track-result {
-      animation: reveal-soft linear both; animation-timeline: view(); animation-range: entry 0% entry 40%;
+      animation: reveal-soft linear both; animation-timeline: view(); animation-range: entry 0px entry 160px;
     }
     .pc, .acc, .also, .ok-sum {
-      animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 35%;
+      animation: reveal linear both; animation-timeline: view(); animation-range: entry 0px entry 160px;
     }
   }
 }
