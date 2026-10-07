@@ -116,7 +116,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 @media (min-width: 900px) {
   .hero-imgs { grid-template-columns: 1fr 1fr; }
   .hero-imgs > div + div { display: block; }
-  .hero-img { object-position: center 30%; }
+  .hero-img { object-position: center 6%; }
 }
 @keyframes settle { from { transform: scale(1.05); } }
 .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.42)); pointer-events: none; }
@@ -146,7 +146,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 
 .ed { position: relative; aspect-ratio: 4 / 5; max-height: 88svh; width: 100%; overflow: hidden; }
 @media (min-width: 900px) { .ed { aspect-ratio: 16 / 9; } }
-.ed img { object-fit: cover; object-position: center 62%; }
+.ed img { object-fit: cover; object-position: center 85%; }
 .ed p { position: absolute; left: var(--g); bottom: var(--s4); color: var(--paper); font-family: var(--display); font-size: clamp(32px, 4.5vw, 56px); line-height: 1; text-shadow: 0 1px 16px rgba(0, 0, 0, 0.3); }
 
 /* Footer */
