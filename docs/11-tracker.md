@@ -103,7 +103,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Content Security Policy | P6 | |
 | Rate limiting | P3 | |
 | Admin 2FA and audit log | P5 | |
-| Daily encrypted database backup, restore proven on every run | DONE | `db-backup.yml`; needs `BACKUP_PASSPHRASE` secret — see `14-operations.md` |
+| Daily encrypted database backup, restore proven on every run | DONE | `db-backup.yml`; first backup Oct 7 |
 | Error monitoring (Sentry) | P6 | |
 
 ## H. Performance, SEO, accessibility
@@ -133,7 +133,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Lockfile committed | DONE | Next.js 16.4.0, React 19.3.0 |
 | Database schema, migrations, seed, storefront reads from DB | DONE | `db/migrations`, `lib/store.ts`; 7 database tests in CI |
 | Pages static, refreshed on data change (`refreshStorefront`, `POST /api/revalidate`) | DONE | Replaced 60 s ISR, which left prefetches hanging |
-| Production database on Neon | KHALED | Automated: Khaled adds 3 GitHub secrets, then "Production setup" creates Frankfurt DB + preview branch, sets Vercel, deploys, verifies |
+| Production database on Neon | DONE | Oct 7: project "nuriya-store", Frankfurt, Postgres 17, branches production + preview; live /api/health = connected, seeded. First encrypted backup restored and stored. |
 | Preview deployments on a separate test database (Neon branch "preview") | DONE | Test orders never touch production |
 | Server functions pinned to Frankfurt | DONE | `vercel.json` |
 | Phone alerts for outages, failed backups, failed migrations | DONE | GitHub issue labelled "alert", auto-closes on recovery |
