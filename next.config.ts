@@ -10,6 +10,10 @@ const securityHeaders = [
 
 const config: NextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // Put the (small) stylesheet inside the HTML so the first paint does not wait for a CSS download.
+    inlineCss: true,
+  },
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],

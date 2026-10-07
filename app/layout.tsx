@@ -8,7 +8,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
 
-const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-display", display: "swap" });
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: "normal", variable: "--font-display", display: "swap" });
 const body = Poppins({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-body", display: "swap" });
 const arabic = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], variable: "--font-arabic", display: "swap", preload: false });
 

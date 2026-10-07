@@ -18,6 +18,7 @@ export default async function Home() {
               alt="A girl wearing the cream Quiet Confidence quarter-zip with wide-leg jeans"
               fill
               priority
+              quality={70}
               sizes="(min-width: 900px) 50vw, 100vw"
             />
           </div>

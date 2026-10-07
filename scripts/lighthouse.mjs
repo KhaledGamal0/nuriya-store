@@ -38,7 +38,8 @@ for (const path of PAGES) {
   rows.push(row);
   const fail = (msg) => findings.push({ vp: "mobile", where: path, kind: "lighthouse", detail: msg });
   if (row.perf < 95) fail(`performance ${row.perf} (budget 95)`);
-  for (const k of ["a11y", "bp", "seo"]) if (row[k] < 95) fail(`${k} ${row[k]} (budget 95)`);
+  // Checkout is deliberately noindex, so its SEO score is expected to be low.
+  for (const k of ["a11y", "bp", "seo"]) if (row[k] < 95 && !(k === "seo" && path === "/checkout")) fail(`${k} ${row[k]} (budget 95)`);
   if (row.lcp > 2.0) fail(`LCP ${row.lcp.toFixed(2)}s (budget 2.0s)`);
   if (row.cls > 0.05) fail(`CLS ${row.cls.toFixed(3)} (budget 0.05)`);
   if (row.jsKb > 150) fail(`JavaScript ${row.jsKb} KB transferred`);
@@ -46,11 +47,24 @@ for (const path of PAGES) {
     .filter((x) => x.details?.type === "opportunity" && (x.details.overallSavingsMs ?? 0) > 100)
     .map((x) => `${x.title} (~${Math.round(x.details.overallSavingsMs)} ms)`);
   row.tips = opportunities.slice(0, 4).join("; ");
+  const lcpEl = a["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node?.snippet ?? "";
+  const phases = (a["largest-contentful-paint-element"]?.details?.items?.[1]?.items ?? []).map((p) => `${p.phase} ${Math.round(p.timing)}ms`).join(", ");
+  const blocking = (a["render-blocking-resources"]?.details?.items ?? []).map((i) => `${i.url.replace(BASE, "")} ${Math.round(i.wastedMs)}ms`).join(", ");
+  const scripts = (a["network-requests"]?.details?.items ?? [])
+    .filter((i) => i.resourceType === "Script")
+    .sort((x, y) => (y.transferSize ?? 0) - (x.transferSize ?? 0))
+    .slice(0, 5)
+    .map((i) => `${i.url.replace(BASE, "").replace(/^\/_next\/static\/chunks\//, "")} ${Math.round((i.transferSize ?? 0) / 1024)}KB`)
+    .join(", ");
+  const fonts = (a["network-requests"]?.details?.items ?? []).filter((i) => i.resourceType === "Font").map((i) => `${Math.round((i.transferSize ?? 0) / 1024)}KB`).join(" + ");
+  const lcpImg = (a["network-requests"]?.details?.items ?? []).find((i) => i.resourceType === "Image" && i.url.includes("_next/image"));
+  row.detail = `LCP element: ${lcpEl.slice(0, 90)} | phases: ${phases} | render-blocking: ${blocking || "none"} | biggest scripts: ${scripts} | fonts: ${fonts} | first image: ${lcpImg ? Math.round(lcpImg.transferSize / 1024) + "KB" : "-"}`;
 }
 
 let md = "# Lighthouse (mobile, simulated 4G)\n\n| Page | Perf | A11y | Best pr. | SEO | LCP | CLS | TBT | JS |\n|---|---|---|---|---|---|---|---|---|\n";
 for (const r of rows) md += `| ${r.path} | ${r.perf} | ${r.a11y} | ${r.bp} | ${r.seo} | ${r.lcp.toFixed(2)}s | ${r.cls.toFixed(3)} | ${Math.round(r.tbt)}ms | ${r.jsKb} KB |\n`;
 md += "\n" + rows.filter((r) => r.tips).map((r) => `- ${r.path}: ${r.tips}`).join("\n") + "\n";
+md += "\n### Details\n" + rows.map((r) => `- ${r.path}: ${r.detail}`).join("\n") + "\n";
 await fs.writeFile("ui-report/lighthouse.md", md);
 await fs.writeFile("ui-report/lighthouse-findings.json", JSON.stringify(findings, null, 2));
 const report = await fs.readFile("ui-report/report.md", "utf8").catch(() => "# UI/UX audit\n\n");
