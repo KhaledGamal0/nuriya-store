@@ -30,6 +30,10 @@
 
 ## Phase 2 decisions (Oct 7 2026)
 - Neon Postgres, region Frankfurt; connection strings only in Vercel / GitHub secrets, never in chat or code.
+- Setup is automated (Khaled, Oct 7: "do everything from your side"): Khaled adds only NEON_API_KEY, VERCEL_TOKEN and BACKUP_PASSPHRASE as GitHub secrets; the "Production setup" workflow does the rest. Workflows read the database address from the Neon API at run time, so no connection string is stored anywhere except Vercel.
+- Vercel preview deployments use a separate Neon branch "preview" (test data only), so test orders never land in the production database.
+- Server functions pinned to Frankfurt (`vercel.json` regions fra1), next to the database.
+- Failures of uptime, backup, migration or setup open a GitHub issue labelled "alert" (phone notification through the GitHub app) and close it when fixed.
 - Stock tracking off per size until Khaled gives counts (all sizes available meanwhile).
 - No size pre-selected on product pages (Khaled).
 - Pages static + on-demand refresh (not timed refresh).

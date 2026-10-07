@@ -1,10 +1,14 @@
 name: Uptime check
 
-# Opens the live shop like a customer would. If anything is down, this run fails and GitHub
-# emails you (Settings → Notifications → Actions: "failed workflows only").
+# Opens the live shop like a customer would. If anything is down it opens a GitHub issue labelled
+# "alert" (the GitHub app notifies your phone) and closes it by itself when the shop is back.
 # Every 15 min: shop pages only (pre-built, so this never wakes or bills the database).
 # Every 6 hours: also /api/health, which runs one tiny query against Neon.
 # Set the repository VARIABLE (not secret) SITE_URL, e.g. https://nuriya-store.vercel.app
+permissions:
+  contents: read
+  issues: write
+
 on:
   schedule:
     - cron: "*/15 * * * *"
@@ -18,6 +22,10 @@ jobs:
     env:
       SITE: ${{ vars.SITE_URL || 'https://nuriya-store.vercel.app' }}
     steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: scripts/alert.sh
+          sparse-checkout-cone-mode: false
       - name: Shop pages
         run: |
           fail=0
@@ -34,3 +42,13 @@ jobs:
           echo "$body"
           echo "$body" | grep -q '"ok":true' || { echo "::error::Database health check failed: $body"; exit 1; }
           echo "$body" | grep -q '"database":"connected"' || echo "::warning::Site is not using the database yet: $body"
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh open "Shop is down" "The live site or its database did not answer. Browsing usually keeps working if only the database is affected."
+      - name: Clear alert
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh close "Shop is down" "The shop answers normally again."

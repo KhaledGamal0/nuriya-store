@@ -1,8 +1,8 @@
 name: Database deploy
 
-# Applies new migrations to the production database (Neon) whenever db/migrations changes on main,
-# and can be run by hand from the Actions tab (with "seed" ticked the first time).
-# Needs the repository secret DATABASE_URL = Neon's DIRECT (unpooled) connection string.
+# Applies new migrations to the live database whenever db/migrations changes on main
+# (production branch, then the preview branch), and can be run by hand from the Actions tab.
+# The database address comes from Neon via the NEON_API_KEY secret (or a DATABASE_URL secret, if set).
 on:
   push:
     branches: [main]
@@ -14,17 +14,26 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: db-deploy
+  cancel-in-progress: false
+
 jobs:
   migrate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DB_URL_SECRET: ${{ secrets.DATABASE_URL }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
     steps:
-      - name: Check the secret is set
+      - name: Check access
         run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "::warning::Repository secret DATABASE_URL is not set yet. Nothing to do."
+          if [ -z "$DB_URL_SECRET" ] && [ -z "$NEON_API_KEY" ]; then
+            echo "::warning::No NEON_API_KEY (or DATABASE_URL) secret yet. Nothing to do."
             echo "NO_DB=1" >> "$GITHUB_ENV"
           fi
       - uses: actions/checkout@v5
@@ -36,9 +45,30 @@ jobs:
           cache: npm
       - if: env.NO_DB != '1'
         run: npm ci --no-audit --no-fund
-      - name: Apply migrations
+      - name: Database address — production (masked)
+        if: env.NO_DB != '1'
+        run: |
+          if [ -n "$DB_URL_SECRET" ]; then echo "DATABASE_URL=$DB_URL_SECRET" >> "$GITHUB_ENV"; else node scripts/neon.mjs env production; fi
+      - name: Apply migrations — production
         if: env.NO_DB != '1'
         run: npm run db:migrate
-      - name: Seed starting data
+      - name: Seed starting data — production
         if: env.NO_DB != '1' && inputs.seed
         run: npm run db:seed
+      # GITHUB_ENV values reach only the NEXT step, so the address and the migration are two steps.
+      - name: Database address — preview (masked)
+        if: env.NO_DB != '1' && env.NEON_API_KEY != ''
+        run: node scripts/neon.mjs env preview
+      - name: Apply migrations — preview
+        if: env.NO_DB != '1' && env.NEON_API_KEY != ''
+        run: npm run db:migrate
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh open "Database migration failed" "A database change did not apply. The site keeps running on the old structure; do not deploy code that needs the new one."
+      - name: Clear alert
+        if: success() && env.NO_DB != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh close "Database migration failed"

@@ -1,0 +1,62 @@
+name: Production setup
+
+# One button that connects the live site to its database. Safe to run again at any time.
+# 1. Finds or creates the Neon project in Frankfurt, plus a "preview" branch for test deployments.
+# 2. Creates the tables and the starting data (product, photos, delivery areas) on both.
+# 3. Sets Vercel's variables, deploys main to production, and checks the live /api/health.
+# Needs repository secrets NEON_API_KEY and VERCEL_TOKEN. No connection string is ever printed.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: production-setup
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://nuriya-store.vercel.app' }}
+      GITHUB_REPOSITORY_ID: ${{ github.repository_id }}
+    steps:
+      - name: Check secrets
+        run: |
+          missing=""
+          [ -n "$NEON_API_KEY" ] || missing="$missing NEON_API_KEY"
+          [ -n "$VERCEL_TOKEN" ] || missing="$missing VERCEL_TOKEN"
+          if [ -n "$missing" ]; then echo "::error::Add these repository secrets first:$missing"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Neon project and branches (Frankfurt)
+        run: node scripts/neon.mjs setup
+      - name: Tables and starting data — production
+        run: |
+          npm run db:migrate
+          npm run db:seed
+      - name: Tables and starting data — preview
+        run: |
+          DATABASE_URL="$PREVIEW_DATABASE_URL" npm run db:migrate
+          DATABASE_URL="$PREVIEW_DATABASE_URL" npm run db:seed
+      - name: Vercel variables, deploy and live check
+        run: node scripts/vercel.mjs
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh open "Production setup failed" "The setup workflow stopped. The live site is unchanged."
+      - name: Clear alert
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh close "Production setup failed" "Setup completed."

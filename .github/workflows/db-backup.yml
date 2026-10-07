@@ -3,8 +3,8 @@ name: Database backup
 # Daily copy of the production database, kept 30 days, ENCRYPTED (this repository is public and
 # the database will hold customer names, phones and addresses).
 # Each run also restores the copy into a throwaway Postgres to prove the backup actually works.
-# Needs secrets: DATABASE_URL (Neon DIRECT string) and BACKUP_PASSPHRASE (long random text you keep
-# in your password manager — without it the backups cannot be opened).
+# Needs secrets: NEON_API_KEY (or DATABASE_URL = Neon DIRECT string) and BACKUP_PASSPHRASE (long random
+# text you keep in your password manager — without it the backups cannot be opened).
 # To open one: download the artifact, then
 #   gpg --batch --passphrase "<BACKUP_PASSPHRASE>" -d nuriya-YYYY-MM-DD.dump.gpg > nuriya.dump
 #   pg_restore --no-owner -d "<target database>" nuriya.dump
@@ -12,6 +12,10 @@ on:
   schedule:
     - cron: "30 0 * * *" # 03:30 Cairo, quietest hour
   workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   backup:
@@ -28,15 +32,25 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U check" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DB_URL_SECRET: ${{ secrets.DATABASE_URL }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
       BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
     steps:
       - name: Check secrets
         run: |
-          if [ -z "$DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
-            echo "::warning::DATABASE_URL or BACKUP_PASSPHRASE secret is not set yet. Nothing to back up."
+          if { [ -z "$DB_URL_SECRET" ] && [ -z "$NEON_API_KEY" ]; } || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::warning::NEON_API_KEY and BACKUP_PASSPHRASE secrets are needed. Nothing to back up yet."
             echo "SKIP=1" >> "$GITHUB_ENV"
           fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        if: env.SKIP != '1'
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        if: env.SKIP != '1'
+        run: |
+          if [ -n "$DB_URL_SECRET" ]; then echo "DATABASE_URL=$DB_URL_SECRET" >> "$GITHUB_ENV"; else node scripts/neon.mjs env production; fi
       - name: Dump (Postgres 17 tools)
         if: env.SKIP != '1'
         run: |
@@ -62,3 +76,13 @@ jobs:
           name: nuriya-db-${{ env.STAMP }}
           path: nuriya-*.dump.gpg
           retention-days: 30
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh open "Database backup failed" "Tonight's backup was not made or could not be restored. Neon's own restore window still covers recent hours."
+      - name: Clear alert
+        if: success() && env.SKIP != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh close "Database backup failed"
