@@ -7,6 +7,7 @@ import { useStore } from "./StoreProvider";
 import { ClearBag } from "./ClearBag";
 import { formatEgp } from "@/lib/money";
 import { prettyPhone, readReceipt, type Receipt } from "@/lib/receipt";
+import { preview } from "@/lib/blur";
 
 const INSTAGRAM = "https://instagram.com/nuriya.eg";
 
@@ -120,7 +121,7 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
                 const image = color?.images[0];
                 return (
                   <div className="ln" key={`${l.color}-${l.size}`}>
-                    <div className="ln-img">{image && <Image src={image.src} alt="" fill sizes="72px" loading="eager" />}</div>
+                    <div className="ln-img" style={image ? preview(image.src) : undefined}>{image && <Image src={image.src} alt="" fill sizes="72px" loading="eager" />}</div>
                     <div className="ln-m">
                       <b>{catalog.name}</b>
                       <span>

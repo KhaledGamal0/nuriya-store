@@ -9,7 +9,7 @@ import { minFee } from "@/lib/shipping";
 import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
-import { PREVIEWS, preview } from "@/lib/blur";
+import { preview } from "@/lib/blur";
 
 type Params = { params: Promise<{ color: string }> };
 
@@ -57,7 +57,7 @@ export default async function ProductPage({ params }: Params) {
   return (
     <div className="wrap pdp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Gallery images={c.images.map((i) => ({ ...i, preview: PREVIEWS[i.src] }))} label={`${catalog.name}, ${c.name}`} />
+      <Gallery images={c.images} label={`${catalog.name}, ${c.name}`} />
       <div className="info">
         <div>
           <div className="t-row">
