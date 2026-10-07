@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ProductImage } from "@/lib/catalog";
 import { Dialog, CloseButton } from "./Dialog";
 import { preview } from "@/lib/blur";
+import { PHONE_FULL } from "@/lib/sizes";
 
 function Arrow({ dir }: { dir: "prev" | "next" }) {
   return (
@@ -21,13 +22,6 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
   const [viewIndex, setViewIndex] = useState(0);
-  // The other photos start downloading the moment the first one has arrived, so they never slow it down
-  // (on phones the first photo gets the whole connection). The timer is a safety net only.
-  const [rest, setRest] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setRest(true), 1500);
-    return () => clearTimeout(t);
-  }, []);
   const total = images.length;
 
   const goStrip = (i: number) => strip.current?.scrollTo({ left: i * strip.current.clientWidth, behavior: "smooth" });
@@ -69,18 +63,16 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
             }}
             aria-label={`Open photo ${i + 1} of ${total} full screen`}
           >
-            {/* The first photo loads at top priority; the rest load straight after it (eager, not lazy:
-                lazy loading inside a sideways gallery is unreliable on iPhone and photos could stay blank). */}
-            {(i === 0 || rest) && (
-              <Image
-                src={img.src}
-                alt={img.alt}
-                fill
-                quality={65}
-                sizes="(min-width: 900px) 30vw, 100vw"
-                {...(i === 0 ? { priority: true, onLoad: () => setRest(true) } : { loading: "eager" as const })}
-              />
-            )}
+            {/* All product photos load straight away: the first at top priority, the rest just behind it.
+                Lazy loading inside a sideways gallery is unreliable on iPhone (photos could stay blank). */}
+            <Image
+              src={img.src}
+              alt={img.alt}
+              fill
+              quality={65}
+              sizes={`(min-width: 900px) 30vw, ${PHONE_FULL}`}
+              {...(i === 0 ? { priority: true } : { loading: "eager" as const, fetchPriority: "low" as const })}
+            />
           </button>
         ))}
       </div>
@@ -119,7 +111,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
           {images.map((img) => (
             <div className="vw-i" key={img.src} style={preview(img.src)}>
               {/* Same size and quality as the gallery, so on phones the photo is already downloaded: opens instantly. */}
-              {open && <Image src={img.src} alt={img.alt} fill sizes="100vw" quality={65} loading="eager" />}
+              {open && <Image src={img.src} alt={img.alt} fill sizes={PHONE_FULL} quality={65} loading="eager" />}
             </div>
           ))}
         </div>

@@ -74,7 +74,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Arabic numerals in phone numbers accepted | FIXED | Oct 7: ٠١٠… was refused before |
 | Internet drop mid-order shows a calm message and keeps the form | FIXED | Oct 7: used to show the error page |
 | Photo loading: all product/home photos load immediately (first at top priority, rest low priority — lazy loading left gallery photos blank on iPhone); frames show a soft gradient of the photo's colours until it arrives; no fade (an unloaded photo can never be invisible) | DONE | `lib/blur.ts`; audit swipes every gallery photo and scrolls the home page, fails on any blank photo |
-| Scrolling: words blur-in softly, photos/cards glide up slightly (scroll-driven CSS, no JS, never starts blank) | DONE | |
+| Scrolling: no scroll reveals (removed Oct 7 — text could rest blurred where the scroll stopped); content always sharp | DONE | audit `first-screen-not-sharp` |
 | Order tracking page for customers | DONE | `/track` — needs order number + phone; never shows the address |
 | Order emails / SMS | P6 | Email optional (phone-first) |
 | Referral 10% code | LATER + KHALED | How to track it is undecided |
@@ -127,7 +127,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Static pages, optimized images (AVIF/WebP), self-hosted fonts | DONE | |
 | Photos prepared ahead of time: every size made once as WebP (`scripts/make-images.py` → `public/img`), served as finished files cached 1 year — no on-demand resizing, so even the first visitor after a photo change gets photos instantly | DONE | `lib/image-loader.ts`; test fails if a size is missing |
 | Live photo speed measured on the real site after every deploy (first-time iPhone visitor, 5G + 4G, empty cache) | DONE | `.github/workflows/live-photos.yml` → `live-photos` branch |
-| First screen sharp on arrival (scroll reveals never blur what is already on screen; nothing starts invisible); product photos 2–6 start right after photo 1 so it gets the full connection | DONE | audit `first-screen-not-sharp` check; Lighthouse mobile 95–99 all pages |
+| First screen sharp on arrival (nothing starts invisible); all product photos load at once; phones download the 828 px photo (same look, ~half the bytes of 1200 px) via `lib/sizes.ts` | DONE | audit `first-screen-not-sharp` check; Lighthouse mobile 95–99 all pages |
 | Product structured data, sitemap, robots, page titles | DONE | |
 | Keyboard, screen reader, focus, reduced motion | DONE | Full audit in P6 |
 | Lighthouse measured on every push | DONE | Oct 7: Perf 92–97, A11y/Best practices/SEO 100, CLS 0. LCP ~3 s on simulated 4G (budget 2 s) — re-measure on the live CDN |

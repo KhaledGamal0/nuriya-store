@@ -4,8 +4,9 @@ import { getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 import { productPath } from "@/lib/catalog";
 import { preview } from "@/lib/blur";
+import { PHONE_FULL } from "@/lib/sizes";
 
-const craftCommon = { alt: "", fill: true, quality: 65, sizes: "100vw", loading: "eager" as const, fetchPriority: "low" as const };
+const craftCommon = { alt: "", fill: true, quality: 65, sizes: PHONE_FULL, loading: "eager" as const, fetchPriority: "low" as const };
 const { props: craftTall } = getImageProps({ ...craftCommon, src: "/images/craft-sleeve-tall.jpg" });
 const { props: craftWide } = getImageProps({ ...craftCommon, src: "/images/craft-sleeve-wide.jpg" });
 
@@ -22,7 +23,7 @@ export default async function Home() {
             fill
             priority
             quality={65}
-            sizes="(min-width: 900px) 50vw, 100vw"
+            sizes={`(min-width: 900px) 50vw, ${PHONE_FULL}`}
           />
         </div>
         <div className="wrap hero-c">

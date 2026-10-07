@@ -391,23 +391,8 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 .toast[data-on="true"] { transform: translate(-50%, 0); visibility: visible; transition: transform 0.4s var(--ease); }
 
 
-/* Scroll reveal: progressive enhancement, content is fully visible where unsupported */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    /* Content below the first screen settles gently into place as it scrolls in (driven by the scroll itself,
-       no JavaScript). It starts partly visible, so nothing ever looks blank, and finishes within its first 160px on screen,
-       so anything already on the first screen (even a tall section) is sharp from the first paint. */
-    /* Words: a soft blur-in. Photos and cards: a small glide up, never blurred (always sharp, light on phones). */
-    .reveal, .page-sec, .ok-next, .track-result {
-      animation: reveal-soft linear both; animation-timeline: view(); animation-range: entry 0px entry 160px;
-    }
-    .pc, .acc, .also, .ok-sum {
-      animation: reveal linear both; animation-timeline: view(); animation-range: entry 0px entry 160px;
-    }
-  }
-}
-@keyframes reveal { from { opacity: 0.6; transform: translateY(16px); } }
-@keyframes reveal-soft { from { opacity: 0.35; filter: blur(6px); transform: translateY(12px); } }
+/* No scroll reveals: a scroll-driven effect depends on where the page stops, so text could rest blurred
+   or faded on screen (Khaled, Oct 7 2026). Content is always fully sharp; the scroll itself is the motion. */
 
 /* Add to bag confirmation */
 .btn[data-added="true"] { background: var(--burg); }

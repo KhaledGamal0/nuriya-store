@@ -47,3 +47,5 @@
 - Stock tracking off per size until Khaled gives counts (all sizes available meanwhile).
 - No size pre-selected on product pages (Khaled).
 - Pages static + on-demand refresh (not timed refresh).
+
+- Oct 7 2026 (Khaled): no scroll reveal/blur effects — text must never rest blurred. Content is always sharp.
