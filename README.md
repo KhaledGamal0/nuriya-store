@@ -8,7 +8,7 @@ npm run build
 ```
 
 Custom e-commerce website + admin dashboard for **Nuriya** (Cairo women's clothing, @nuriya.eg).
-Owner: Khaled Gamal. Status: **PLANNING — nothing built yet. Wait for Khaled's go before starting.**
+Owner: Khaled Gamal. Live: https://nuriya-store.vercel.app. Status and next steps: `docs/11-tracker.md`.
 
 ## Read in this order
 | File | What it holds |
@@ -32,4 +32,5 @@ Owner: Khaled Gamal. Status: **PLANNING — nothing built yet. Wait for Khaled's
 - `kit/` — official brand kit: **SVG logos (use on site)**, favicons, colors css/json, type specimen, print pieces, OG image, hero banner, styling boards (HD)
 - `photos-raw/` — WhatsApp-compressed product/model/label photos (≤1280 px — NOT launch quality)
 - `instagram-screens/` — 9 screenshots of the feed, posts, stories (shows content style + view counts)
+- `photos-instagram/` — 18 full-resolution screenshots of real model photos (source of the site's model photos, cropped clean)
 - `reference/` — brand book PDF, courier price list, return policy screen

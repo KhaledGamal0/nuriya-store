@@ -3,7 +3,7 @@ import Link from "next/link";
 import { COLORS, PRODUCT } from "@/lib/catalog";
 import { formatEgp } from "@/lib/money";
 
-const hover: Record<string, string> = { cream: "/images/cream-chest.jpg", burgundy: "/images/burgundy-hanger.jpg" };
+const hover: Record<string, string> = { cream: "/images/cream-model.jpg", burgundy: "/images/burgundy-model.jpg" };
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
           <div>
             <Image
               className="hero-img"
-              src="/images/cream-on-model.jpg"
+              src="/images/hero-cream.jpg"
               alt="A girl wearing the cream Quiet Confidence quarter-zip with wide-leg jeans"
               fill
               priority
@@ -23,8 +23,8 @@ export default function Home() {
           <div>
             <Image
               className="hero-img"
-              src="/images/burgundy-hanger.jpg"
-              alt="The burgundy Quiet Confidence quarter-zip with a white collar"
+              src="/images/hero-burgundy.jpg"
+              alt="A girl wearing the burgundy Quiet Confidence quarter-zip"
               fill
               sizes="50vw"
             />
@@ -50,7 +50,7 @@ export default function Home() {
         <div className="grid">
           {COLORS.map((c) => {
             const color = PRODUCT.colors[c];
-            const first = color.images[0]!;
+            const first = color.images.find((i) => i.src.includes("styled")) ?? color.images[0]!;
             return (
               <Link className="pc reveal" href={`/quiet-confidence/${c}`} key={c}>
                 <div className="pc-ph">
@@ -70,7 +70,7 @@ export default function Home() {
       </section>
 
       <section className="ed" aria-label="Craft">
-        <Image src="/images/sleeve.jpg" alt="Embroidered sleeve: do what you love, love what you do" fill sizes="100vw" />
+        <Image src="/images/cream-sleeve.jpg" alt="Embroidered sleeve: do what you love, love what you do" fill sizes="100vw" />
         <p className="reveal">
           Every stitch,
           <br />

@@ -11,7 +11,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Product copy, details, size chart | DONE | `lib/catalog.ts` |
 | Fabric composition, weight, care instructions | KHALED | Shown as "coming soon" until provided |
 | Original full-quality photos (or a shoot) | KHALED | Current photos are compressed; shot list in `07-roadmap.md` |
-| Burgundy sleeve close-up taken from the embroidery reel (1264×1580) | DONE | Third burgundy photo |
+| Burgundy sleeve close-up taken from the embroidery reel (1264×1580) | DONE | |
+| Real model photos for both colours, cut clean from Khaled's Instagram screenshots (1290×1612) | DONE | Cream 5 photos, burgundy 6; new hero; originals still sharper |
 | AI styling images received Oct 7 | NOT USED | 7 of 8 misspell the logo (Nariya, Nsriya, Nautiga, Nauljpa) or invent the sleeve embroidery; none is sharper than the HD boards already used. Usable for Instagram only after fixing the logo. |
 | Stock count per color and size | KHALED | Needed for P2 |
 | Exact Canva display font name | KHALED | Using Instrument Serif meanwhile |
