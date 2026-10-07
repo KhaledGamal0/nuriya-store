@@ -1,0 +1,35 @@
+name: Live photo speed
+
+# Opens the live shop as a first-time iPhone visitor (empty cache) and reports how long until every
+# photo shows, and whether each photo came from Vercel's edge cache. Runs after every push to main
+# (once the deploy is live) and on demand.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Wait for the deploy
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 40); do
+            s=$(gh api repos/${{ github.repository }}/commits/${{ github.sha }}/statuses -q '[.[]|select(.context=="Vercel")][0].state')
+            echo "Vercel: $s"; [ "$s" = success ] && exit 0; [ "$s" = failure ] && exit 1; sleep 15
+          done
+      - run: npm install --no-save --no-audit --no-fund playwright && npx playwright install --with-deps chromium
+      - run: node scripts/live-photos.mjs | tee -a "$GITHUB_STEP_SUMMARY"

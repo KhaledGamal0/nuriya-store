@@ -29,7 +29,7 @@ jobs:
       - name: Shop pages
         run: |
           fail=0
-          for p in / /quiet-confidence/cream /quiet-confidence/burgundy /checkout /returns; do
+          for p in / /quiet-confidence/white /quiet-confidence/burgundy /checkout /returns; do
             code=$(curl -s -o /dev/null -w "%{http_code} %{time_total}" --retry 2 --retry-delay 5 --max-time 20 "$SITE$p")
             echo "$p → $code"
             [ "${code%% *}" = "200" ] || { echo "::error::$p returned $code"; fail=1; }
