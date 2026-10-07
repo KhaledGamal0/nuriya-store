@@ -411,6 +411,20 @@ await (async () => {
     await page.screenshot({ path: `${OUT}/shots/loading-${name}.png` });
   }
   await page.unroute("**/_next/image**");
+  // Swipe through every gallery photo like a customer: each one must actually load (no blank grey frames).
+  for (const path of ["/quiet-confidence/white", "/quiet-confidence/burgundy"]) {
+    await page.goto(BASE + path, { waitUntil: "load" });
+    const n = await page.locator(".gal-i").count();
+    for (let i = 0; i < n; i++) {
+      await page.locator(".gal-i").nth(i).scrollIntoViewIfNeeded();
+      await page.evaluate((k) => document.querySelector(".gal").scrollTo({ left: k * window.innerWidth }), i);
+      await page.waitForTimeout(250);
+    }
+    await page.waitForTimeout(1500);
+    const blank = await page.evaluate(() => [...document.querySelectorAll(".gal-i img")].filter((im) => !(im.complete && im.naturalWidth > 0)).length);
+    if (blank) add("mobile", "gallery", "flow", `${path}: ${blank} gallery photo(s) never loaded after swiping through`);
+    await page.screenshot({ path: `${OUT}/shots/gallery-last-${path.split("/").pop()}.png` });
+  }
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(3500);
