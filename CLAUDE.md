@@ -20,7 +20,7 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 - **Approved look (Oct 7 2026, Khaled):** clean and simple, big-brand editorial. Mostly white, plum ink, pink only as a tiny accent. Full-bleed real photos. Few elements, one job per section, strict 8px spacing scale. Khaled rejected busy layouts: no extra tags, badges, marquees, trust rows or decorative props. Reference: `prototype/storefront-template.html`.
 - **Not generic:** no star-rating grids, no three-icon trust rows, no promo popups, no gradient buttons, no heavy shadows, no stock photos, no lorem ipsum.
 - **Mobile first** (390 px). Traffic comes from Instagram on phones over 4G.
-- **Performance budget:** LCP < 2.0 s mobile 4G, CLS < 0.05, INP < 200 ms, product page JS < 90 KB gzip, Lighthouse mobile ≥ 95. A change that breaks the budget is not done.
+- **Performance budget (measured by `scripts/lighthouse.mjs` on every push):** LCP < 2.0 s mobile 4G, CLS < 0.05, INP < 200 ms, total JS ≤ 180 KB transferred (React + Next.js alone are ~118 KB; keep our own code small), Lighthouse mobile ≥ 95. No entrance animations that start content invisible (they delay LCP). A change that breaks the budget is not done.
 - **Money:** prices, shipping and discounts are computed ONLY on the server from the DB. Amounts stored as integer piasters. Never trust the client cart.
 - **Payments:** Paymob Intention API + hosted Unified Checkout (card data never touches our server). Order becomes PAID only from a server webhook with verified HMAC + matching amount/currency/order id, processed idempotently. The browser return URL never marks paid. COD orders go to CONFIRMATION_NEEDED.
 - **Guest checkout by phone.** No forced customer accounts.

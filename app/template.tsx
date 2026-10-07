@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 
-/** Re-mounts on every navigation, so each new page fades in softly. */
+/**
+ * Re-mounts on every navigation. No fade: pages are pre-built and appear instantly, and a fade-in
+ * delays what visitors see (and the LCP metric) by its full duration.
+ */
 export default function Template({ children }: { children: ReactNode }) {
-  return <div className="page-in">{children}</div>;
+  return <>{children}</>;
 }

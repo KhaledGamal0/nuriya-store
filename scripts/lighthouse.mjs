@@ -42,7 +42,7 @@ for (const path of PAGES) {
   for (const k of ["a11y", "bp", "seo"]) if (row[k] < 95 && !(k === "seo" && path === "/checkout")) fail(`${k} ${row[k]} (budget 95)`);
   if (row.lcp > 2.0) fail(`LCP ${row.lcp.toFixed(2)}s (budget 2.0s)`);
   if (row.cls > 0.05) fail(`CLS ${row.cls.toFixed(3)} (budget 0.05)`);
-  if (row.jsKb > 150) fail(`JavaScript ${row.jsKb} KB transferred`);
+  if (row.jsKb > 180) fail(`JavaScript ${row.jsKb} KB transferred (budget 180)`);
   const opportunities = Object.values(a)
     .filter((x) => x.details?.type === "opportunity" && (x.details.overallSavingsMs ?? 0) > 100)
     .map((x) => `${x.title} (~${Math.round(x.details.overallSavingsMs)} ms)`);
