@@ -30,7 +30,9 @@ export const PRODUCT = {
   slug: "quiet-confidence",
   name: "Quiet Confidence",
   type: "Quarter-zip",
-  pricePiasters: 120_000,
+  pricePiasters: 100_000,
+  /** Launch offer (Khaled, Oct 7 2026): the old price, shown struck through. null = no offer. */
+  compareAtPiasters: 120_000 as number | null,
   summary:
     "A soft oversized quarter-zip with a contrast collar, a silver ring-pull zip and our signature embroidery.",
   details: [
@@ -98,6 +100,8 @@ export type CatalogData = {
   details: readonly string[];
   fabric: string | null;
   pricePiasters: number;
+  /** Old price shown struck through during an offer (display only; checkout charges pricePiasters). */
+  compareAtPiasters: number | null;
   sizeChart: readonly SizeChartRow[];
   colorOrder: readonly ColorId[];
   colors: Record<ColorId, ColorwayData>;
@@ -117,6 +121,7 @@ export function staticCatalog(): CatalogData {
     details: PRODUCT.details,
     fabric: PRODUCT.fabric,
     pricePiasters: PRODUCT.pricePiasters,
+    compareAtPiasters: PRODUCT.compareAtPiasters,
     sizeChart: PRODUCT.sizeChart,
     colorOrder: COLORS,
     colors: { cream: colorway("cream"), burgundy: colorway("burgundy") },

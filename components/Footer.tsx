@@ -32,7 +32,6 @@ export function Footer() {
             <ul>
               <li><Link className="line-link" href="/size-guide">Size guide</Link></li>
               <li><Link className="line-link" href="/returns">Delivery and returns</Link></li>
-              <li><Link className="line-link" href="/track">Track your order</Link></li>
             </ul>
           </nav>
           <nav aria-labelledby="ft-follow">

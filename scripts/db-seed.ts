@@ -27,9 +27,9 @@ const SKU_COLOR: Record<string, string> = { cream: "CRM", burgundy: "BRG" };
 try {
   await sql.begin(async (tx) => {
     const [p] = await tx`
-      INSERT INTO products (slug, name_en, type_en, summary_en, details_en, fabric_en, price_piasters)
+      INSERT INTO products (slug, name_en, type_en, summary_en, details_en, fabric_en, price_piasters, compare_at_piasters)
       VALUES (${PRODUCT.slug}, ${PRODUCT.name}, ${PRODUCT.type}, ${PRODUCT.summary},
-              ${tx.json([...PRODUCT.details])}, ${PRODUCT.fabric}, ${PRODUCT.pricePiasters})
+              ${tx.json([...PRODUCT.details])}, ${PRODUCT.fabric}, ${PRODUCT.pricePiasters}, ${PRODUCT.compareAtPiasters})
       ON CONFLICT (slug) DO UPDATE SET slug = EXCLUDED.slug
       RETURNING id`;
     const productId = p!.id;

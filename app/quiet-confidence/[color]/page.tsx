@@ -9,6 +9,7 @@ import { minFee } from "@/lib/shipping";
 import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
+import { Price } from "@/components/Price";
 import { preview } from "@/lib/blur";
 
 type Params = { params: Promise<{ color: string }> };
@@ -62,12 +63,12 @@ export default async function ProductPage({ params }: Params) {
         <div>
           <div className="t-row">
             <h1>{catalog.name}</h1>
-            <span className="price">{formatEgp(catalog.pricePiasters)}</span>
+            <Price now={catalog.pricePiasters} was={catalog.compareAtPiasters} />
           </div>
           <p className="info-sub">Oversized quarter-zip · {c.name}</p>
         </div>
         <ProductPurchase color={color} />
-        <p className="small">Cash on delivery or card. Check your order with the courier before you accept.</p>
+        <p className="small">Cash on delivery. Check your order with the courier before you accept.</p>
         <div className="acc">
           <details>
             <summary>Details</summary>

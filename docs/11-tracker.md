@@ -127,6 +127,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Static pages, optimized images (AVIF/WebP), self-hosted fonts | DONE | |
 | Photos prepared ahead of time: every size made once as WebP (`scripts/make-images.py` → `public/img`), served as finished files cached 1 year — no on-demand resizing, so even the first visitor after a photo change gets photos instantly | DONE | `lib/image-loader.ts`; test fails if a size is missing |
 | Photos already downloaded paint together with their frame (decoding=sync on gallery, viewer, home cards) — no colour flash on repeat views or when opening the viewer | DONE | |
+| Launch offer 1,000 EGP (was 1,200, shown struck through on home + product pages; checkout charges the server price) | DONE | migration 0007, `components/Price.tsx` |
+| Order tracking page | PAUSED (Oct 7, Khaled) | /track → home; `findOrder` kept + tested |
 | Health e-mails: daily early warning before any limit (Neon, Vercel domain, certificate, backups, GitHub inactivity, Resend, stock) + full weekly report every Sunday | DONE | `health-report.yml`, `scripts/health-report.mjs` |
 | Database changes refresh the live site automatically (after the migration AND the Vercel deploy of the same commit) | DONE | `db-deploy.yml` |
 | Live photo speed measured on the real site after every deploy (first-time iPhone visitor, 5G + 4G, empty cache) | DONE | `.github/workflows/live-photos.yml` → `live-photos` branch |

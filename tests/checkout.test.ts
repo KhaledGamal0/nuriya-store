@@ -18,16 +18,16 @@ test("valid order is priced on the server", () => {
   const r = validateCheckout(good);
   assert.ok(r.ok);
   if (!r.ok) return;
-  assert.equal(r.order.subtotalPiasters, 120_000);
+  assert.equal(r.order.subtotalPiasters, 100_000); // launch offer: 1,000 EGP
   assert.equal(r.order.shippingPiasters, 9_000);
-  assert.equal(r.order.totalPiasters, 129_000);
+  assert.equal(r.order.totalPiasters, 109_000);
   assert.equal(r.order.phone, "01012345678");
 });
 
 test("a price sent by the browser is ignored", () => {
   const r = validateCheckout({ ...good, cart: JSON.stringify([{ color: "cream", size: "S/M", qty: 1, price: 1 }]) });
   assert.ok(r.ok);
-  if (r.ok) assert.equal(r.order.totalPiasters, 129_000);
+  if (r.ok) assert.equal(r.order.totalPiasters, 109_000);
 });
 
 test("unknown color, size or area is rejected", () => {

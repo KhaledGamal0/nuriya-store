@@ -13,6 +13,7 @@ export const products = pgTable("products", {
   fabricEn: text("fabric_en"),
   careEn: text("care_en"),
   pricePiasters: integer("price_piasters").notNull(),
+  compareAtPiasters: integer("compare_at_piasters"),
   status: text("status").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 });

@@ -8,7 +8,7 @@ const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const findings = [];
 const add = (where, detail) => findings.push(`- ${where}: ${detail}`);
 
-for (const path of ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/checkout", "/returns", "/size-guide", "/track"]) {
+for (const path of ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/checkout", "/returns", "/size-guide"]) {
   const res = await fetch(BASE + path).catch(() => null);
   if (!res || res.status !== 200) add(path, `returned ${res?.status ?? "no response"} while the database was down`);
 }

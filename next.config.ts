@@ -26,7 +26,11 @@ const config: NextConfig = {
   },
   async redirects() {
     // The colour is called White (Khaled, Oct 7 2026); old links to /cream keep working.
-    return [{ source: "/quiet-confidence/cream", destination: "/quiet-confidence/white", permanent: true }];
+    return [
+      { source: "/quiet-confidence/cream", destination: "/quiet-confidence/white", permanent: true },
+      // Order tracking is paused until it is finished (Khaled, Oct 7 2026); old links land on the home page.
+      { source: "/track", destination: "/", permanent: false },
+    ];
   },
   async headers() {
     const photoCache = [{ key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" }];

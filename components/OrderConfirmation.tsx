@@ -97,11 +97,6 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
             <Link className="btn" href="/">
               Continue shopping
             </Link>
-            {number && (
-              <Link className="btn btn-line" href={`/track?o=${number}`}>
-                Track your order
-              </Link>
-            )}
           </div>
           <p className="small">
             Questions? Message us on{" "}

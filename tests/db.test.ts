@@ -24,7 +24,8 @@ test("seed created the catalog and all delivery areas", { skip }, async () => {
 test("storefront reads price, photos and fees from the database", { skip }, async () => {
   const { getCatalog, getAreas } = await import("../lib/store.ts");
   const catalog = await getCatalog();
-  assert.equal(catalog.pricePiasters, 120_000);
+  assert.equal(catalog.pricePiasters, 100_000);
+  assert.equal(catalog.compareAtPiasters, 120_000); // offer: old price shown struck through
   assert.equal(catalog.colors.cream.images.length, 3);
   assert.equal(catalog.colors.burgundy.images.length, 3);
   assert.ok(catalog.colors.cream.sizes.every((s) => s.available));

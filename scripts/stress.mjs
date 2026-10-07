@@ -94,7 +94,7 @@ async function outcome(page, timeout = 30000) {
 
 // ---------- 1. Page load ----------
 await scenario("page load", async () => {
-  const paths = ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/size-guide", "/returns", "/track", "/checkout", "/api/health"];
+  const paths = ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/size-guide", "/returns", "/checkout", "/api/health"];
   const total = 2400;
   const times = [];
   let errors = 0;
@@ -202,7 +202,7 @@ await scenario("order saved but the answer is lost", async () => {
   // Refresh keeps the confirmation; Back does not re-order.
   await page.reload({ waitUntil: "networkidle" });
   if (!(await page.getByText("Order placed successfully").isVisible())) add("refresh", "thank-you page lost its confirmation after refresh");
-  if (!(await page.evaluate(() => document.body.innerText.includes("2,475 EGP")))) add("refresh", "order summary missing after refresh (expected 2,475 EGP)");
+  if (!(await page.evaluate(() => document.body.innerText.includes("2,075 EGP")))) add("refresh", "order summary missing after refresh (expected 2,075 EGP)");
   await page.goBack({ waitUntil: "networkidle" }).catch(() => {});
   await page.waitForTimeout(800);
   if ((await ordersFor(phone)).length !== 1) add("back button", "going back created another order");
@@ -275,27 +275,11 @@ await scenario("one device spamming orders", async () => {
   await ctx.close();
 });
 
-await scenario("one device spamming order lookups", async () => {
-  const { ctx, page } = await open({ extraHTTPHeaders: { "x-forwarded-for": "203.0.113.10" } });
-  await page.goto(BASE + "/track", { waitUntil: "networkidle" });
-  await page.getByLabel("Order number").fill("NUR-ZZZZZZ");
-  await page.getByLabel("Mobile number").fill("01000000000");
-  let limited = 0;
-  for (let i = 0; i < 22; i++) {
-    await page.getByRole("button", { name: "Check status" }).click();
-    await page.locator(".form-err").first().waitFor({ timeout: 10000 });
-    await page.waitForTimeout(100);
-    if (/too many lookups/i.test(await page.locator(".form-err").first().innerText())) limited++;
-  }
-  if (limited < 1) add("lookup spam", "22 lookups from one device were never slowed down");
-  await ctx.close();
-});
-
 await scenario("small 320 px phone", async () => {
   const ctx = await browser.newContext({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   await setBag(page, [{ color: "burgundy", size: "S/M", qty: 2 }]);
-  for (const p of ["/", "/quiet-confidence/white", "/checkout", "/track", "/returns", "/size-guide"]) {
+  for (const p of ["/", "/quiet-confidence/white", "/checkout", "/returns", "/size-guide"]) {
     await page.goto(BASE + p, { waitUntil: "networkidle" });
     const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (over > 1) add("320 px", `${p} scrolls sideways by ${over} px`);

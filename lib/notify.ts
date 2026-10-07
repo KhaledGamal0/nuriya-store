@@ -147,8 +147,7 @@ ${
     : ""
 }
 <tr><td style="${F}padding:20px 8px 0;font-size:12px;${muted}text-align:center;line-height:1.6">
-  Saved safely in the shop database. Change stock any time: GitHub → Actions → Admin tasks.<br>
-  <a href="${site()}/track?o=${esc(o.number)}" style="color:#683A46">Order page</a>
+  Saved safely in the shop database. Change stock any time: GitHub → Actions → Admin tasks.
 </td></tr>
 </table></td></tr></table></body></html>`;
   return { subject, text, html };

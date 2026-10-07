@@ -220,6 +220,8 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .also span { font-size: 13px; color: var(--ink-2); }
 .t-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
 .price { font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Offer: the old price, struck through and quieter than the new one. */
+.was { color: var(--ink-2); font-weight: 400; text-decoration-thickness: 1px; }
 .o-h { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 12px; min-height: 24px; }
 .o-h b { font-weight: 500; }
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s1); }

@@ -49,10 +49,10 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Price or delivery fee changed during checkout → refused; closed area refused; COD refused where off | `orders.test.ts` | database |
 | Card refused until Paymob is connected | `orders.test.ts` | database |
 | Blocked phone; max 3 orders per phone per day (even all at once); 10 attempts per device | `orders.test.ts` | database |
-| Order lookup needs number AND phone, same message otherwise, no address shown, injection-safe | `orders.test.ts`; browser "track-order" | database + browser |
+| Order lookup needs number AND phone, same message otherwise, no address shown, injection-safe | `orders.test.ts` (tracking page paused Oct 7 2026; lookup code kept and tested) | database + browser |
 | Shop e-mail: sent once, retried after failure, never blocks the order, no duplicates | `orders.test.ts` | database |
 | Database refuses wrong totals and reservations above stock | `orders.test.ts` | database |
-| Thank-you page is idle (no render loop); links and title work after ordering | browser "order-placed" mutation count, "track-order" | browser |
+| Thank-you page is idle (no render loop); links and title work after ordering | browser "order-placed" mutation count | browser |
 | Orders not e-mailed within 10 min → phone alert | `order-watch.yml` (hourly) | scheduled |
 
 ## Robots, crowds and chaos (Oct 7 — before going public)
@@ -81,3 +81,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 ## Added in later phases
 - P4: Paymob — success, decline, cancel, duplicate webhook, forged HMAC rejected, amount mismatch rejected, return URL never marks paid.
 - P5: admin login with 2FA, roles, every change in the audit log, refresh after edits.
+| Launch offer: checkout charges 1,000 EGP (server price), old 1,200 shown struck through only | `checkout.test.ts` (109,000 total), `db.test.ts` (price + compare-at), browser totals 1,090 | unit + database + browser |
