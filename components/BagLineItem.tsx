@@ -21,7 +21,7 @@ export function BagLineItem({ line, onQty, onRemove }: Props) {
   return (
     <div className="ln">
       <div className="ln-img" style={preview(image.src)}>
-        <FadeImage src={image.src} alt="" fill sizes="72px" />
+        <FadeImage src={image.src} alt="" fill sizes="72px" loading="eager" />
       </div>
       <div className="ln-m">
         <b>{catalog.name}</b>

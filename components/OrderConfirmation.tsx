@@ -121,7 +121,7 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
                 const image = color?.images[0];
                 return (
                   <div className="ln" key={`${l.color}-${l.size}`}>
-                    <div className="ln-img" style={image ? preview(image.src) : undefined}>{image && <FadeImage src={image.src} alt="" fill sizes="72px" />}</div>
+                    <div className="ln-img" style={image ? preview(image.src) : undefined}>{image && <FadeImage src={image.src} alt="" fill sizes="72px" loading="eager" />}</div>
                     <div className="ln-m">
                       <b>{catalog.name}</b>
                       <span>

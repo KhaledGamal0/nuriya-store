@@ -99,7 +99,7 @@ export default async function ProductPage({ params }: Params) {
           return (
             <Link key={x} className="also" href={productPath(x)}>
               <span className="also-img" style={preview(o.images[0]!.src)}>
-                <FadeImage src={o.images[0]!.src} alt="" fill sizes="64px" />
+                <FadeImage src={o.images[0]!.src} alt="" fill sizes="64px" loading="eager" fetchPriority="low" />
               </span>
               <span>
                 <b>Also in {o.name.toLowerCase()}</b>
