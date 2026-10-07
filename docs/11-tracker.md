@@ -1,0 +1,116 @@
+# 11 — Master tracker: every business need, and where it stands
+
+Status: **DONE** · **PARTIAL** (started, not finished) · **P2–P7** (planned phase, see `10-build-plan.md`) · **LATER** (after launch) · **KHALED** (needs a decision or input from Khaled).
+Update this file in the same commit as the work. Last update: 2026-10-07.
+
+## A. Brand and content
+| Need | Status | Notes |
+|---|---|---|
+| Brand book, tokens, logo SVG, favicon, share image in the project | DONE | `docs/01-brand.md`, `brand-assets/` |
+| Logo always from the SVG, never typed | DONE | `components/Logo.tsx` |
+| Product copy, details, size chart | DONE | `lib/catalog.ts` |
+| Fabric composition, weight, care instructions | KHALED | Shown as "coming soon" until provided |
+| Original full-quality photos (or a shoot) | KHALED | Current photos are compressed; shot list in `07-roadmap.md` |
+| Stock count per color and size | KHALED | Needed for P2 |
+| Exact Canva display font name | KHALED | Using Instrument Serif meanwhile |
+| About / story page | P6 | Copy exists in brand book |
+| Arabic storefront (real RTL) | LATER | Data model ready for AR from P2 |
+
+## B. Storefront experience
+| Need | Status | Notes |
+|---|---|---|
+| Home: hero, collection, craft image | DONE | |
+| Product page per color, gallery, color + size choice | DONE | |
+| Must choose a size before adding to bag | DONE | |
+| Find my size by weight | DONE | |
+| Bag panel, quantities, remove, remembered on return | DONE | |
+| Menu panel (compact) | DONE | Redesigned after review on Oct 7 |
+| Size guide page, delivery and returns page (EN/AR) | DONE | |
+| One consistent control style, no stray circles | DONE | `docs/12-ui-standards.md` |
+| 404 page | DONE | |
+| Sold-out state and "notify me" | P2 / LATER | Sold out in P2, notify me later |
+| Reviews / customer photos | LATER | |
+| Wishlist, search, filters | LATER | Not needed with one product |
+
+## C. Checkout and orders
+| Need | Status | Notes |
+|---|---|---|
+| Guest checkout by phone, no account | DONE | |
+| Egyptian mobile validation | DONE | 010/011/012/015 |
+| Area picker with Direction fees, live total | DONE | 35 areas |
+| Server recomputes every price and fee | DONE | Unit tested |
+| Inspect-at-door policy shown before placing order | DONE | |
+| Order confirmation page | DONE | |
+| Save orders in a database | P3 | Orders are NOT saved yet |
+| Stock reserved when ordering, no overselling | P3 | |
+| Rate limits and fake-order protection | P3 | |
+| WhatsApp confirmation link for each COD order | P3 / P5 | Manual first, automatic later |
+| Order tracking page for customers | P3 | |
+| Order emails / SMS | P6 | Email optional (phone-first) |
+| Referral 10% code | LATER + KHALED | How to track it is undecided |
+| Discount codes | P5 | |
+
+## D. Payments
+| Need | Status | Notes |
+|---|---|---|
+| Cash on delivery | PARTIAL | Works in checkout; saved to DB in P3 |
+| Card via Paymob hosted page | P4 + KHALED | Needs Paymob merchant account and test keys |
+| Paid only after verified Paymob webhook | P4 | |
+| Refund rule when a card order is refused at the door | KHALED | Full refund, or keep delivery fee? |
+| Damaged or wrong item rule | KHALED | |
+
+## E. Delivery
+| Need | Status | Notes |
+|---|---|---|
+| Direction price list as data | DONE | `data/shipping-zones.json` |
+| Fees editable in admin | P5 | |
+| Courier export sheet (Excel/CSV) | P5 | |
+| Delivery time wording ("90 hours" typo) and Sinai coverage | KHALED | Confirm with Direction |
+| Courier API / live tracking | LATER | If Direction offers an API |
+
+## F. Admin dashboard
+| Need | Status | Notes |
+|---|---|---|
+| Secure login with 2FA, roles, audit log | P5 | |
+| Today view, orders list, order page, status changes | P5 | |
+| Products, stock, photos, prices | P5 | |
+| Shipping zones, discount codes, customers, blocklist | P5 | |
+| Content and policy editing | P5 | |
+| Manual order entry for DM orders | P5 | |
+| Sales analytics and profit view | LATER | |
+
+## G. Security
+| Need | Status | Notes |
+|---|---|---|
+| Security headers (HSTS, frame, sniffing, referrer, permissions) | DONE | `next.config.ts` |
+| Server-side validation of every checkout field | DONE | |
+| Content Security Policy | P6 | |
+| Rate limiting | P3 | |
+| Admin 2FA and audit log | P5 | |
+| Error monitoring (Sentry), backups | P6 | |
+
+## H. Performance, SEO, accessibility
+| Need | Status | Notes |
+|---|---|---|
+| Static pages, optimized images (AVIF/WebP), self-hosted fonts | DONE | |
+| Product structured data, sitemap, robots, page titles | DONE | |
+| Keyboard, screen reader, focus, reduced motion | DONE | Full audit in P6 |
+| Lighthouse ≥ 95 on mobile | P6 | Measure on the live site |
+| Own domain | KHALED | Buy domain, then connect to Vercel |
+
+## I. Marketing and analytics
+| Need | Status | Notes |
+|---|---|---|
+| Share image for links | DONE | |
+| Analytics + Meta Pixel / Conversions API | P6 | |
+| Instagram link in bio, story links, "How to order" highlight | KHALED | At launch |
+| Abandoned checkout follow-up | LATER | |
+
+## J. Engineering and launch
+| Need | Status | Notes |
+|---|---|---|
+| GitHub repo, CI (install, tests, build, typecheck) | DONE | |
+| Vercel hosting with live link | DONE | nuriya-store.vercel.app |
+| Lockfile committed | P2 | |
+| Database (Neon) | P2 + KHALED | Needs a free Neon account |
+| Real-phone test, test orders, courier dry run | P7 | |

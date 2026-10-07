@@ -23,6 +23,8 @@ Owner: Khaled Gamal. Status: **PLANNING — nothing built yet. Wait for Khaled's
 | `docs/08-design-direction.md` | The unique, non-template design direction for the storefront |
 | `docs/09-review-samples-and-stack.md` | Review of saved UI samples + friend prompt, and final stack verdict |
 | `docs/10-build-plan.md` | Phases, tasks, acceptance checklists, progress log |
+| `docs/11-tracker.md` | Master tracker: every business need and its status |
+| `docs/12-ui-standards.md` | UI rules applied to every screen |
 | `CLAUDE.md` | The project brain — Claude Code reads it automatically every session |
 | `data/shipping-zones.json` | Shipping fees as seed data for the database |
 

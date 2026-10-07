@@ -40,7 +40,7 @@ export function Header() {
               <path d="M6 9V5a3.5 3.5 0 0 1 7 0v4" />
             </svg>
             {bag.count > 0 && (
-              <span className="badge" key={bag.count} aria-hidden="true">
+              <span className="bag-n" key={bag.count} aria-hidden="true">
                 {bag.count}
               </span>
             )}
@@ -50,14 +50,18 @@ export function Header() {
 
       <Dialog open={menuOpen} onClose={closeMenu} variant="left" labelledBy="menu-title">
         <div className="dlg-h">
-          <h2 id="menu-title">Menu</h2>
+          <h2 id="menu-title" tabIndex={-1} autoFocus>
+            Menu
+          </h2>
           <CloseButton onClick={closeMenu} label="Close menu" />
         </div>
         <nav className="dlg-b nav" aria-label="Main">
-          <Link href="/" onClick={closeMenu}>Home</Link>
-          <Link href="/quiet-confidence/cream" onClick={closeMenu}>Cream</Link>
-          <Link href="/quiet-confidence/burgundy" onClick={closeMenu}>Burgundy</Link>
+          <p className="nav-label">Shop</p>
+          <Link href="/quiet-confidence/cream" onClick={closeMenu}>Quiet Confidence, cream</Link>
+          <Link href="/quiet-confidence/burgundy" onClick={closeMenu}>Quiet Confidence, burgundy</Link>
+          <p className="nav-label">Help</p>
           <Link href="/size-guide" onClick={closeMenu}>Size guide</Link>
+          <Link href="/returns" onClick={closeMenu}>Delivery and returns</Link>
         </nav>
         <div className="dlg-f">
           <a className="small" href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
@@ -68,7 +72,9 @@ export function Header() {
 
       <Dialog open={bag.bagOpen} onClose={bag.closeBag} variant="right" labelledBy="bag-title">
         <div className="dlg-h">
-          <h2 id="bag-title">Bag</h2>
+          <h2 id="bag-title" tabIndex={-1} autoFocus>
+            Bag{bag.count > 0 ? ` (${bag.count})` : ""}
+          </h2>
           <CloseButton onClick={bag.closeBag} label="Close bag" />
         </div>
         <div className="dlg-b">

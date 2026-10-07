@@ -29,19 +29,20 @@ export function ProductPurchase({ color }: { color: ColorId }) {
       <div>
         <div className="o-h">
           <b>Color</b>
-          <span>{PRODUCT.colors[color].name}</span>
         </div>
-        <div className="sw" role="group" aria-label="Color">
+        <div className="opts" role="group" aria-label="Color">
           {COLORS.map((c) => (
             <Link
               key={c}
+              className="opt"
               href={`/quiet-confidence/${c}`}
               replace
               scroll={false}
-              aria-label={PRODUCT.colors[c].name}
               aria-current={c === color ? "true" : undefined}
-              style={{ background: PRODUCT.colors[c].swatch }}
-            />
+            >
+              <span className="dot" style={{ background: PRODUCT.colors[c].swatch }} aria-hidden="true" />
+              {PRODUCT.colors[c].name}
+            </Link>
           ))}
         </div>
       </div>
@@ -53,10 +54,11 @@ export function ProductPurchase({ color }: { color: ColorId }) {
             Find my size
           </button>
         </div>
-        <div className="sz" role="group" aria-labelledby="size-label" id="size-group">
+        <div className="opts" role="group" aria-labelledby="size-label" id="size-group">
           {SIZES.map((s) => (
             <button
               key={s}
+              className="opt"
               type="button"
               aria-pressed={size === s}
               onClick={() => {
@@ -80,8 +82,10 @@ export function ProductPurchase({ color }: { color: ColorId }) {
       </button>
 
       <Dialog open={guideOpen} onClose={() => setGuideOpen(false)} variant="sheet" labelledBy="fit-title">
-        <div className="t-row">
-          <h2 id="fit-title">Find my size</h2>
+        <div className="sheet-h">
+          <h2 id="fit-title" tabIndex={-1} autoFocus>
+            Find my size
+          </h2>
           <CloseButton onClick={() => setGuideOpen(false)} />
         </div>
         <div className="kg">

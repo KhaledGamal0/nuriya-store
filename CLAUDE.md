@@ -11,6 +11,8 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 6. `docs/06-admin-dashboard.md` — admin scope
 7. `docs/08-design-direction.md` — the design concept; `docs/09-review-samples-and-stack.md` — what to avoid
 8. `docs/10-build-plan.md` — **phases, tasks and acceptance checklists. Work only on the current phase.**
+9. `docs/11-tracker.md` — **master tracker of every business need. Update it in the same commit as the work.**
+10. `docs/12-ui-standards.md` — **UI rules for every screen (one radius, no stray circles, hover only on mouse devices).**
 
 ## Non-negotiables
 - **Logo:** always the SVG from `brand-assets/kit/01_Logo/svg/`. NEVER type "Nuriya" in a font.
