@@ -81,7 +81,7 @@ for (const path of PAGES) {
     .map((i) => `${i.url.replace(BASE, "").replace(/^\/_next\/static\/chunks\//, "")} ${Math.round((i.transferSize ?? 0) / 1024)}KB`)
     .join(", ");
   const fonts = (a["network-requests"]?.details?.items ?? []).filter((i) => i.resourceType === "Font").map((i) => `${Math.round((i.transferSize ?? 0) / 1024)}KB`).join(" + ");
-  const lcpImg = (a["network-requests"]?.details?.items ?? []).find((i) => i.resourceType === "Image" && i.url.includes("_next/image"));
+  const lcpImg = (a["network-requests"]?.details?.items ?? []).find((i) => i.resourceType === "Image" && (i.url.includes("_next/image") || i.url.includes("/img/")));
   row.detail = `LCP element: ${lcpEl.slice(0, 90)} | phases: ${phases} | render-blocking: ${blocking || "none"} | biggest scripts: ${scripts} | fonts: ${fonts} | first image: ${lcpImg ? Math.round(lcpImg.transferSize / 1024) + "KB" : "-"}`;
 }
 

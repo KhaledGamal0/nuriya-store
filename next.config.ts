@@ -16,13 +16,13 @@ const config: NextConfig = {
   },
   poweredByHeader: false,
   images: {
-    // WebP only: almost as small as AVIF, far faster for phones to decode and for the server to make.
-    formats: ["image/webp"],
-    // 65: gallery/cards/hero (fabric still crisp, ~30% lighter); 75 default; 90 full-screen viewer.
+    // Every size is made ahead of time by scripts/make-images.py (keep these widths equal to its WIDTHS).
+    // The on-demand optimizer is not used: its first request for each new photo size took seconds.
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
+    deviceSizes: [480, 828, 1200, 1600],
+    imageSizes: [96, 192],
     qualities: [65, 75, 90],
-    // Resized photos stay cached 30 days (Vercel edge + browser). A changed photo always gets a NEW file name.
-    minimumCacheTTL: 2592000,
-    deviceSizes: [390, 640, 828, 1080, 1280, 1600, 2048],
   },
   async redirects() {
     // The colour is called White (Khaled, Oct 7 2026); old links to /cream keep working.
@@ -34,6 +34,8 @@ const config: NextConfig = {
       { source: "/:path*", headers: securityHeaders },
       { source: "/images/:path*", headers: photoCache },
       { source: "/email/:path*", headers: photoCache },
+      // Prepared photos never change (a changed photo gets a new name), so browsers keep them for a year.
+      { source: "/img/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
     ];
   },
 };

@@ -125,6 +125,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Need | Status | Notes |
 |---|---|---|
 | Static pages, optimized images (AVIF/WebP), self-hosted fonts | DONE | |
+| Photos prepared ahead of time: every size made once as WebP (`scripts/make-images.py` → `public/img`), served as finished files cached 1 year — no on-demand resizing, so even the first visitor after a photo change gets photos instantly | DONE | `lib/image-loader.ts`; test fails if a size is missing |
 | Product structured data, sitemap, robots, page titles | DONE | |
 | Keyboard, screen reader, focus, reduced motion | DONE | Full audit in P6 |
 | Lighthouse measured on every push | DONE | Oct 7: Perf 92–97, A11y/Best practices/SEO 100, CLS 0. LCP ~3 s on simulated 4G (budget 2 s) — re-measure on the live CDN |
