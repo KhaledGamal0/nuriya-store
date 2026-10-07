@@ -153,6 +153,43 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     }
   });
 
+  await step(vp, "photo-viewer", async () => {
+    where = "photo-viewer";
+    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+    await page.locator(".gal-i").first().click();
+    await page.waitForTimeout(500);
+    if (!(await page.locator("dialog.dlg-full[open]").count())) add(vp, where, "flow", "tapping a photo did not open the full-screen viewer");
+    await page.getByRole("button", { name: "Next photo" }).click();
+    await page.waitForTimeout(700);
+    const label = await page.locator("#viewer-title").textContent();
+    if (!label?.startsWith("2 /")) add(vp, where, "flow", `next arrow did not move to photo 2 (shows "${label}")`);
+    await checks(page, vp, where);
+    await page.screenshot({ path: `${OUT}/shots/${vp}-photo-viewer.png` });
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
+    if (await page.locator("dialog[open]").count()) add(vp, where, "flow", "Escape did not close the photo viewer");
+  });
+
+  await step(vp, "size-kept-across-colors", async () => {
+    where = "size-kept-across-colors";
+    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+    await page.locator("#size-group").getByRole("button", { name: "L/XL" }).click();
+    await page.locator(".opts").first().getByRole("link", { name: "Burgundy" }).click();
+    await page.waitForURL(/burgundy/);
+    await page.waitForTimeout(500);
+    if ((await page.locator("#size-group").getByRole("button", { name: "L/XL" }).getAttribute("aria-pressed")) !== "true") add(vp, where, "flow", "chosen size was lost when switching colour");
+    await page.evaluate(() => sessionStorage.removeItem("nuriya-size"));
+  });
+
+  if (vp === "mobile") await step(vp, "buy-bar", async () => {
+    where = "buy-bar";
+    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+    await page.mouse.wheel(0, 1400);
+    await page.waitForTimeout(700);
+    if ((await page.locator(".buybar").getAttribute("data-on")) !== "true") add(vp, where, "flow", "buy bar did not appear after scrolling past Add to bag");
+    await page.screenshot({ path: `${OUT}/shots/${vp}-buy-bar.png` });
+  });
+
   await step(vp, "add-without-size", async () => {
     where = "add-without-size";
     await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });

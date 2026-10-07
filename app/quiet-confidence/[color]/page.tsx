@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { COLORS, PRODUCT, isColor } from "@/lib/catalog";
 import { formatEgp } from "@/lib/money";
@@ -53,9 +55,12 @@ export default async function ProductPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Gallery images={c.images} label={`${PRODUCT.name}, ${c.name}`} />
       <div className="info">
-        <div className="t-row">
-          <h1>{PRODUCT.name}</h1>
-          <span className="price">{formatEgp(PRODUCT.pricePiasters)}</span>
+        <div>
+          <div className="t-row">
+            <h1>{PRODUCT.name}</h1>
+            <span className="price">{formatEgp(PRODUCT.pricePiasters)}</span>
+          </div>
+          <p className="info-sub">Oversized quarter-zip · {c.name}</p>
         </div>
         <ProductPurchase color={color} />
         <p className="small">Cash on delivery or card. Check your order with the courier before you accept.</p>
@@ -85,6 +90,23 @@ export default async function ProductPage({ params }: Params) {
             </div>
           </details>
         </div>
+        {COLORS.filter((x) => x !== color).map((x) => {
+          const o = PRODUCT.colors[x];
+          return (
+            <Link key={x} className="also" href={`/quiet-confidence/${x}`}>
+              <span className="also-img">
+                <Image src={o.images[0]!.src} alt="" fill sizes="64px" />
+              </span>
+              <span>
+                <b>Also in {o.name.toLowerCase()}</b>
+                <span>{o.detail}</span>
+              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

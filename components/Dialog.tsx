@@ -5,7 +5,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 type Props = {
   open: boolean;
   onClose: () => void;
-  variant: "left" | "right" | "sheet";
+  variant: "left" | "right" | "sheet" | "full";
   labelledBy: string;
   children: ReactNode;
 };
@@ -51,7 +51,7 @@ export function Dialog({ open, onClose, variant, labelledBy, children }: Props) 
   return (
     <dialog
       ref={ref}
-      className={`dlg dlg-${variant === "sheet" ? "sheet" : `panel dlg-${variant}`}`}
+      className={`dlg ${variant === "sheet" || variant === "full" ? `dlg-${variant}` : `dlg-panel dlg-${variant}`}`}
       aria-labelledby={labelledBy}
       onCancel={(e) => {
         // Escape key: animate out instead of closing instantly.
