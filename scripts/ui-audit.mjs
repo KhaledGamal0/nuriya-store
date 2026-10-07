@@ -184,8 +184,10 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   if (vp === "mobile") await step(vp, "buy-bar", async () => {
     where = "buy-bar";
     await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
-    await page.mouse.wheel(0, 1400);
+    await page.evaluate(() => window.scrollTo(0, 1400));
     await page.waitForTimeout(700);
+    const box = await page.locator(".buybar").boundingBox();
+    if (!box || box.y + box.height > 844 + 1 || box.y < 844 - box.height - 1) add(vp, where, "flow", `buy bar is not pinned to the bottom of the screen (y=${box?.y})`);
     if ((await page.locator(".buybar").getAttribute("data-on")) !== "true") add(vp, where, "flow", "buy bar did not appear after scrolling past Add to bag");
     await page.screenshot({ path: `${OUT}/shots/${vp}-buy-bar.png` });
   });

@@ -179,7 +179,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
   .gal { grid-auto-flow: row; grid-template-columns: 1fr 1fr; gap: var(--s1); overflow: visible; margin: 0; }
 }
 .gal-bar { display: flex; justify-content: center; margin-top: var(--s1); }
-.gal-bar button { width: 32px; height: 44px; display: grid; place-items: center; }
+.gal-bar button { width: 44px; height: 44px; display: grid; place-items: center; }
 .gal-bar i { height: 2px; width: 24px; background: var(--line); transition: background 0.3s; }
 .gal-bar button[aria-current="true"] i { background: var(--ink); }
 @media (min-width: 900px) { .gal-bar, .gal-count { display: none; } }
@@ -387,7 +387,8 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 
 /* Page change: soft fade (app/template.tsx re-mounts on every navigation) */
 .page-in { animation: page-in 0.45s var(--ease) both; }
-@keyframes page-in { from { opacity: 0; transform: translateY(8px); } }
+/* Opacity only: a transform here would pin fixed elements (buy bar) to the page instead of the screen. */
+@keyframes page-in { from { opacity: 0; } }
 
 /* Scroll reveal: progressive enhancement, content is fully visible where unsupported */
 @supports (animation-timeline: view()) {
