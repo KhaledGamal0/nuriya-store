@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { IBM_Plex_Sans_Arabic, Instrument_Serif, Poppins } from "next/font/google";
 import { BagProvider } from "@/components/BagProvider";
+import { StoreProvider } from "@/components/StoreProvider";
+import { getAreas, getCatalog } from "@/lib/store";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
@@ -26,18 +28,24 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+/** Re-read prices, stock and delivery fees from the database at most once a minute. */
+export const revalidate = 60;
+
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const [catalog, areas] = await Promise.all([getCatalog(), getAreas()]);
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable} ${arabic.variable}`}>
       <body>
         <a className="skip" href="#main">
           Skip to content
         </a>
+        <StoreProvider catalog={catalog} areas={areas}>
         <BagProvider>
           <Header />
           <main id="main">{children}</main>
           <Footer />
         </BagProvider>
+        </StoreProvider>
       </body>
     </html>
   );

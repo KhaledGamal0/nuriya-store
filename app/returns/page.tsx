@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ReturnsPolicy } from "@/components/ReturnsPolicy";
-import { areasByFee, MIN_FEE_PIASTERS } from "@/lib/shipping";
+import { areasByFee, minFee } from "@/lib/shipping";
+import { getAreas } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 
 export const metadata: Metadata = {
@@ -8,7 +9,10 @@ export const metadata: Metadata = {
   description: "Delivery fees across Egypt, payment options, and how returns work at Nuriya.",
 };
 
-export default function ReturnsPage() {
+export const revalidate = 60;
+
+export default async function ReturnsPage() {
+  const areas = await getAreas();
   return (
     <div className="wrap page">
       <header className="page-h">
@@ -22,7 +26,7 @@ export default function ReturnsPage() {
       <section className="page-sec" aria-labelledby="fees-title">
         <h2 id="fees-title">Delivery fees</h2>
         <ul className="fees">
-          {areasByFee().map((g) => (
+          {areasByFee(areas).map((g) => (
             <li key={g.feePiasters}>
               <div>
                 <b>{g.label}</b>
@@ -32,7 +36,7 @@ export default function ReturnsPage() {
             </li>
           ))}
         </ul>
-        <p className="small">The exact fee for your area shows at checkout, from {formatEgp(MIN_FEE_PIASTERS)}.</p>
+        <p className="small">The exact fee for your area shows at checkout, from {formatEgp(minFee(areas))}.</p>
       </section>
 
       <section className="page-sec" aria-labelledby="pay-title">

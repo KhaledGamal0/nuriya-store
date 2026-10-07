@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { COLORS, PRODUCT, SIZES, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
+import { sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 import { useBag } from "./BagProvider";
 import { Dialog, CloseButton } from "./Dialog";
 
 export function ProductPurchase({ color }: { color: ColorId }) {
   const bag = useBag();
+  const { catalog } = useStore();
+  const options = catalog.colors[color].sizes;
+  const isAvailable = (s: SizeId) => options.some((o) => o.size === s && o.available);
+  const allSoldOut = options.every((o) => !o.available);
   // No size is ever pre-selected: the customer always chooses one on purpose.
   const [size, setSize] = useState<SizeId | null>(null);
 
@@ -18,7 +23,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
   const fit = sizeForWeight(kg);
 
   function addToBag() {
-    if (!size) {
+    if (!size || !isAvailable(size)) {
       setNeedSize(true);
       const group = document.getElementById("size-group");
       group?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -40,7 +45,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
           <b>Color</b>
         </div>
         <div className="opts" role="group" aria-label="Color">
-          {COLORS.map((c) => (
+          {catalog.colorOrder.map((c) => (
             <Link
               key={c}
               className="opt"
@@ -52,8 +57,8 @@ export function ProductPurchase({ color }: { color: ColorId }) {
               }}
               aria-current={c === color ? "true" : undefined}
             >
-              <span className="dot" style={{ background: PRODUCT.colors[c].swatch }} aria-hidden="true" />
-              {PRODUCT.colors[c].name}
+              <span className="dot" style={{ background: catalog.colors[c].swatch }} aria-hidden="true" />
+              {catalog.colors[c].name}
             </Link>
           ))}
         </div>
@@ -67,18 +72,21 @@ export function ProductPurchase({ color }: { color: ColorId }) {
           </button>
         </div>
         <div className="opts" role="group" aria-labelledby="size-label" id="size-group">
-          {SIZES.map((s) => (
+          {options.map(({ size: s, available }) => (
             <button
               key={s}
               className="opt"
               type="button"
               aria-pressed={size === s}
+              disabled={!available}
+              aria-label={available ? s : `${s}, sold out`}
               onClick={() => {
                 setSize(s);
                 setNeedSize(false);
               }}
             >
               {s}
+              {!available && <span className="opt-note">Sold out</span>}
             </button>
           ))}
         </div>
@@ -89,8 +97,10 @@ export function ProductPurchase({ color }: { color: ColorId }) {
         )}
       </div>
 
-      <button type="button" className="btn" onClick={addToBag} data-added={added ? "true" : "false"} aria-live="polite">
-        {added ? (
+      <button type="button" className="btn" onClick={addToBag} disabled={allSoldOut} data-added={added ? "true" : "false"} aria-live="polite">
+        {allSoldOut ? (
+          "Sold out"
+        ) : added ? (
           <>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M5 12.5l4.5 4.5L19 7.5" />
@@ -119,11 +129,12 @@ export function ProductPurchase({ color }: { color: ColorId }) {
         </div>
         <input id="kg" type="range" min={40} max={95} value={kg} onChange={(e) => setKg(Number(e.target.value))} />
         <p className="res" aria-live="polite">
-          We recommend <b>{fit.size}</b>. {fit.note}
+          We recommend <b>{fit.size}</b>. {isAvailable(fit.size) ? fit.note : `${fit.size} is sold out in ${catalog.colors[color].name.toLowerCase()} right now.`}
         </p>
         <button
           type="button"
           className="btn"
+          disabled={!isAvailable(fit.size)}
           onClick={() => {
             setSize(fit.size);
             setNeedSize(false);

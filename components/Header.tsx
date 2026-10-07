@@ -8,12 +8,13 @@ import { Dialog, CloseButton } from "./Dialog";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
 import { formatEgp } from "@/lib/money";
-import { MIN_FEE_PIASTERS } from "@/lib/shipping";
+import { useStore } from "./StoreProvider";
 
 const INSTAGRAM = "https://www.instagram.com/nuriya.eg";
 
 export function Header() {
   const bag = useBag();
+  const { minFeePiasters } = useStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
   const pathname = usePathname();
@@ -144,7 +145,7 @@ export function Header() {
               <span>Subtotal</span>
               <span>{formatEgp(bag.subtotalPiasters)}</span>
             </div>
-            <p className="small">Delivery from {formatEgp(MIN_FEE_PIASTERS)}, added at checkout.</p>
+            <p className="small">Delivery from {formatEgp(minFeePiasters)}, added at checkout.</p>
             <Link className="btn" href="/checkout" onClick={bag.closeBag}>
               Checkout
             </Link>

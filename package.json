@@ -7,12 +7,16 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types tests/*.test.ts"
+    "test": "node --test --experimental-strip-types --test-concurrency=1 tests/*.test.ts",
+    "db:migrate": "node --experimental-strip-types scripts/db-migrate.ts",
+    "db:seed": "node --experimental-strip-types scripts/db-seed.ts"
   },
   "dependencies": {
     "next": "^16.3.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "drizzle-orm": "^0.45.0",
+    "postgres": "^3.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import { PRODUCT } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 import { formatEgp } from "@/lib/money";
 import { MAX_QTY_PER_LINE } from "@/lib/checkout";
 import type { BagLine } from "./BagProvider";
@@ -11,7 +13,8 @@ type Props = {
 };
 
 export function BagLineItem({ line, onQty, onRemove }: Props) {
-  const color = PRODUCT.colors[line.color];
+  const { catalog, unitPrice } = useStore();
+  const color = catalog.colors[line.color];
   const image = color.images[0]!;
   const editable = Boolean(onQty && onRemove);
   return (
@@ -20,7 +23,7 @@ export function BagLineItem({ line, onQty, onRemove }: Props) {
         <Image src={image.src} alt="" fill sizes="72px" />
       </div>
       <div className="ln-m">
-        <b>{PRODUCT.name}</b>
+        <b>{catalog.name}</b>
         <span>
           {color.name} · {line.size}
         </span>
@@ -39,7 +42,7 @@ export function BagLineItem({ line, onQty, onRemove }: Props) {
         )}
       </div>
       <div className="ln-r">
-        <span className="price">{formatEgp(line.qty * PRODUCT.pricePiasters)}</span>
+        <span className="price">{formatEgp(line.qty * unitPrice(line.color, line.size))}</span>
         {editable && (
           <button type="button" className="rm" onClick={onRemove}>
             Remove

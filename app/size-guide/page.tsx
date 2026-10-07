@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SizeTable } from "@/components/SizeTable";
-import { PRODUCT } from "@/lib/catalog";
+import { getCatalog } from "@/lib/store";
 
 export const metadata: Metadata = { title: "Size guide", description: "Nuriya sizes S/M and L/XL, measured flat in centimeters." };
 
-export default function SizeGuidePage() {
+export const revalidate = 60;
+
+export default async function SizeGuidePage() {
+  const catalog = await getCatalog();
   return (
     <div className="wrap page">
       <header className="page-h">
@@ -16,14 +19,14 @@ export default function SizeGuidePage() {
 
       <section className="page-sec" aria-labelledby="m-title">
         <h2 id="m-title">Measurements</h2>
-        <SizeTable />
+        <SizeTable rows={catalog.sizeChart} />
       </section>
 
       <section className="page-sec" aria-labelledby="w-title">
         <h2 id="w-title">Which size is mine?</h2>
         <div className="note" style={{ display: "grid" }}>
           <div className="fit-rows">
-            {PRODUCT.sizeChart.map((r) => (
+            {catalog.sizeChart.map((r) => (
               <div key={r.size}>
                 <b>{r.size}</b>
                 <span>

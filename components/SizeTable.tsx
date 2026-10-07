@@ -1,6 +1,6 @@
-import { PRODUCT } from "@/lib/catalog";
+import type { SizeChartRow } from "@/lib/catalog";
 
-export function SizeTable() {
+export function SizeTable({ rows }: { rows: readonly SizeChartRow[] }) {
   return (
     <table className="tbl">
       <thead>
@@ -12,7 +12,7 @@ export function SizeTable() {
         </tr>
       </thead>
       <tbody>
-        {PRODUCT.sizeChart.map((r) => (
+        {rows.map((r) => (
           <tr key={r.size}>
             <th scope="row">{r.size}</th>
             <td>{r.shoulderCm} cm</td>

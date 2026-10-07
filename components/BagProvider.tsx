@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { PRODUCT, isColor, isSize, type ColorId, type SizeId } from "@/lib/catalog";
+import { isColor, isSize, type ColorId, type SizeId } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 import { MAX_QTY_PER_LINE } from "@/lib/checkout";
 
 export type BagLine = { color: ColorId; size: SizeId; qty: number };
@@ -38,6 +39,7 @@ function load(): BagLine[] {
 }
 
 export function BagProvider({ children }: { children: ReactNode }) {
+  const { unitPrice } = useStore();
   const [lines, setLines] = useState<BagLine[]>([]);
   const [ready, setReady] = useState(false);
   const [bagOpen, setBagOpen] = useState(false);
@@ -79,7 +81,7 @@ export function BagProvider({ children }: { children: ReactNode }) {
     () => ({
       lines,
       count: lines.reduce((n, l) => n + l.qty, 0),
-      subtotalPiasters: lines.reduce((n, l) => n + l.qty * PRODUCT.pricePiasters, 0),
+      subtotalPiasters: lines.reduce((n, l) => n + l.qty * unitPrice(l.color, l.size), 0),
       add,
       setQty: (index, qty) =>
         setLines((prev) => prev.map((l, j) => (j === index ? { ...l, qty: Math.max(1, Math.min(MAX_QTY_PER_LINE, qty)) } : l))),
@@ -90,7 +92,7 @@ export function BagProvider({ children }: { children: ReactNode }) {
       closeBag: () => setBagOpen(false),
       toast,
     }),
-    [lines, add, bagOpen, toast],
+    [lines, add, bagOpen, toast, unitPrice],
   );
 
   return (

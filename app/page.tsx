@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { COLORS, PRODUCT } from "@/lib/catalog";
+import { getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 
 const hover: Record<string, string> = { cream: "/images/cream-model.jpg", burgundy: "/images/burgundy-model.jpg" };
 
-export default function Home() {
+export default async function Home() {
+  const catalog = await getCatalog();
   return (
     <>
       <section className="hero" aria-label="Quiet Confidence">
@@ -44,12 +45,12 @@ export default function Home() {
 
       <section className="wrap sec" id="shop" aria-labelledby="shop-title" style={{ scrollMarginTop: "var(--header)" }}>
         <div className="sec-h reveal">
-          <h2 id="shop-title">{PRODUCT.name}</h2>
-          <span className="small">{COLORS.length} colors</span>
+          <h2 id="shop-title">{catalog.name}</h2>
+          <span className="small">{catalog.colorOrder.length} colors</span>
         </div>
         <div className="grid">
-          {COLORS.map((c) => {
-            const color = PRODUCT.colors[c];
+          {catalog.colorOrder.map((c) => {
+            const color = catalog.colors[c];
             const first = color.images.find((i) => i.src.includes("styled")) ?? color.images[0]!;
             return (
               <Link className="pc reveal" href={`/quiet-confidence/${c}`} key={c}>
@@ -59,9 +60,9 @@ export default function Home() {
                 </div>
                 <div className="pc-t">
                   <b>
-                    {PRODUCT.type}, {color.name.toLowerCase()}
+                    {catalog.type}, {color.name.toLowerCase()}
                   </b>
-                  <span>{formatEgp(PRODUCT.pricePiasters)}</span>
+                  <span>{color.sizes.some((s) => s.available) ? formatEgp(catalog.pricePiasters) : "Sold out"}</span>
                 </div>
               </Link>
             );

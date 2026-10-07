@@ -2,10 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { newOrderNumber, validateCheckout, type FieldErrors } from "@/lib/checkout";
+import { getAreas, getCatalog } from "@/lib/store";
 
 export type CheckoutState = { errors: FieldErrors; message?: string } | null;
 
 export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<CheckoutState> {
+  const [catalog, areas] = await Promise.all([getCatalog(), getAreas()]);
   const result = validateCheckout({
     phone: form.get("phone"),
     name: form.get("name"),
@@ -13,7 +15,7 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
     address: form.get("address"),
     payment: form.get("payment"),
     cart: form.get("cart"),
-  });
+  }, { catalog, areas });
 
   if (!result.ok) {
     return { errors: result.errors, message: "Please check the highlighted fields." };

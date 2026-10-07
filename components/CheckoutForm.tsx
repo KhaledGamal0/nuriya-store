@@ -6,10 +6,10 @@ import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
 import { formatEgp } from "@/lib/money";
-import { AREAS, areasByFee } from "@/lib/shipping";
+import { areasByFee } from "@/lib/shipping";
+import { useStore } from "./StoreProvider";
 import { fieldError, type FieldErrors } from "@/lib/checkout";
 
-const GROUPS = areasByFee();
 const FIELDS = ["phone", "name", "area", "address"] as const;
 type Field = (typeof FIELDS)[number];
 
@@ -56,11 +56,13 @@ function Summary({ feePiasters }: { feePiasters?: number }) {
 
 export function CheckoutForm() {
   const bag = useBag();
+  const { areas } = useStore();
+  const groups = areasByFee(areas);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(placeOrder, null);
   const [areaId, setAreaId] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const formRef = useRef<HTMLFormElement>(null);
-  const fee = AREAS.find((a) => a.id === areaId)?.feePiasters;
+  const fee = areas.find((a) => a.id === areaId)?.feePiasters;
 
   // Server errors replace local ones after each submit.
   useEffect(() => {
@@ -163,7 +165,7 @@ export function CheckoutForm() {
               }}
             >
               <option value="">Choose your area</option>
-              {GROUPS.map((g) => (
+              {groups.map((g) => (
                 <optgroup key={g.feePiasters} label={`${formatEgp(g.feePiasters)} delivery`}>
                   {g.areas.map((a) => (
                     <option key={a.id} value={a.id}>

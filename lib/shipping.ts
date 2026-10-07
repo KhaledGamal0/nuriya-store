@@ -34,12 +34,14 @@ const GROUP_LABELS: Record<string, string> = {
 };
 
 /** Areas grouped by fee, cheapest first — for the checkout picker and the delivery page. */
-export function areasByFee(): { feePiasters: number; label: string; areas: Area[] }[] {
+export function areasByFee(list: readonly Area[] = AREAS): { feePiasters: number; label: string; areas: Area[] }[] {
   const groups = new Map<number, Area[]>();
-  for (const area of AREAS) groups.set(area.feePiasters, [...(groups.get(area.feePiasters) ?? []), area]);
+  for (const area of list) groups.set(area.feePiasters, [...(groups.get(area.feePiasters) ?? []), area]);
   return [...groups.entries()]
     .sort((a, b) => a[0] - b[0])
     .map(([feePiasters, areas]) => ({ feePiasters, label: GROUP_LABELS[areas[0]!.zoneId] ?? areas[0]!.nameEn, areas }));
 }
 
-export const MIN_FEE_PIASTERS = Math.min(...AREAS.map((a) => a.feePiasters));
+export function minFee(list: readonly Area[] = AREAS): number {
+  return list.length ? Math.min(...list.map((a) => a.feePiasters)) : 0;
+}

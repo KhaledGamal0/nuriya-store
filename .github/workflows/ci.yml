@@ -5,10 +5,25 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: nuriya
+          POSTGRES_PASSWORD: nuriya
+          POSTGRES_DB: nuriya
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nuriya" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nuriya:nuriya@localhost:5432/nuriya
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -16,10 +31,25 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install
-        run: npm ci --no-audit --no-fund
-      - name: Unit tests
-        run: npm test
-      - name: Build (Next.js also type-checks here)
-        run: npm run build
+        run: mkdir -p ci-logs && npm install --no-audit --no-fund 2>&1 | tee ci-logs/1-install.log; exit ${PIPESTATUS[0]}
+      - name: Database migrations and seed (run twice to prove they are repeatable)
+        run: (npm run db:migrate && npm run db:seed && npm run db:migrate && npm run db:seed) 2>&1 | tee ci-logs/2-db.log; exit ${PIPESTATUS[0]}
+      - name: Unit and database tests
+        run: npm test 2>&1 | tee ci-logs/3-test.log; exit ${PIPESTATUS[0]}
+      - name: Build with database
+        run: npm run build 2>&1 | tee ci-logs/4-build.log; exit ${PIPESTATUS[0]}
       - name: Type check
-        run: npm run typecheck
+        run: npm run typecheck 2>&1 | tee ci-logs/5-typecheck.log; exit ${PIPESTATUS[0]}
+      - name: Build without database (how the live site runs until Neon is connected)
+        run: rm -rf .next && DATABASE_URL= npm run build 2>&1 | tee ci-logs/6-build-no-db.log; exit ${PIPESTATUS[0]}
+      - name: Publish logs to the ci-logs branch
+        if: always() && github.event_name == 'push'
+        run: |
+          cp package-lock.json ci-logs/ 2>/dev/null || true
+          cd ci-logs
+          git init -q -b ci-logs
+          git config user.name "ci"
+          git config user.email "ci@users.noreply.github.com"
+          git add -A
+          git commit -q -m "CI logs for ${GITHUB_SHA::7}"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" ci-logs

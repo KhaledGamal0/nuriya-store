@@ -1,7 +1,11 @@
 // Server-side checkout rules. The browser only sends WHAT the customer wants (color, size, quantity);
 // every price, fee and total is computed here from the catalog and the shipping table.
-import { PRODUCT, isColor, isSize, type ColorId, type SizeId } from "./catalog.ts";
-import { getArea, type Area } from "./shipping.ts";
+import { isColor, isSize, priceFor, staticCatalog, type CatalogData, type ColorId, type SizeId } from "./catalog.ts";
+import { AREAS, type Area } from "./shipping.ts";
+
+/** What checkout needs to know about the store right now (from the database in production). */
+export type CheckoutContext = { catalog: CatalogData; areas: readonly Area[] };
+const STATIC_CONTEXT: CheckoutContext = { catalog: staticCatalog(), areas: AREAS };
 
 export const MAX_QTY_PER_LINE = 5;
 export const MAX_LINES = 8;
@@ -81,6 +85,7 @@ export const MESSAGES = {
   address: "Add your street, building and floor.",
   payment: "Choose how you want to pay.",
   cart: "Your bag is empty or has an item we could not find.",
+  soldOut: "Sorry, one of the sizes in your bag has just sold out. Please update your bag.",
 } as const;
 
 /** Check one field. Used live in the browser and again on the server. */
@@ -91,13 +96,14 @@ export function fieldError(field: "phone" | "name" | "area" | "address", value: 
     case "name":
       return cleanText(value, 80).length >= 3 ? undefined : MESSAGES.name;
     case "area":
-      return getArea(value) ? undefined : MESSAGES.area;
+      // The browser only checks that an area was chosen; the server checks it exists and is active.
+      return typeof value === "string" && value.length > 0 ? undefined : MESSAGES.area;
     case "address":
       return cleanText(value, 300).length >= 10 ? undefined : MESSAGES.address;
   }
 }
 
-export function validateCheckout(input: CheckoutInput): CheckoutResult {
+export function validateCheckout(input: CheckoutInput, ctx: CheckoutContext = STATIC_CONTEXT): CheckoutResult {
   const errors: FieldErrors = {};
 
   const phone = normalizePhone(input.phone);
@@ -106,7 +112,7 @@ export function validateCheckout(input: CheckoutInput): CheckoutResult {
   const name = cleanText(input.name, 80);
   if (name.length < 3) errors.name = MESSAGES.name;
 
-  const area = getArea(input.areaId);
+  const area = typeof input.areaId === "string" ? ctx.areas.find((a) => a.id === input.areaId) : undefined;
   if (!area) errors.area = MESSAGES.area;
 
   const address = cleanText(input.address, 300);
@@ -120,11 +126,12 @@ export function validateCheckout(input: CheckoutInput): CheckoutResult {
 
   if (!phone || !area || !payment || !cart || Object.keys(errors).length > 0) return { ok: false, errors };
 
-  const lines: PricedLine[] = cart.map((line) => ({
-    ...line,
-    unitPiasters: PRODUCT.pricePiasters,
-    linePiasters: PRODUCT.pricePiasters * line.qty,
-  }));
+  const lines: PricedLine[] = [];
+  for (const line of cart) {
+    const unit = priceFor(ctx.catalog, line.color, line.size);
+    if (unit === null) return { ok: false, errors: { cart: MESSAGES.soldOut } };
+    lines.push({ ...line, unitPiasters: unit, linePiasters: unit * line.qty });
+  }
   const subtotalPiasters = lines.reduce((sum, l) => sum + l.linePiasters, 0);
   const shippingPiasters = area.feePiasters;
 

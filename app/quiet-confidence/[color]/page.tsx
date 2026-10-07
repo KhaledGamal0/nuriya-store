@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { COLORS, PRODUCT, isColor } from "@/lib/catalog";
+import { COLORS, isColor } from "@/lib/catalog";
+import { getAreas, getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
-import { MIN_FEE_PIASTERS } from "@/lib/shipping";
+import { minFee } from "@/lib/shipping";
 import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
@@ -12,6 +13,7 @@ import { SizeTable } from "@/components/SizeTable";
 type Params = { params: Promise<{ color: string }> };
 
 export const dynamicParams = false;
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return COLORS.map((color) => ({ color }));
@@ -20,10 +22,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { color } = await params;
   if (!isColor(color)) return {};
-  const c = PRODUCT.colors[color];
+  const catalog = await getCatalog();
+  const c = catalog.colors[color];
   return {
-    title: `${PRODUCT.name} quarter-zip, ${c.name.toLowerCase()}`,
-    description: PRODUCT.summary,
+    title: `${catalog.name} quarter-zip, ${c.name.toLowerCase()}`,
+    description: catalog.summary,
     openGraph: { images: [{ url: c.images[0]!.src }] },
     alternates: { canonical: `/quiet-confidence/${color}` },
   };
@@ -32,33 +35,35 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ProductPage({ params }: Params) {
   const { color } = await params;
   if (!isColor(color)) notFound();
-  const c = PRODUCT.colors[color];
+  const [catalog, areas] = await Promise.all([getCatalog(), getAreas()]);
+  const c = catalog.colors[color];
+  const inStock = c.sizes.some((s) => s.available);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `${PRODUCT.name} quarter-zip`,
+    name: `${catalog.name} quarter-zip`,
     color: c.name,
-    description: PRODUCT.summary,
+    description: catalog.summary,
     image: c.images.map((i) => i.src),
     brand: { "@type": "Brand", name: "Nuriya" },
     offers: {
       "@type": "Offer",
       priceCurrency: "EGP",
-      price: PRODUCT.pricePiasters / 100,
-      availability: "https://schema.org/InStock",
+      price: catalog.pricePiasters / 100,
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },
   };
 
   return (
     <div className="wrap pdp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Gallery images={c.images} label={`${PRODUCT.name}, ${c.name}`} />
+      <Gallery images={c.images} label={`${catalog.name}, ${c.name}`} />
       <div className="info">
         <div>
           <div className="t-row">
-            <h1>{PRODUCT.name}</h1>
-            <span className="price">{formatEgp(PRODUCT.pricePiasters)}</span>
+            <h1>{catalog.name}</h1>
+            <span className="price">{formatEgp(catalog.pricePiasters)}</span>
           </div>
           <p className="info-sub">Oversized quarter-zip · {c.name}</p>
         </div>
@@ -68,8 +73,8 @@ export default async function ProductPage({ params }: Params) {
           <details>
             <summary>Details</summary>
             <div className="acc-in">
-              <p>{PRODUCT.summary}</p>
-              {PRODUCT.details.map((d) => (
+              <p>{catalog.summary}</p>
+              {catalog.details.map((d) => (
                 <p key={d}>{d}</p>
               ))}
               <p>{c.detail}</p>
@@ -78,20 +83,20 @@ export default async function ProductPage({ params }: Params) {
           <details>
             <summary>Size and fit</summary>
             <div className="acc-in">
-              <SizeTable />
+              <SizeTable rows={catalog.sizeChart} />
               <p>Oversized fit. Between sizes, size down.</p>
             </div>
           </details>
           <details>
             <summary>Delivery and returns</summary>
             <div className="acc-in">
-              <p>Delivery across Egypt from {formatEgp(MIN_FEE_PIASTERS)}. The exact fee shows at checkout.</p>
+              <p>Delivery across Egypt from {formatEgp(minFee(areas))}. The exact fee shows at checkout.</p>
               <p>Open your parcel and check it while the courier is with you. After the courier leaves, returns and exchanges are closed.</p>
             </div>
           </details>
         </div>
-        {COLORS.filter((x) => x !== color).map((x) => {
-          const o = PRODUCT.colors[x];
+        {catalog.colorOrder.filter((x) => x !== color).map((x) => {
+          const o = catalog.colors[x];
           return (
             <Link key={x} className="also" href={`/quiet-confidence/${x}`}>
               <span className="also-img">

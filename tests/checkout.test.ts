@@ -72,3 +72,35 @@ test("money and size helpers", () => {
   assert.equal(sizeForWeight(66).size, "L/XL");
   assert.match(newOrderNumber(), /^NUR-[2-9A-HJ-NP-Z]{6}$/);
 });
+
+import { staticCatalog } from "../lib/catalog.ts";
+
+function ctxWith(mutate: (c: ReturnType<typeof staticCatalog>) => void) {
+  const catalog = staticCatalog();
+  mutate(catalog);
+  return { catalog, areas: AREAS };
+}
+
+test("a sold-out size cannot be ordered", () => {
+  const ctx = ctxWith((c) => {
+    c.colors.cream = { ...c.colors.cream, sizes: c.colors.cream.sizes.map((s) => (s.size === "S/M" ? { ...s, available: false } : s)) };
+  });
+  const r = validateCheckout(good, ctx);
+  assert.equal(r.ok, false);
+  if (!r.ok) assert.match(r.errors.cart ?? "", /sold out/);
+});
+
+test("the price comes from the store data, not a constant", () => {
+  const ctx = ctxWith((c) => {
+    c.colors.cream = { ...c.colors.cream, sizes: c.colors.cream.sizes.map((s) => ({ ...s, pricePiasters: 99_900 })) };
+  });
+  const r = validateCheckout(good, ctx);
+  assert.ok(r.ok);
+  if (r.ok) assert.equal(r.order.totalPiasters, 99_900 + 9_000);
+});
+
+test("an area that is not active is rejected", () => {
+  const r = validateCheckout(good, { catalog: staticCatalog(), areas: AREAS.filter((a) => a.id !== "alexandria") });
+  assert.equal(r.ok, false);
+  if (!r.ok) assert.ok(r.errors.area);
+});

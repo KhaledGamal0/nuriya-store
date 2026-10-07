@@ -1,4 +1,5 @@
-// Product catalog. Phase 2 moves this into the database and the admin; the shape stays the same.
+// Product data. This is the SEED for the database (scripts/db-seed.ts) and the fallback when no database is connected.
+// The storefront reads the catalog through lib/store.ts, never from PRODUCT directly.
 // Money is always integer piasters (1 EGP = 100 piasters).
 
 export type ColorId = "cream" | "burgundy";
@@ -79,4 +80,48 @@ export function sizeForWeight(kg: number): { size: SizeId; note: string } {
   if (kg <= 65) return { size: "S/M", note: "Relaxed and oversized, as designed." };
   if (kg <= 80) return { size: "L/XL", note: "Relaxed and oversized, as designed." };
   return { size: "L/XL", note: "It may fit closer than oversized. Message us on Instagram and we will help." };
+}
+
+// ---------- Catalog as the storefront sees it (from the database, or from PRODUCT above as fallback) ----------
+
+export type SizeOption = { size: SizeId; available: boolean; pricePiasters: number };
+export type ColorwayData = Colorway & { sizes: readonly SizeOption[] };
+export type SizeChartRow = { size: SizeId; shoulderCm: number; chestCm: number; lengthCm: number; weightKg: readonly [number, number] };
+export type CatalogData = {
+  slug: string;
+  name: string;
+  type: string;
+  summary: string;
+  details: readonly string[];
+  fabric: string | null;
+  pricePiasters: number;
+  sizeChart: readonly SizeChartRow[];
+  colorOrder: readonly ColorId[];
+  colors: Record<ColorId, ColorwayData>;
+};
+
+/** The built-in product data, every size available. Used until the database is connected, and by tests. */
+export function staticCatalog(): CatalogData {
+  const colorway = (id: ColorId): ColorwayData => ({
+    ...PRODUCT.colors[id],
+    sizes: SIZES.map((size) => ({ size, available: true, pricePiasters: PRODUCT.pricePiasters })),
+  });
+  return {
+    slug: PRODUCT.slug,
+    name: PRODUCT.name,
+    type: PRODUCT.type,
+    summary: PRODUCT.summary,
+    details: PRODUCT.details,
+    fabric: PRODUCT.fabric,
+    pricePiasters: PRODUCT.pricePiasters,
+    sizeChart: PRODUCT.sizeChart,
+    colorOrder: COLORS,
+    colors: { cream: colorway("cream"), burgundy: colorway("burgundy") },
+  };
+}
+
+/** Price of one colour/size, or null when it cannot be sold (sold out, inactive or unknown). */
+export function priceFor(catalog: CatalogData, color: ColorId, size: SizeId): number | null {
+  const option = catalog.colors[color]?.sizes.find((s) => s.size === size);
+  return option && option.available ? option.pricePiasters : null;
 }
