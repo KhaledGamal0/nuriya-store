@@ -65,10 +65,14 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   // One key per checkout attempt, made in the browser at the first tap (never at build time, or every
   // shopper would share it). Retries and double taps reuse it, so the server saves one order only.
   const keyRef = useRef<string | null>(null);
+  // A second tap while the first is still on its way is ignored (the server would return the same
+  // order anyway, but the extra round trip could bounce the shopper back to the thank-you page).
+  const sendingRef = useRef(false);
   const fee = areas.find((a) => a.id === areaId)?.feePiasters;
 
   // Server errors replace local ones after each submit.
   useEffect(() => {
+    sendingRef.current = false; // the server answered without redirecting: allow another try
     if (state?.errors) {
       setErrors(state.errors);
       focusFirst(state.errors);
@@ -126,6 +130,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
           // Submitted by hand (not the form's action prop) so React does not clear the fields:
           // if the server says no, the shopper keeps everything they typed.
           e.preventDefault();
+          if (sendingRef.current) return;
           const form = new FormData(e.currentTarget);
           const next: FieldErrors = {};
           for (const f of FIELDS) {
@@ -139,6 +144,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
           }
           keyRef.current ??= crypto.randomUUID();
           form.set("key", keyRef.current);
+          sendingRef.current = true;
           startTransition(() => action(form));
         }}
       >
@@ -148,7 +154,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
         </p>
         <input type="hidden" name="cart" value={JSON.stringify(bag.lines)} />
         {/* Left empty by people; bots that fill every field are refused. */}
-        <div className="hp" aria-hidden="true">
+        <div className="hp" aria-hidden="true" inert>
           <label>
             Leave empty
             <input type="text" name="hp_note" tabIndex={-1} autoComplete="off" defaultValue="" />

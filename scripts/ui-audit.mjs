@@ -43,6 +43,7 @@ async function checks(page, vp, where) {
     };
     for (const el of document.querySelectorAll("a, button, input, select, textarea, summary, [role=button]")) {
       if (!visible(el)) continue;
+      if (el.closest("[inert], [aria-hidden='true']")) continue; // not reachable by people (e.g. the bot trap)
       if (el.closest("p, li, td") && el.tagName === "A") continue; // inline text links are exempt (WCAG 2.5.8)
       const b = el.getBoundingClientRect();
       if (b.width < 44 - 0.5 || b.height < 44 - 0.5) {
@@ -330,6 +331,8 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     });
     await page.waitForURL(/\/checkout\/done/, { timeout: 15000 }).catch(() => add(vp, where, "flow", "placing a valid order did not reach the confirmation page"));
     where = "order-placed";
+    await page.waitForLoadState("networkidle");
+    await page.waitForFunction(() => document.title.length > 0, null, { timeout: 5000 }).catch(() => {});
     await checks(page, vp, where);
     await shot(page, `${vp}-order-placed`);
   });
