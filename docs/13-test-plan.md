@@ -82,3 +82,5 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 - P4: Paymob — success, decline, cancel, duplicate webhook, forged HMAC rejected, amount mismatch rejected, return URL never marks paid.
 - P5: admin login with 2FA, roles, every change in the audit log, refresh after edits.
 | Launch offer: checkout charges 1,000 EGP (server price), old 1,200 shown struck through only | `checkout.test.ts` (109,000 total), `db.test.ts` (price + compare-at), browser totals 1,090 | unit + database + browser |
+| Offer ends after N orders, exactly once, even with orders at the same moment; a bag still at the offer price is refused after it ends | `orders.test.ts` | database |
+| An order takes pieces straight out of stock; a refused order takes nothing | `orders.test.ts`, `load.test.ts`, stress "crowd" | database + browser |

@@ -51,3 +51,4 @@
 - Oct 7 2026 (Khaled): no scroll reveal/blur effects — text must never rest blurred. Content is always sharp.
 - Oct 7 2026 (Khaled): removed 4 photos (burgundy model at the glass, burgundy with coat and scarf, burgundy on hanger, white with pleated trousers). Burgundy opens with the collar photo; White has 3 photos, Burgundy 3.
 - Oct 7 2026 (Khaled): launch offer: 1,000 EGP instead of 1,200 (old price shown struck through; `products.compare_at_piasters`, set NULL to end the offer). Order tracking page removed for now (/track goes to the home page; lookup code kept). Size guide page no longer shows weight (weight helper stays on the product page).
+- Oct 7 2026 (Khaled): offer ends by itself after 7 orders (both colours together, counted from the offer start; cancelled/expired don't count), then 1,200 EGP. Orders take pieces straight out of stock (no separate reservation). Tracking + admin come in the next phases (Phase 5).

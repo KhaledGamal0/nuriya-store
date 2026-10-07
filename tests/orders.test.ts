@@ -18,7 +18,7 @@ async function cleanup() {
   await sql!`DELETE FROM customers WHERE phone LIKE '0109%'`;
   await sql!`DELETE FROM rate_limits`;
   await sql!`UPDATE variants SET track_inventory = false, stock_on_hand = 0, stock_reserved = 0, is_active = true`;
-  await sql!`UPDATE products SET price_piasters = 120000 WHERE slug = 'quiet-confidence'`;
+  await sql!`UPDATE products SET price_piasters = 120000, compare_at_piasters = NULL, offer_orders_limit = NULL, offer_started_at = NULL WHERE slug = 'quiet-confidence'`;
   await sql!`UPDATE shipping_areas SET is_active = true`;
   await sql!`UPDATE shipping_zones SET is_active = true, cod_allowed = true`;
 }
@@ -137,7 +137,7 @@ test("two buyers cannot both get the last piece", { skip }, async () => {
   const [winner = noRow()] = won;
   assert.equal(winner.ok && winner.soldOutNow, true);
   const [v = noRow()] = await sql!`SELECT stock_on_hand, stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
-  assert.deepEqual({ ...v }, { stock_on_hand: 1, stock_reserved: 1 });
+  assert.deepEqual({ ...v }, { stock_on_hand: 0, stock_reserved: 0 }, "the piece comes straight out of stock");
 });
 
 test("a refused order leaves no trace: no order, no reservation", { skip }, async () => {
@@ -157,8 +157,8 @@ test("a refused order leaves no trace: no order, no reservation", { skip }, asyn
   await sql!`UPDATE variants SET stock_on_hand = 0 WHERE sku = 'NUR-QC-BRG-LXL'`;
   const r = await place(r0.order);
   assert.deepEqual(r, { ok: false, reason: "sold_out" });
-  const [v = noRow()] = await sql!`SELECT stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
-  assert.equal(v.stock_reserved, 0, "the cream reservation must be rolled back");
+  const [v = noRow()] = await sql!`SELECT stock_on_hand, stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
+  assert.deepEqual({ ...v }, { stock_on_hand: 5, stock_reserved: 0 }, "the cream deduction must be rolled back");
   const [{ n } = noRow()] = await sql!`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ${phone}`;
   assert.equal(n, 0);
 });
@@ -290,4 +290,33 @@ test("the database refuses an order whose total doesn't add up or a reservation 
     INSERT INTO orders (number, customer_id, status, payment_method, area_id, address, subtotal_piasters, shipping_piasters, total_piasters, customer_phone)
     VALUES ('NUR-TEST22', ${c.id}, 'CONFIRMATION_NEEDED', 'cod', ${a.id}, 'x', 120000, 7500, 1, ${phone})`);
   await assert.rejects(sql!`UPDATE variants SET track_inventory = true, stock_on_hand = 1, stock_reserved = 2 WHERE sku = 'NUR-QC-CRM-SM'`);
+});
+
+test("launch offer ends by itself after the set number of orders; the next order pays the old price", { skip }, async () => {
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_orders_limit = 2, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
+  await sql!`UPDATE variants SET track_inventory = true, stock_on_hand = 10, stock_reserved = 0 WHERE sku = 'NUR-QC-CRM-SM'`;
+  const first = await place(await valid(nextPhone()));
+  assert.ok(first.ok && !first.offerEnded, "order 1 of 2 keeps the offer");
+  const stale = await valid(nextPhone()); // priced at 1,000 while the offer is still on
+  const second = await place(await valid(nextPhone()));
+  assert.ok(second.ok && second.offerEnded, "order 2 of 2 ends the offer");
+  const [p = noRow()] = await sql!`SELECT price_piasters, compare_at_piasters, offer_orders_limit FROM products WHERE slug = 'quiet-confidence'`;
+  assert.deepEqual({ ...p }, { price_piasters: 120000, compare_at_piasters: null, offer_orders_limit: null });
+  assert.deepEqual(await place(stale), { ok: false, reason: "price_changed" }, "a bag priced at the offer is refused after it ended");
+  const third = await place(await valid(nextPhone()));
+  assert.ok(third.ok, "new orders go through at the old price");
+  const [{ unit } = noRow()] = await sql!`SELECT i.unit_piasters AS unit FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.number = ${third.ok ? third.number : ""}`;
+  assert.equal(unit, 120000);
+  const [v = noRow()] = await sql!`SELECT stock_on_hand FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
+  assert.equal(v.stock_on_hand, 7, "3 orders took 3 pieces out of stock");
+});
+
+test("offer count is exact when many orders arrive at once", { skip }, async () => {
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_orders_limit = 3, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
+  const orders = await Promise.all(Array.from({ length: 6 }, () => valid(nextPhone())));
+  const results = await Promise.all(orders.map((o) => place(o)));
+  const ok = results.filter((r) => r.ok);
+  assert.equal(ok.length, 3, "exactly 3 orders at the offer price");
+  assert.equal(ok.filter((r) => r.ok && r.offerEnded).length, 1, "exactly one order ends the offer");
+  assert.ok(results.filter((r) => !r.ok).every((r) => !r.ok && r.reason === "price_changed"));
 });

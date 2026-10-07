@@ -46,7 +46,10 @@ What Khaled must provide is marked 🟣.
 - [ ] Today view, orders list/filters/search, order page timeline, status actions, WhatsApp confirm link
 - [ ] Courier export (Direction sheet) + packing slip print
 - [ ] Products/variants/stock/media manager, shipping zones editor, discount codes, customers (refused-count flag, blocklist), content blocks, policy editor
-- [ ] Manual order entry (for DM orders)
+- [ ] Manual order entry — dropped (Oct 7, Khaled: orders on the website only, no DM orders)
+- [ ] Cancel / refused-at-door puts the pieces back in stock (orders take stock straight away since Oct 7)
+- [ ] Offer settings: price, old price shown struck through, end after N orders (today: 1,000 EGP for the first 7 orders, then 1,200 automatically)
+- [ ] Order tracking page back on (number + phone; code kept in `lib/orders.ts` `findOrder`, paused Oct 7) once statuses are updated from admin
 **Accept:** 🟣 Khaled runs a full day of fake orders from his phone without help · every change logged.
 
 ## Phase 6 — Polish, SEO, analytics, security, launch prep (3 days)

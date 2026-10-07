@@ -46,7 +46,7 @@ test("a price change in the database is what checkout charges", { skip }, async 
     assert.ok(r.ok);
     if (r.ok) assert.equal(r.order.totalPiasters, 2 * 125_000 + 7_500);
   } finally {
-    await sql!`UPDATE products SET price_piasters = 120000 WHERE slug = 'quiet-confidence'`;
+    await sql!`UPDATE products SET price_piasters = 100000 WHERE slug = 'quiet-confidence'`;
   }
 });
 

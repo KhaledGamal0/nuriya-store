@@ -81,7 +81,8 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
   }
 
   console.info("order.saved", { number: saved.number, existing: saved.existing, payment: saved.payment });
-  if (saved.soldOutNow) refreshStorefront(); // a size just sold out: pages show it within seconds
+  // A size just sold out, or the launch offer just ended: pages show it within seconds.
+  if (saved.soldOutNow || saved.offerEnded) refreshStorefront();
   // E-mail the shop after the response is sent, so the customer never waits for it (and retry older misses).
   after(() => sendPendingOrderEmails(getSql()).catch((e) => console.error("order.email.batch_failed", e)));
 

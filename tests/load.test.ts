@@ -98,8 +98,8 @@ test("60 buyers race for 25 pieces: exactly the stock is sold, never more", { sk
   const sold = results.reduce((n, r, i) => n + (r.ok ? wants[i]! : 0), 0);
   assert.ok(results.every((r) => r.ok || r.reason === "sold_out"), "the only refusal is sold out");
   assert.ok(sold <= 25 && sold >= 24, `sold ${sold} of 25`); // 24 when the last buyer wanted 2 with 1 left
-  const [v] = await sql!`SELECT stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
-  assert.equal(v!.stock_reserved, sold, "reserved stock equals what the saved orders contain");
+  const [v] = await sql!`SELECT stock_on_hand FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
+  assert.equal(v!.stock_on_hand, 25 - sold, "stock went down by exactly what the saved orders contain");
   const [{ q } = { q: -1 }] = await sql!`SELECT coalesce(sum(i.qty), 0)::int AS q FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.customer_phone LIKE '0108%'`;
   assert.equal(q, sold);
 });

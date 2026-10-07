@@ -34,7 +34,7 @@ export type RefusalReason =
   | "bad_key";
 
 export type PlaceResult =
-  | { ok: true; number: string; payment: "cod" | "card"; existing: boolean; soldOutNow: boolean }
+  | { ok: true; number: string; payment: "cod" | "card"; existing: boolean; soldOutNow: boolean; offerEnded?: boolean }
   | { ok: false; reason: RefusalReason };
 
 class Refusal extends Error {
@@ -129,6 +129,12 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
         if (area.fee !== order.shippingPiasters) throw new Refusal("price_changed");
         if (order.payment === "cod" && !area.cod_allowed) throw new Refusal("cod_unavailable");
 
+        // Lock the product row: orders queue here for a moment, so the offer count below is exact and an order
+        // placed after the offer ended is priced at the new price (price_changed → the customer refreshes).
+        const [offer = noRow("product")] = await tx<{ id: number; limit: number | null; started: Date | null; was: number | null }[]>`
+          SELECT id, offer_orders_limit AS limit, offer_started_at AS started, compare_at_piasters AS was
+          FROM products WHERE slug = ${PRODUCT_SLUG} FOR UPDATE`;
+
         // Lock the variants being bought, always in id order (no deadlocks between two buyers).
         const wanted = order.lines.map((l) => `${l.color}|${l.size}`);
         const variants = await tx<VariantRow[]>`
@@ -148,8 +154,9 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
           const v = variants.find((x) => x.color === line.color && x.size === line.size);
           if (!v || !v.sellable) throw new Refusal("sold_out");
           if (v.unit !== line.unitPiasters) throw new Refusal("price_changed");
+          // Pieces come straight out of stock (Khaled, Oct 7 2026). The WHERE makes overselling impossible.
           const [left] = await tx<{ tracked: boolean; left: number }[]>`
-            UPDATE variants SET stock_reserved = stock_reserved + ${line.qty}
+            UPDATE variants SET stock_on_hand = CASE WHEN track_inventory THEN stock_on_hand - ${line.qty} ELSE stock_on_hand END
             WHERE id = ${v.id} AND (NOT track_inventory OR stock_on_hand - stock_reserved >= ${line.qty})
             RETURNING track_inventory AS tracked, stock_on_hand - stock_reserved AS left`;
           if (!left) throw new Refusal("sold_out");
@@ -180,7 +187,25 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
           INSERT INTO order_events (order_id, type, data)
           VALUES (${saved.id}, 'created', ${JSON.stringify({ source: "web", payment: order.payment, totalPiasters: total, status })}::jsonb)`;
 
-        return { ok: true as const, number, payment: order.payment, existing: false, soldOutNow };
+        // Launch offer: after the set number of orders the price goes back to the old price, for everyone after this one.
+        let offerEnded = false;
+        if (offer.limit !== null && offer.was !== null) {
+          const [{ n } = noRow("offer count")] = await tx<{ n: number }[]>`
+            SELECT count(*)::int AS n FROM orders
+            WHERE created_at >= ${offer.started ?? new Date(0)} AND status NOT IN ('CANCELLED', 'EXPIRED')`;
+          if (n >= offer.limit) {
+            await tx`
+              UPDATE products SET price_piasters = compare_at_piasters, compare_at_piasters = NULL,
+                                  offer_orders_limit = NULL, updated_at = now()
+              WHERE id = ${offer.id}`;
+            await tx`
+              INSERT INTO order_events (order_id, type, data)
+              VALUES (${saved.id}, 'offer_ended', ${JSON.stringify({ afterOrders: n, newPricePiasters: offer.was })}::jsonb)`;
+            offerEnded = true;
+          }
+        }
+
+        return { ok: true as const, number, payment: order.payment, existing: false, soldOutNow, offerEnded };
       });
     } catch (err) {
       if (err instanceof Refusal) return { ok: false, reason: err.reason };

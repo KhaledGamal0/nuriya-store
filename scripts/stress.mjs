@@ -146,9 +146,9 @@ await scenario("crowd: 30 buyers, 10 pieces", async () => {
     metric("crowd: thank-you pages / sold-out messages", `${done} / ${soldOut}`);
     if (done !== 10) add("crowd", `expected exactly 10 orders to succeed, got ${done}`);
     if (other.length) add("crowd", `unexpected messages: ${[...new Set(other)].join(" | ").slice(0, 200)}`);
-    const [v] = await db`SELECT stock_reserved FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
+    const [v] = await db`SELECT stock_on_hand FROM variants WHERE sku = 'NUR-QC-CRM-SM'`;
     const [{ n }] = await db`SELECT count(*)::int AS n FROM orders WHERE customer_phone = ANY(${buyers.map((b) => b.phone)})`;
-    if (n !== 10 || v.stock_reserved !== 10) add("crowd", `database: ${n} orders saved, ${v.stock_reserved} reserved (expected 10 and 10)`);
+    if (n !== 10 || v.stock_on_hand !== 0) add("crowd", `database: ${n} orders saved, ${v.stock_on_hand} left in stock (expected 10 saved, 0 left)`);
     for (const b of buyers) if (b.page.errors.length) add("crowd", `page error: ${b.page.errors[0].slice(0, 120)}`);
     await Promise.all(buyers.map((b) => b.ctx.close()));
   } finally {

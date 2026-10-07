@@ -128,6 +128,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Photos prepared ahead of time: every size made once as WebP (`scripts/make-images.py` → `public/img`), served as finished files cached 1 year — no on-demand resizing, so even the first visitor after a photo change gets photos instantly | DONE | `lib/image-loader.ts`; test fails if a size is missing |
 | Photos already downloaded paint together with their frame (decoding=sync on gallery, viewer, home cards) — no colour flash on repeat views or when opening the viewer | DONE | |
 | Launch offer 1,000 EGP (was 1,200, shown struck through on home + product pages; checkout charges the server price) | DONE | migration 0007, `components/Price.tsx` |
+| Offer ends automatically after 7 orders → 1,200 EGP (exact under concurrent orders: product row locked) | DONE | migration 0008, `orders.test.ts` |
+| Orders take stock straight away (stock_on_hand goes down) | DONE | migration 0008, `orders.test.ts`, `load.test.ts` |
 | Order tracking page | PAUSED (Oct 7, Khaled) | /track → home; `findOrder` kept + tested |
 | WhatsApp confirm button in the order e-mail opens a fully formatted message (bold order number, items, totals, payment, delivery address, reply YES) | DONE | `whatsappLink`, `fuzz.test.ts` |
 | Health e-mails: daily early warning before any limit (Neon, Vercel domain, certificate, backups, GitHub inactivity, Resend, stock) + full weekly report every Sunday | DONE | `health-report.yml`, `scripts/health-report.mjs` |
