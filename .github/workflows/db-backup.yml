@@ -55,7 +55,8 @@ jobs:
         if: env.SKIP != '1'
         run: |
           echo "STAMP=$(date -u +%F)" >> "$GITHUB_ENV"
-          docker run --rm --network host -e DATABASE_URL -v "$PWD:/out" postgres:17 \
+          # Run as the runner's own user so the next steps can read and delete the file.
+          docker run --rm --network host --user "$(id -u):$(id -g)" -e DATABASE_URL -v "$PWD:/out" postgres:17 \
             sh -c 'pg_dump --format=custom --no-owner --no-privileges -d "$DATABASE_URL" -f /out/nuriya.dump'
           ls -lh nuriya.dump
       - name: Prove it restores
@@ -69,7 +70,7 @@ jobs:
         run: |
           gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
             --symmetric --cipher-algo AES256 -o "nuriya-$STAMP.dump.gpg" nuriya.dump
-          shred -u nuriya.dump
+          rm -f nuriya.dump rows.txt
       - uses: actions/upload-artifact@v4
         if: env.SKIP != '1'
         with:
