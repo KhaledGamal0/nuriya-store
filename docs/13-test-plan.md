@@ -40,7 +40,20 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Live site up (pages every 15 min, database every 6 h) | `uptime.yml` | scheduled |
 | Backup can actually be restored | `db-backup.yml` restores each dump into a fresh Postgres | scheduled |
 
+| Order saved with items, customer, history; COD → CONFIRMATION_NEEDED; prices from DB | `orders.test.ts` "a COD order is saved…" | database |
+| Browser price never reaches the database | `orders.test.ts` | database |
+| Same checkout twice / three taps at once → one order | `orders.test.ts`; browser "checkout-filled" double submit + "order-saved" DB check | database + browser |
+| Key replayed with another phone refused; malformed key refused | `orders.test.ts` | database |
+| Two buyers, last piece → one wins, stock reserved once | `orders.test.ts` | database (concurrency) |
+| Refused order leaves no order and no reservation (rollback) | `orders.test.ts` | database |
+| Price or delivery fee changed during checkout → refused; closed area refused; COD refused where off | `orders.test.ts` | database |
+| Card refused until Paymob is connected | `orders.test.ts` | database |
+| Blocked phone; max 3 orders per phone per day (even all at once); 10 attempts per device | `orders.test.ts` | database |
+| Order lookup needs number AND phone, same message otherwise, no address shown, injection-safe | `orders.test.ts`; browser "track-order" | database + browser |
+| Shop e-mail: sent once, retried after failure, never blocks the order, no duplicates | `orders.test.ts` | database |
+| Database refuses wrong totals and reservations above stock | `orders.test.ts` | database |
+| Orders not e-mailed within 10 min → phone alert | `order-watch.yml` (hourly) | scheduled |
+
 ## Added in later phases
-- P3: order saved with items and events, stock reserved in one transaction, two buyers cannot buy the last piece (concurrency test), rate limits, order tracking page.
 - P4: Paymob — success, decline, cancel, duplicate webhook, forged HMAC rejected, amount mismatch rejected, return URL never marks paid.
 - P5: admin login with 2FA, roles, every change in the audit log, refresh after edits.

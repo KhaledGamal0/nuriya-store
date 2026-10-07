@@ -26,10 +26,12 @@ What Khaled must provide is marked 🟣.
 **Accept:** ✅ price change in DB shows after refresh (UI audit) · ✅ sold-out variant can't be added (DB test) · ⏳ production Neon connected (Khaled) · ⏳ stock counts (Khaled).
 
 ## Phase 3 — Cart + checkout + COD (3 days)
-- [ ] Bag (server-validated), one-page checkout: phone → name → governorate/area (fee instantly) → address → payment
-- [ ] Server re-prices everything; stock reserved in a transaction; order number NUR-0001
-- [ ] COD → CONFIRMATION_NEEDED; confirmation page (wavy thank-you card style) + track-order page (hang tag)
-- [ ] Rate limits + Egyptian phone validation + per-phone order limit
+- [x] Bag (server-validated), one-page checkout: phone → name → governorate/area (fee instantly) → address → payment
+- [x] Server re-prices everything; stock reserved in a transaction; order number NUR-XXXXXX (random, unguessable — kept from Phase 2)
+- [x] COD → CONFIRMATION_NEEDED; confirmation page + track-order page (`/track`) — kept in the approved clean style
+- [x] Rate limits + Egyptian phone validation + per-phone order limit
+- [x] Added: no duplicate orders (idempotency key), price-change refusal, shop e-mail with WhatsApp link + hourly safety net
+- [ ] Khaled: Resend key for the order e-mail; full COD order on his phone in < 60 s
 **Accept:** tampered price in request is ignored (test) · two buyers can't buy the last item (test) · full COD order works on phone in < 60 s.
 
 ## Phase 4 — Paymob card payments (2–3 days)

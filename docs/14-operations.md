@@ -37,6 +37,7 @@ After it succeeds, the Vercel token can be deleted (vercel.com → Tokens); it's
 | Database deploy | when a migration is pushed | A migration that doesn't apply |
 | **Uptime check** | every 15 min (pages), every 6 h (database) | A page that isn't 200, or `/api/health` not ok |
 | **Database backup** | daily 03:30 Cairo | A dump that can't be made **or can't be restored** |
+| **Order watch** | hourly | Any order saved but not e-mailed to the shop within 10 minutes (alert lists order numbers only) |
 
 A failure opens a GitHub issue labelled **alert** (the GitHub app pushes it to your phone) and closes it automatically when the next run passes. GitHub pauses scheduled workflows on a public repo after 60 days with no commits; a push or "Enable workflow" turns them back on.
 
@@ -60,6 +61,11 @@ Secrets are never pasted into chat, code, issues or screenshots.
 | `/api/health` says `database: error` | neon.tech/status, Neon project → Monitoring | Usually recovers by itself; browsing keeps working. If the free 100 compute-hours are used up: upgrade to Launch. |
 | Wrong data after an edit | Which rows, since when | Neon restore to just before the edit (into a branch, check, then swap) |
 | Secret leaked | — | Neon → Roles → reset password, then run **Production setup** again (it writes the new address into Vercel and redeploys). Revoke a leaked API key or token in Neon/Vercel and add a new secret. |
+
+## Orders: how none get lost
+- The thank-you page appears only after the database confirms the order is saved (one transaction).
+- The shop e-mail goes out after the save. If e-mail fails, the order is still saved, the next order retries it, and Order watch alerts your phone within the hour.
+- Until the admin dashboard (Phase 5), every order is also visible in Neon → Tables → `orders` / `order_items`.
 
 ## Later (with Phase 6)
 Sentry error alerts, CSP, and a status line in the admin dashboard showing the last backup and uptime result.

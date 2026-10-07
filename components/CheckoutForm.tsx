@@ -54,7 +54,7 @@ function Summary({ feePiasters }: { feePiasters?: number }) {
   );
 }
 
-export function CheckoutForm() {
+export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean }) {
   const bag = useBag();
   const { areas } = useStore();
   const groups = areasByFee(areas);
@@ -62,6 +62,9 @@ export function CheckoutForm() {
   const [areaId, setAreaId] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const formRef = useRef<HTMLFormElement>(null);
+  // One key per checkout attempt, made in the browser at the first tap (never at build time, or every
+  // shopper would share it). Retries and double taps reuse it, so the server saves one order only.
+  const keyRef = useRef<string | null>(null);
   const fee = areas.find((a) => a.id === areaId)?.feePiasters;
 
   // Server errors replace local ones after each submit.
@@ -134,6 +137,8 @@ export function CheckoutForm() {
             focusFirst(next);
             return;
           }
+          keyRef.current ??= crypto.randomUUID();
+          form.set("key", keyRef.current);
           startTransition(() => action(form));
         }}
       >
@@ -142,6 +147,13 @@ export function CheckoutForm() {
           No account needed. We confirm every order on WhatsApp.
         </p>
         <input type="hidden" name="cart" value={JSON.stringify(bag.lines)} />
+        {/* Left empty by people; bots that fill every field are refused. */}
+        <div className="hp" aria-hidden="true">
+          <label>
+            Leave empty
+            <input type="text" name="hp_note" tabIndex={-1} autoComplete="off" defaultValue="" />
+          </label>
+        </div>
 
         <fieldset className="fs">
           <legend>Contact</legend>
@@ -191,17 +203,25 @@ export function CheckoutForm() {
               <input type="radio" name="payment" value="cod" defaultChecked />
               <span>Cash on delivery</span>
             </label>
-            <label>
-              <input type="radio" name="payment" value="card" />
-              <span>Card</span>
-              <small className="small">Secure Paymob page</small>
-            </label>
+            {cardEnabled && (
+              <label>
+                <input type="radio" name="payment" value="card" />
+                <span>Card</span>
+                <small className="small">Secure Paymob page</small>
+              </label>
+            )}
           </div>
+          {!cardEnabled && <p className="small">Card payment is coming soon.</p>}
+          {errors.payment && (
+            <p className="form-err" role="alert">
+              {errors.payment}
+            </p>
+          )}
         </fieldset>
 
-        {state?.unavailable && (
+        {state?.notice && (
           <p className="form-err" role="alert">
-            {state.message}
+            {state.notice}
           </p>
         )}
 

@@ -24,6 +24,7 @@ const PAGES = [
   ["size-guide", "/size-guide"],
   ["returns", "/returns"],
   ["checkout-empty", "/checkout"],
+  ["track", "/track"],
   ["order-done", "/checkout/done?o=NUR-ABCDEF&p=cod"],
   ["not-found", "/this-page-does-not-exist"],
 ];
@@ -164,6 +165,10 @@ async function techChecks() {
   if (!/noindex/.test(checkout)) f("/checkout", "checkout should not be indexed by search engines", "seo");
 }
 await techChecks().catch((e) => add("server", "tech", "audit-step-failed", String(e.message).slice(0, 160)));
+
+// Direct database access to prove what the browser flows really saved.
+const db = process.env.DATABASE_URL ? (await import("postgres")).default(process.env.DATABASE_URL, { max: 1, onnotice: () => {} }) : null;
+const PHONES = { mobile: "010 1234 5678", desktop: "011 1234 5678" };
 
 const browser = await chromium.launch();
 for (const [vp, opts] of Object.entries(VIEWPORTS)) {
@@ -310,23 +315,65 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
 
   await step(vp, "checkout-filled", async () => {
     where = "checkout-filled";
-    await page.getByLabel("Mobile number").fill("010 1234 5678");
+    await page.getByLabel("Mobile number").fill(PHONES[vp]);
     await page.getByLabel("Full name").fill("Nour Ahmed");
     await page.getByLabel("Area").selectOption("alexandria");
     await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");
     if (await page.locator(".f-err").count()) add(vp, where, "flow", "errors still showing after every field was fixed");
     if (!(await page.evaluate(() => document.body.innerText.includes("1,290 EGP")))) add(vp, where, "flow", "total did not update to 1,290 EGP for Alexandria");
     await shot(page, `${vp}-checkout-filled`);
-    await page.getByRole("button", { name: "Place order" }).click();
-    await page.waitForURL(/\/checkout\/done/, { timeout: 10000 }).catch(() => add(vp, where, "flow", "placing a valid order did not reach the confirmation page"));
+    // Double tap: the form is submitted twice in a row. Exactly one order must be saved.
+    await page.evaluate(() => {
+      const form = document.querySelector(".co form");
+      form.requestSubmit();
+      form.requestSubmit();
+    });
+    await page.waitForURL(/\/checkout\/done/, { timeout: 15000 }).catch(() => add(vp, where, "flow", "placing a valid order did not reach the confirmation page"));
     where = "order-placed";
+    await checks(page, vp, where);
     await shot(page, `${vp}-order-placed`);
+  });
+
+  let orderNo = null;
+  await step(vp, "order-saved", async () => {
+    where = "order-saved";
+    orderNo = new URL(page.url()).searchParams.get("o");
+    if (!orderNo || !(await page.getByText(`Order ${orderNo}`).isVisible())) add(vp, where, "flow", "confirmation page does not show the order number");
+    if (!db) return;
+    const phone = PHONES[vp].replace(/\s/g, "");
+    const rows = await db`SELECT number, status, total_piasters FROM orders WHERE customer_phone = ${phone}`;
+    if (rows.length !== 1) add(vp, where, "order-safety", `expected exactly 1 saved order after a double tap, found ${rows.length}`);
+    const o = rows[0];
+    if (o && o.number !== orderNo) add(vp, where, "order-safety", `confirmation shows ${orderNo} but the database saved ${o.number}`);
+    if (o && o.status !== "CONFIRMATION_NEEDED") add(vp, where, "order-safety", `COD order saved as ${o.status}, expected CONFIRMATION_NEEDED`);
+    if (o && o.total_piasters !== 129000) add(vp, where, "order-safety", `saved total ${o.total_piasters} piasters, expected 129000 (1,290 EGP)`);
+    const items = o ? await db`SELECT count(*)::int AS n FROM order_items i JOIN orders x ON x.id = i.order_id WHERE x.number = ${o.number}` : [{ n: 0 }];
+    if (items[0].n < 1) add(vp, where, "order-safety", "order saved without its items");
+  });
+
+  await step(vp, "track-order", async () => {
+    where = "track-order";
+    if (!orderNo) return;
+    await page.getByRole("link", { name: "Track your order" }).first().click();
+    await page.waitForURL(/\/track/, { timeout: 10000 });
+    await page.waitForTimeout(300);
+    if ((await page.getByLabel("Order number").inputValue()) !== orderNo) add(vp, where, "flow", "order number was not filled in from the confirmation page");
+    await page.getByLabel("Mobile number").fill("010 0000 0000");
+    await page.getByRole("button", { name: "Check status" }).click();
+    await page.getByText("We couldn't find an order", { exact: false }).waitFor({ timeout: 10000 }).catch(() => add(vp, where, "security", "wrong phone did not get the not-found message"));
+    await page.getByLabel("Mobile number").fill(PHONES[vp]);
+    await page.getByRole("button", { name: "Check status" }).click();
+    await page.getByText("Received", { exact: false }).first().waitFor({ timeout: 10000 }).catch(() => add(vp, where, "flow", "tracking did not show the order status"));
+    if (!(await page.evaluate(() => document.body.innerText.includes("1,290 EGP")))) add(vp, where, "flow", "tracking does not show the order total");
+    await checks(page, vp, where);
+    await shot(page, `${vp}-track-order`);
   });
 
   await ctx.close();
 }
 await refreshCheck(browser).catch((e) => add("mobile", "refresh", "audit-step-failed", String(e.message).slice(0, 160)));
 await browser.close();
+await db?.end();
 
 const byKind = {};
 for (const f of findings) (byKind[f.kind] ??= []).push(f);

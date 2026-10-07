@@ -1,0 +1,52 @@
+name: Order watch
+
+# Safety net for order e-mails. Every hour it counts orders that were saved but not e-mailed to the shop
+# within 10 minutes. If any, it opens an "alert" issue (phone notification) with the order NUMBERS only —
+# never names, phones or addresses, because this repository is public. Closes itself when all are sent.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+    steps:
+      - name: Check access
+        run: |
+          [ -n "$NEON_API_KEY" ] || { echo "::warning::NEON_API_KEY secret not set."; echo "SKIP=1" >> "$GITHUB_ENV"; }
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        if: env.SKIP != '1'
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        if: env.SKIP != '1'
+        run: node scripts/neon.mjs env production
+      - name: Orders waiting without an e-mail
+        if: env.SKIP != '1'
+        run: |
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -F ' ' -c \
+            "SELECT count(*), coalesce(string_agg(number, ', ' ORDER BY created_at), '') FROM orders WHERE notified_at IS NULL AND created_at < now() - interval '10 minutes' AND created_at > now() - interval '7 days'" > waiting.txt
+          read -r count numbers < waiting.txt
+          echo "waiting=$count"
+          echo "WAITING=$count" >> "$GITHUB_ENV"
+          echo "NUMBERS=$numbers" >> "$GITHUB_ENV"
+      - name: Alert
+        if: env.SKIP != '1' && env.WAITING != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/alert.sh open "Orders not e-mailed" "$WAITING order(s) are saved but the e-mail to the shop did not go out: $NUMBERS. They are safe in the database. Check the RESEND_API_KEY / ORDER_ALERT_EMAIL setup, or open Neon → Tables → orders."
+      - name: Clear alert
+        if: env.SKIP != '1' && env.WAITING == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh close "Orders not e-mailed" "All orders have been e-mailed."

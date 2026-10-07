@@ -33,6 +33,10 @@
 - Setup is automated (Khaled, Oct 7: "do everything from your side"): Khaled adds only NEON_API_KEY, VERCEL_TOKEN and BACKUP_PASSPHRASE as GitHub secrets; the "Production setup" workflow does the rest. Workflows read the database address from the Neon API at run time, so no connection string is stored anywhere except Vercel.
 - Vercel preview deployments use a separate Neon branch "preview" (test data only), so test orders never land in the production database.
 - Server functions pinned to Frankfurt (`vercel.json` regions fra1), next to the database.
+- Phase 3 (Oct 7, Khaled: "orders sent to my mail khaledgamaldeveloper@gmail.com"): every new order is e-mailed to the shop (Resend), with a WhatsApp confirm link. The address is kept only in GitHub/Vercel secrets, never in code (public repo).
+- Phase 3 defaults (announced to Khaled Oct 7, change any time): max 3 orders per phone per 24 h; 10 checkout attempts per device per 10 min; 20 order lookups per device per 10 min.
+- Card payment hidden and refused until Paymob is connected (Phase 4), so no unpaid card order can exist.
+- Order lookup shows status, items, area and totals — never the address or full name.
 - Failures of uptime, backup, migration or setup open a GitHub issue labelled "alert" (phone notification through the GitHub app) and close it when fixed.
 - Stock tracking off per size until Khaled gives counts (all sizes available meanwhile).
 - No size pre-selected on product pages (Khaled).

@@ -53,7 +53,10 @@ try {
   note(`Vercel project "${project.name}" found.`);
 
   // Replace any earlier values of the variables we manage, so there is exactly one of each.
-  const managed = ["DATABASE_URL", "REVALIDATE_SECRET", "NEXT_PUBLIC_SITE_URL"];
+  // Optional: order e-mail settings, copied only when the GitHub secrets exist (production only,
+  // so test orders on preview deployments never e-mail the shop).
+  const optional = ["RESEND_API_KEY", "ORDER_ALERT_EMAIL"].filter((k) => process.env[k]?.trim());
+  const managed = ["DATABASE_URL", "REVALIDATE_SECRET", "NEXT_PUBLIC_SITE_URL", ...optional];
   const { envs = [] } = await vercel(`/v9/projects/${project.id}/env`);
   for (const e of envs.filter((e) => managed.includes(e.key))) await vercel(`/v9/projects/${project.id}/env/${e.id}`, { method: "DELETE" });
 
@@ -66,9 +69,11 @@ try {
       { key: "DATABASE_URL", value: process.env.PREVIEW_DATABASE_URL_POOLED, type: "sensitive", target: ["preview"], comment: "Neon pooled, preview branch (test data only)" },
       { key: "REVALIDATE_SECRET", value: revalidate, type: "sensitive", target: ["production", "preview"] },
       { key: "NEXT_PUBLIC_SITE_URL", value: SITE, type: "plain", target: ["production", "preview"] },
+      ...optional.map((key) => ({ key, value: process.env[key].trim(), type: "sensitive", target: ["production"] })),
     ]),
   });
-  note("Vercel variables set: DATABASE_URL (production → Neon production, preview → Neon preview), REVALIDATE_SECRET, NEXT_PUBLIC_SITE_URL.");
+  note(`Vercel variables set: DATABASE_URL (production → Neon production, preview → Neon preview), REVALIDATE_SECRET, NEXT_PUBLIC_SITE_URL${optional.length ? ", " + optional.join(", ") : ""}.`);
+  if (optional.length < 2) note("Order e-mails are not configured yet (RESEND_API_KEY and ORDER_ALERT_EMAIL secrets). Orders are still saved; the hourly Order watch alerts you.");
 
   const repoId = process.env.GITHUB_REPOSITORY_ID;
   const dep = await vercel(`/v13/deployments?forceNew=1&skipAutoDetectionConfirmation=1`, {
@@ -89,7 +94,7 @@ try {
   const health = await res.json().catch(() => ({}));
   note(`Live health: ${JSON.stringify(health)}`);
   if (health.database !== "connected" || !health.seeded) fail("Live site is not reading the database yet. See the health line above.");
-  note("Done: the live site reads products and delivery fees from the Neon database in Frankfurt.");
+  note(`Done: the live site reads products and delivery fees from the Neon database in Frankfurt. Order e-mails: ${health.email ?? "unknown"}.`);
 } catch (e) {
   fail(String(e.message ?? e));
 }

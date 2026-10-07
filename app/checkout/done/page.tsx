@@ -21,6 +21,15 @@ export default async function DonePage({ searchParams }: Props) {
           : "We'll message you on WhatsApp to confirm your order."}{" "}
         Please check your order with the courier before you accept.
       </p>
+      {orderNo && (
+        <p className="small">
+          Keep your order number. You can check its status any time on{" "}
+          <Link className="line-link" href={`/track?o=${orderNo}`}>
+            Track your order
+          </Link>
+          .
+        </p>
+      )}
       <Link className="btn btn-line" href="/">
         Continue shopping
       </Link>

@@ -57,11 +57,14 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Server recomputes every price and fee | DONE | Unit tested |
 | Inspect-at-door policy shown before placing order | DONE | |
 | Order confirmation page | DONE | |
-| Save orders in a database | P3 | Orders are NOT saved yet |
-| Stock reserved when ordering, no overselling | P3 | |
-| Rate limits and fake-order protection | P3 | |
-| WhatsApp confirmation link for each COD order | P3 / P5 | Manual first, automatic later |
-| Order tracking page for customers | P3 | |
+| Save orders in a database | DONE | One transaction: customer, order, items, history, stock. Thank-you page only after the save. `lib/orders.ts` |
+| No duplicate orders from double taps or retries | DONE | One key per checkout attempt; tested in DB (3 taps at once) and in the browser |
+| Stock reserved when ordering, no overselling | DONE | Row locks; "two buyers, last piece" test. Releasing stock on cancel comes with admin (P5) |
+| Price or fee changed during checkout is refused, never charged silently | DONE | |
+| Rate limits and fake-order protection | DONE | 10 attempts / device / 10 min; 3 orders / phone / 24 h; blocklist; bot trap field |
+| WhatsApp confirmation link for each COD order | DONE | In the order e-mail (pre-written message). Automatic sending later |
+| Order e-mail to the shop | PARTIAL + KHALED | Code done and tested; needs Resend key (`RESEND_API_KEY`, `ORDER_ALERT_EMAIL` secrets). Hourly Order watch alerts if any order is not e-mailed |
+| Order tracking page for customers | DONE | `/track` — needs order number + phone; never shows the address |
 | Order emails / SMS | P6 | Email optional (phone-first) |
 | Referral 10% code | LATER + KHALED | How to track it is undecided |
 | Discount codes | P5 | |
@@ -69,7 +72,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 ## D. Payments
 | Need | Status | Notes |
 |---|---|---|
-| Cash on delivery | PARTIAL | Works in checkout; saved to DB in P3 |
+| Cash on delivery | DONE | Saved as CONFIRMATION_NEEDED; refused where the zone has COD off |
+| Card option hidden until Paymob is live | DONE | `PAYMOB_ENABLED`; server refuses card meanwhile |
 | Card via Paymob hosted page | P4 + KHALED | Needs Paymob merchant account and test keys |
 | Paid only after verified Paymob webhook | P4 | |
 | Refund rule when a card order is refused at the door | KHALED | Full refund, or keep delivery fee? |
@@ -101,7 +105,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Security headers (HSTS, frame, sniffing, referrer, permissions) | DONE | `next.config.ts` |
 | Server-side validation of every checkout field | DONE | |
 | Content Security Policy | P6 | |
-| Rate limiting | P3 | |
+| Rate limiting | DONE | Postgres counters (`rate_limits`), checkout + order lookup |
 | Admin 2FA and audit log | P5 | |
 | Daily encrypted database backup, restore proven on every run | DONE | `db-backup.yml`; first backup Oct 7 |
 | Error monitoring (Sentry) | P6 | |

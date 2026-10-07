@@ -350,6 +350,7 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 .pay label:has(input:checked) { border-color: var(--ink); background: var(--stone); }
 .pay input { accent-color: var(--ink); width: 18px; height: 18px; margin: 0; }
 .pay span { flex: 1; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .form-err { margin-top: var(--s2); padding: 12px 14px; border-radius: var(--r); background: #fbeef0; color: var(--error); font-size: 13px; }
 .sum { background: var(--stone); border-radius: var(--r); padding: var(--s3); display: grid; gap: var(--s2); }
 .sum-m { padding: 0 var(--s2); gap: 0; }
@@ -400,3 +401,13 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Track order */
+.track { padding-block: var(--s5) var(--s6); display: grid; gap: var(--s2); max-width: 560px; }
+.track h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1; }
+.track-form { display: grid; gap: var(--s2); margin-top: var(--s2); }
+.track-result { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--line); display: grid; gap: var(--s1); }
+.track-result h2 { font-size: 28px; line-height: 1.15; }
+.track-result ul { list-style: none; padding: 0; margin: var(--s2) 0 0; display: grid; gap: var(--s1); font-size: 14px; }
+.track-result li { display: flex; justify-content: space-between; gap: var(--s2); }
+.track-result li.big { padding-top: var(--s1); border-top: 1px solid var(--line); font-weight: 500; }
