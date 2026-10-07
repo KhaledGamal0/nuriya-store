@@ -1,0 +1,12 @@
+/* Nuriya brand colors */
+:root {
+  --nuriya-pink:      #FFE1ED; /* main background */
+  --nuriya-plum:      #3C0E18; /* logo, text, buttons */
+  --nuriya-plum-soft: #683A46; /* body copy */
+  --nuriya-rose-gold: #B78074; /* accents only - not for small text */
+  --nuriya-burgundy:  #7A2B3C; /* product color */
+  --nuriya-cream:     #F3F0E8; /* product color */
+  --nuriya-white:     #FFFFFF;
+  --nuriya-tint:      #FFF0F6; /* cards, table rows, inputs */
+  --nuriya-hairline:  #E7C7D1; /* borders */
+}

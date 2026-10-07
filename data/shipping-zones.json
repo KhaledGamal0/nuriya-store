@@ -1,0 +1,34 @@
+{
+  "courier": "Direction",
+  "currency": "EGP",
+  "source": "Direction price list image, received 2026-10-07",
+  "zones": [
+    { "id": "cairo-giza", "fee": 75, "areas": [
+      { "en": "Cairo", "ar": "القاهرة" }, { "en": "Giza", "ar": "الجيزة" } ] },
+    { "id": "new-cities", "fee": 75, "areas": [
+      { "en": "Madinaty", "ar": "مدينتي" }, { "en": "El Shorouk", "ar": "الشروق" }, { "en": "El Obour", "ar": "العبور" },
+      { "en": "6th of October", "ar": "أكتوبر" }, { "en": "Hadayek October", "ar": "حدائق أكتوبر" }, { "en": "Sheikh Zayed", "ar": "الشيخ زايد" } ] },
+    { "id": "delta-canal", "fee": 90, "areas": [
+      { "en": "Giza countryside", "ar": "أرياف الجيزة" }, { "en": "Alexandria", "ar": "الإسكندرية" }, { "en": "Beheira", "ar": "البحيرة" },
+      { "en": "Gharbia", "ar": "الغربية" }, { "en": "Dakahlia", "ar": "الدقهلية" }, { "en": "Qalyubia", "ar": "القليوبية" },
+      { "en": "Kafr El Sheikh", "ar": "كفر الشيخ" }, { "en": "Monufia", "ar": "المنوفية" }, { "en": "Ismailia", "ar": "الإسماعيلية" },
+      { "en": "Suez", "ar": "السويس" }, { "en": "Port Said", "ar": "بور سعيد" }, { "en": "Damietta", "ar": "دمياط" }, { "en": "Sharqia", "ar": "الشرقية" } ] },
+    { "id": "upper-north", "fee": 100, "areas": [
+      { "en": "Fayoum", "ar": "الفيوم" }, { "en": "Beni Suef", "ar": "بني سويف" } ] },
+    { "id": "upper", "fee": 105, "areas": [
+      { "en": "Minya", "ar": "المنيا" }, { "en": "Assiut", "ar": "أسيوط" }, { "en": "Sohag", "ar": "سوهاج" },
+      { "en": "Qena", "ar": "قنا" }, { "en": "Luxor", "ar": "الأقصر" }, { "en": "Aswan", "ar": "أسوان" } ] },
+    { "id": "new-valley", "fee": 125, "areas": [ { "en": "New Valley", "ar": "الوادي الجديد" } ] },
+    { "id": "new-capital", "fee": 135, "areas": [ { "en": "New Administrative Capital", "ar": "العاصمة الإدارية الجديدة" } ] },
+    { "id": "resorts", "fee": 165, "areas": [
+      { "en": "Red Sea (Hurghada)", "ar": "البحر الأحمر (الغردقة)" }, { "en": "Sharm El Sheikh", "ar": "شرم الشيخ" },
+      { "en": "North Coast", "ar": "الساحل الشمالي" }, { "en": "Marsa Matrouh", "ar": "مرسى مطروح" } ] }
+  ],
+  "terms": {
+    "delivery_hours": { "cairo_giza": "90 (likely typo, confirm)", "other": 72 },
+    "fees_on_refused_or_returned": 0,
+    "same_day_multiplier": 2,
+    "pickup_min_orders": 3,
+    "loss_compensation": { "force_majeure_pct": 80, "other_pct": 100 }
+  }
+}

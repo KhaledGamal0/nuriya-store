@@ -1,0 +1,47 @@
+{
+  "blush-pink": {
+    "hex": "#FFE1ED",
+    "rgb": "255, 225, 237",
+    "use": "Main background"
+  },
+  "nuriya-plum": {
+    "hex": "#3C0E18",
+    "rgb": "60, 14, 24",
+    "use": "Logo, text, buttons"
+  },
+  "rose-gold": {
+    "hex": "#B78074",
+    "rgb": "183, 128, 116",
+    "use": "Accents, tagline, lines"
+  },
+  "burgundy": {
+    "hex": "#7A2B3C",
+    "rgb": "122, 43, 60",
+    "use": "Product color"
+  },
+  "cream": {
+    "hex": "#F3F0E8",
+    "rgb": "243, 240, 232",
+    "use": "Product color"
+  },
+  "white": {
+    "hex": "#FFFFFF",
+    "rgb": "255, 255, 255",
+    "use": "Cards, QR plate"
+  },
+  "soft-plum": {
+    "hex": "#683A46",
+    "rgb": "104, 58, 70",
+    "use": "Body text"
+  },
+  "pink-tint": {
+    "hex": "#FFF0F6",
+    "rgb": "255, 240, 246",
+    "use": "Table rows, inputs"
+  },
+  "hairline": {
+    "hex": "#E7C7D1",
+    "rgb": "231, 199, 209",
+    "use": "Borders, dividers"
+  }
+}
