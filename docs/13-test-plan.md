@@ -52,6 +52,7 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Order lookup needs number AND phone, same message otherwise, no address shown, injection-safe | `orders.test.ts`; browser "track-order" | database + browser |
 | Shop e-mail: sent once, retried after failure, never blocks the order, no duplicates | `orders.test.ts` | database |
 | Database refuses wrong totals and reservations above stock | `orders.test.ts` | database |
+| Thank-you page is idle (no render loop); links and title work after ordering | browser "order-placed" mutation count, "track-order" | browser |
 | Orders not e-mailed within 10 min → phone alert | `order-watch.yml` (hourly) | scheduled |
 
 ## Added in later phases

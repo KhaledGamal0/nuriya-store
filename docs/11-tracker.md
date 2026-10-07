@@ -64,6 +64,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Rate limits and fake-order protection | DONE | 10 attempts / device / 10 min; 3 orders / phone / 24 h; blocklist; bot trap field |
 | WhatsApp confirmation link for each COD order | DONE | In the order e-mail (pre-written message). Automatic sending later |
 | Order e-mail to the shop | PARTIAL + KHALED | Code done and tested; needs Resend key (`RESEND_API_KEY`, `ORDER_ALERT_EMAIL` secrets). Hourly Order watch alerts if any order is not e-mailed |
+| Thank-you page render loop (blocked taps after ordering) | FIXED | Oct 7: bag `clear()` was re-created and re-ran forever; audit now detects render loops |
 | Order tracking page for customers | DONE | `/track` — needs order number + phone; never shows the address |
 | Order emails / SMS | P6 | Email optional (phone-first) |
 | Referral 10% code | LATER + KHALED | How to track it is undecided |
