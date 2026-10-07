@@ -16,7 +16,10 @@ const config: NextConfig = {
   },
   poweredByHeader: false,
   images: {
-    formats: ["image/avif", "image/webp"],
+    // WebP only: almost as small as AVIF, far faster for phones to decode and for the server to make.
+    formats: ["image/webp"],
+    // Resized photos stay cached 30 days (Vercel edge + browser). A changed photo always gets a NEW file name.
+    minimumCacheTTL: 2592000,
     deviceSizes: [390, 640, 828, 1080, 1280, 1600, 2048],
   },
   async redirects() {
@@ -24,7 +27,12 @@ const config: NextConfig = {
     return [{ source: "/quiet-confidence/cream", destination: "/quiet-confidence/white", permanent: true }];
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    const photoCache = [{ key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/images/:path*", headers: photoCache },
+      { source: "/email/:path*", headers: photoCache },
+    ];
   },
 };
 

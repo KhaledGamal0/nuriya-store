@@ -37,6 +37,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: no-preference) { html[data-scroll-behavior="smooth"] { scroll-behavior: smooth; } }
+/* No sideways jump when a panel locks the page on desktop (no effect on phones). */
+html { scrollbar-gutter: stable; }
 body {
   margin: 0;
   background: var(--paper);
@@ -178,7 +180,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 /* Product page */
 .pdp { display: grid; gap: var(--s3); padding-bottom: var(--s5); }
 @media (min-width: 900px) { .pdp { grid-template-columns: 1.3fr 1fr; gap: var(--s5); padding-top: var(--s4); align-items: start; } }
-.gal { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--g) * -1); }
+.gal { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; margin-inline: calc(var(--g) * -1); }
 .gal::-webkit-scrollbar { display: none; }
 .gal-wrap { position: relative; }
 .gal-i { display: block; width: 100%; padding: 0; position: relative; aspect-ratio: 4 / 5; scroll-snap-align: start; background: var(--stone); cursor: zoom-in; overflow: hidden; }
@@ -291,6 +293,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .dlg-right[open] { animation: dlg-in-x 0.38s var(--ease); }
 .dlg-left[open] { animation: dlg-in-xl 0.38s var(--ease); }
 .dlg-sheet[open] { animation: dlg-in-y 0.38s var(--ease); }
+.dlg { overscroll-behavior: contain; } /* scrolling inside a panel never moves the page behind it */
 .dlg[open]::backdrop { animation: dlg-fade 0.3s ease-out; }
 .dlg-right[data-closing] { animation: dlg-out-x 0.26s cubic-bezier(0.4, 0, 1, 1) forwards; }
 .dlg-left[data-closing] { animation: dlg-out-xl 0.26s cubic-bezier(0.4, 0, 1, 1) forwards; }

@@ -3,14 +3,14 @@ import Link from "next/link";
 import { getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 import { productPath } from "@/lib/catalog";
-import { blur } from "@/lib/blur";
+import { preview } from "@/lib/blur";
 
 export default async function Home() {
   const catalog = await getCatalog();
   return (
     <>
       <section className="hero" aria-label="Quiet Confidence">
-        <div className="hero-ph">
+        <div className="hero-ph" style={preview("/images/hero-pair.jpg")}>
           <Image
             className="hero-img"
             src="/images/hero-pair.jpg"
@@ -19,7 +19,6 @@ export default async function Home() {
             priority
             quality={75}
             sizes="(min-width: 900px) 50vw, 100vw"
-            {...blur("/images/hero-pair.jpg")}
           />
         </div>
         <div className="wrap hero-c">
@@ -46,8 +45,8 @@ export default async function Home() {
             const second = color.images[1] ?? first;
             return (
               <Link className="pc" href={productPath(c)} key={c}>
-                <div className="pc-ph">
-                  <Image src={first.src} alt={first.alt} fill sizes="(min-width: 900px) 600px, 50vw" {...blur(first.src)} />
+                <div className="pc-ph" style={preview(first.src)}>
+                  <Image src={first.src} alt={first.alt} fill sizes="(min-width: 900px) 600px, 50vw" />
                   <Image src={second.src} alt="" fill sizes="(min-width: 900px) 600px, 50vw" />
                 </div>
                 <div className="pc-t">
@@ -62,16 +61,15 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="ed" aria-label="Craft">
+      <section className="ed" aria-label="Craft" style={preview("/images/craft-sleeve-tall.jpg")}>
         <Image
           className="ed-tall"
           src="/images/craft-sleeve-tall.jpg"
           alt="White cuff embroidered in burgundy: do what you love, love what you do"
           fill
           sizes="(min-width: 900px) 1px, 100vw"
-          {...blur("/images/craft-sleeve-tall.jpg")}
         />
-        <Image className="ed-wide" src="/images/craft-sleeve-wide.jpg" alt="" fill sizes="(min-width: 900px) 100vw, 1px" {...blur("/images/craft-sleeve-wide.jpg")} />
+        <Image className="ed-wide" src="/images/craft-sleeve-wide.jpg" alt="" fill sizes="(min-width: 900px) 100vw, 1px" />
         <p className="reveal">
           Every stitch,
           <br />

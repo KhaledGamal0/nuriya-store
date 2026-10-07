@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { ProductImage } from "@/lib/catalog";
 import { Dialog, CloseButton } from "./Dialog";
-import { blur } from "@/lib/blur";
+import { preview } from "@/lib/blur";
 
 function Arrow({ dir }: { dir: "prev" | "next" }) {
   return (
@@ -55,13 +55,14 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
             type="button"
             className="gal-i"
             key={img.src}
+            style={preview(img.src)}
             onClick={() => {
               setViewIndex(i);
               setOpen(true);
             }}
             aria-label={`Open photo ${i + 1} of ${total} full screen`}
           >
-            <Image src={img.src} alt={img.alt} fill priority={i === 0} sizes="(min-width: 900px) 30vw, 100vw" {...blur(img.src)} />
+            <Image src={img.src} alt={img.alt} fill priority={i === 0} sizes="(min-width: 900px) 30vw, 100vw" />
           </button>
         ))}
       </div>
@@ -99,7 +100,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
         >
           {images.map((img) => (
             <div className="vw-i" key={img.src}>
-              <Image src={img.src} alt={img.alt} fill sizes="100vw" quality={90} {...blur(img.src)} />
+              <Image src={img.src} alt={img.alt} fill sizes="100vw" quality={90} />
             </div>
           ))}
         </div>

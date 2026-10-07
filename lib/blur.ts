@@ -16,8 +16,9 @@ export const BLUR: Record<string, string> = {
   "/images/hero-pair.jpg": "data:image/webp;base64,UklGRmIAAABXRUJQVlA4IFYAAAAQAgCdASoKAA8AAwBSJQBOgCLMgr4/ra4AAPwjEx74M6FypdjRV7YaLqmL4pU/ShcN4VthDL9iJmbkyh5MZEoBlQCRPA6b9v/PwlggeAHFhh3YjwwAAA==",
 };
 
-/** Props for next/image: a blur-up preview when one exists. */
-export function blur(src: string): { placeholder?: "blur"; blurDataURL?: string } {
+/** Background for a photo's frame: the tiny preview, stretched smoothly by the browser into a soft blur.
+ * Shows instantly; the real photo covers it when loaded. No blur filter, so no extra work for the phone. */
+export function preview(src: string): { backgroundImage: string; backgroundSize: string; backgroundPosition: string } | undefined {
   const data = BLUR[src];
-  return data ? { placeholder: "blur", blurDataURL: data } : {};
+  return data ? { backgroundImage: `url(${data})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined;
 }
