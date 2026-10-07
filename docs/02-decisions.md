@@ -34,7 +34,7 @@
 - Vercel preview deployments use a separate Neon branch "preview" (test data only), so test orders never land in the production database.
 - Server functions pinned to Frankfurt (`vercel.json` regions fra1), next to the database.
 - Phase 3 (Oct 7, Khaled: "orders sent to my mail khaledgamaldeveloper@gmail.com"): every new order is e-mailed to the shop (Resend), with a WhatsApp confirm link. The address is kept only in GitHub/Vercel secrets, never in code (public repo).
-- Phase 3 defaults (announced to Khaled Oct 7, change any time): max 3 orders per phone per 24 h; 10 checkout attempts per device per 10 min; 20 order lookups per device per 10 min.
+- Phase 3 defaults (announced to Khaled Oct 7, change any time): max 3 orders per phone per 24 h; 30 checkout attempts per device (IP) per 10 min — raised from 10 after the stress test showed shared mobile-carrier addresses (CGNAT) would block real customers during a drop; 20 order lookups per device per 10 min.
 - Card payment hidden and refused until Paymob is connected (Phase 4), so no unpaid card order can exist.
 - Order lookup shows status, items, area and totals — never the address or full name.
 - Failures of uptime, backup, migration or setup open a GitHub issue labelled "alert" (phone notification through the GitHub app) and close it when fixed.

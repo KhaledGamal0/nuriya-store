@@ -113,11 +113,11 @@ test("one phone hammering checkout 15 times at once gets exactly 3 orders", { sk
   assert.equal((await books()).orders, 3);
 });
 
-test("one device firing 30 orders at once gets exactly 10 through", { skip }, async () => {
+test("one device firing 10 more orders than allowed, all at once, gets exactly the limit through", { skip }, async () => {
   const { placeOrder, LIMITS } = await import("../lib/orders.ts");
   const { getSql } = await import("../lib/db/index.ts");
   const c = await ctx();
-  const prepared = await Promise.all(Array.from({ length: 30 }, (_, i) => order(phone(6000 + i), [{ color: "cream", size: "S/M", qty: 1 }], c)));
+  const prepared = await Promise.all(Array.from({ length: LIMITS.checkoutPerDevice.max + 10 }, (_, i) => order(phone(6000 + i), [{ color: "cream", size: "S/M", qty: 1 }], c)));
   const results = await Promise.all(prepared.map((o) => placeOrder(getSql(), o, { key: randomUUID(), ipHash: "same-device" })));
   assert.equal(results.filter((r) => r.ok).length, LIMITS.checkoutPerDevice.max);
   assert.ok(results.filter((r) => !r.ok).every((r) => !r.ok && r.reason === "rate_limited"));

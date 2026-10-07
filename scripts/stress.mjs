@@ -16,6 +16,8 @@ const metrics = [];
 const add = (where, detail) => findings.push(`- ${where}: ${detail}`);
 const metric = (what, value) => metrics.push(`| ${what} | ${value} |`);
 const PHONE_LIKE = "0107%";
+const CHECKOUT_LIMIT = 30; // LIMITS.checkoutPerDevice.max in lib/orders.ts
+let ipSeq = 1;
 let seq = 0;
 const nextPhone = () => `0107${String(Date.now() % 1000).padStart(3, "0")}${String(seq++).padStart(4, "0")}`;
 const ordersFor = async (phone) => (await db`SELECT number, total_piasters FROM orders WHERE customer_phone = ${phone}`).map((r) => ({ ...r }));
@@ -34,8 +36,10 @@ async function scenario(name, fn) {
 const browser = await chromium.launch();
 const phoneCtx = (extra = {}) => browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, ...extra });
 
-async function open(extra) {
-  const ctx = await phoneCtx(extra);
+/** Each simulated customer gets their own internet address, like real life (unless a test sets one). */
+async function open(extra = {}) {
+  const ip = `198.51.${Math.floor(ipSeq / 250)}.${(ipSeq++ % 250) + 1}`;
+  const ctx = await phoneCtx({ ...extra, extraHTTPHeaders: { "x-forwarded-for": ip, ...(extra.extraHTTPHeaders ?? {}) } });
   const page = await ctx.newPage();
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));
@@ -57,8 +61,27 @@ async function fillCheckout(page, phone, { name = "Stress Buyer", area = "cairo"
 
 const placeButton = (page) => page.getByRole("button", { name: /Place order/ });
 
-/** Wait for the result of a submit: the thank-you page, or the message shown on the form. */
+/** Start waiting for the server's answer (or a failed request) BEFORE tapping, so an old message on
+ * screen is never mistaken for the new answer. */
+function answer(page, timeout = 60000) {
+  const isOrder = (r) => r.method() === "POST" && new URL(r.url()).pathname === "/checkout";
+  return Promise.race([
+    page.waitForResponse((res) => isOrder(res.request()), { timeout }).catch(() => null),
+    page.waitForEvent("requestfailed", { predicate: isOrder, timeout }).catch(() => null),
+  ]);
+}
+
+/** Tap "Place order" and return the result of THIS tap. */
+async function submit(page, timeout) {
+  const waiting = answer(page, timeout);
+  await placeButton(page).click();
+  await waiting;
+  return outcome(page, timeout);
+}
+
+/** After the answer arrived: the thank-you page, or the message shown on the form. */
 async function outcome(page, timeout = 30000) {
+  await page.waitForTimeout(300); // let React show the answer
   const end = Date.now() + timeout;
   while (Date.now() < end) {
     if (page.url().includes("/checkout/done")) return { done: true, number: new URL(page.url()).searchParams.get("o") };
@@ -112,7 +135,9 @@ await scenario("crowd: 30 buyers, 10 pieces", async () => {
       }),
     );
     const t0 = Date.now();
+    const answers = buyers.map((b) => answer(b.page));
     await Promise.all(buyers.map((b) => placeButton(b.page).click()));
+    await Promise.all(answers);
     const results = await Promise.all(buyers.map((b) => outcome(b.page, 45000)));
     metric("crowd: all 30 answered in", `${((Date.now() - t0) / 1000).toFixed(1)} s`);
     const done = results.filter((r) => r.done).length;
@@ -138,14 +163,12 @@ await scenario("internet drops while ordering", async () => {
   await setBag(page, [{ color: "burgundy", size: "L/XL", qty: 1 }]);
   await fillCheckout(page, phone);
   await ctx.setOffline(true);
-  await placeButton(page).click();
-  const r1 = await outcome(page, 15000);
+  const r1 = await submit(page, 15000);
   if (r1.done || !/couldn.t reach the shop/i.test(r1.message)) add("offline", `expected the no-connection message, got: ${r1.message ?? "thank-you page"}`);
   if ((await page.getByLabel("Full name").inputValue()) !== "Stress Buyer") add("offline", "the form was cleared");
   if (await page.getByText("Something went wrong").count()) add("offline", "the error page was shown instead of a calm message");
   await ctx.setOffline(false);
-  await placeButton(page).click();
-  const r2 = await outcome(page);
+  const r2 = await submit(page);
   if (!r2.done) add("offline", `retry after reconnecting did not complete: ${r2.message}`);
   const saved = await ordersFor(phone);
   if (saved.length !== 1) add("offline", `expected 1 order, database has ${saved.length}`);
@@ -166,12 +189,10 @@ await scenario("order saved but the answer is lost", async () => {
     }
     return route.continue();
   });
-  await placeButton(page).click();
-  const r1 = await outcome(page, 20000);
+  const r1 = await submit(page, 20000);
   if (r1.done) add("lost answer", "the lost answer was not simulated");
   const before = await ordersFor(phone);
-  await placeButton(page).click();
-  const r2 = await outcome(page);
+  const r2 = await submit(page);
   const after = await ordersFor(phone);
   if (before.length !== 1) add("lost answer", `the first try should have saved 1 order, found ${before.length}`);
   if (!r2.done) add("lost answer", `tapping again did not reach the thank-you page: ${r2.message}`);
@@ -203,8 +224,7 @@ await scenario("tampered bag", async () => {
   if (page.errors.length) add("tampered bag", `checkout crashed: ${page.errors[0].slice(0, 120)}`);
   const text = await page.evaluate(() => document.body.innerText);
   if (!text.includes("6,075 EGP")) add("tampered bag", "checkout total should be 6,075 EGP (5 pieces max + Cairo delivery)");
-  await placeButton(page).click();
-  const r = await outcome(page);
+  const r = await submit(page);
   const [o] = await ordersFor(phone);
   if (!r.done || !o) add("tampered bag", `order did not go through: ${r.message}`);
   else if (o.total_piasters !== 607500) add("tampered bag", `charged ${o.total_piasters} piasters, expected 607500`);
@@ -219,8 +239,7 @@ await scenario("Arabic numerals and Arabic text", async () => {
   await setBag(page, [{ color: "cream", size: "S/M", qty: 1 }]);
   await fillCheckout(page, arabic, { name: "نور أحمد", address: "١٢ شارع الحرية، الدور الثالث" });
   if (await page.locator(".f-err").count()) add("arabic", `field error: ${await page.locator(".f-err").first().innerText()}`);
-  await placeButton(page).click();
-  const r = await outcome(page);
+  const r = await submit(page);
   if (!r.done) add("arabic", `order with Arabic numerals was refused: ${r.message}`);
   if ((await ordersFor(latin)).length !== 1) add("arabic", "order not saved under the normal phone number");
   if (r.done && !(await page.getByText("Thank you, نور.").isVisible())) add("arabic", "thank-you page does not greet the Arabic name");
@@ -235,8 +254,7 @@ await scenario("bot fills the hidden field", async () => {
   await page.evaluate(() => {
     document.querySelector('input[name="hp_note"]').value = "I am a bot";
   });
-  await placeButton(page).click();
-  const r = await outcome(page);
+  const r = await submit(page);
   if (r.done) add("bot", "the bot's order was accepted");
   if ((await ordersFor(phone)).length) add("bot", "the bot's order was saved");
   await ctx.close();
@@ -245,15 +263,15 @@ await scenario("bot fills the hidden field", async () => {
 await scenario("one device spamming orders", async () => {
   const { ctx, page } = await open({ extraHTTPHeaders: { "x-forwarded-for": "203.0.113.9" } });
   const outcomes = [];
-  for (let i = 0; i < 11; i++) {
+  for (let i = 0; i < CHECKOUT_LIMIT + 1; i++) {
     await setBag(page, [{ color: "cream", size: "S/M", qty: 1 }]);
     await fillCheckout(page, nextPhone());
-    await placeButton(page).click();
-    const r = await outcome(page);
+    const r = await submit(page);
     outcomes.push(r.done ? "ok" : /too many attempts/i.test(r.message) ? "limited" : r.message);
   }
-  metric("spam device: results", outcomes.join(", "));
-  if (outcomes.filter((o) => o === "ok").length !== 10 || outcomes.at(-1) !== "limited") add("spam device", `expected 10 orders then "too many attempts": ${outcomes.join(", ")}`);
+  const oks = outcomes.filter((o) => o === "ok").length;
+  metric("spam device: results", `${oks} orders, then ${outcomes.at(-1)}`);
+  if (oks !== CHECKOUT_LIMIT || outcomes.at(-1) !== "limited") add("spam device", `expected ${CHECKOUT_LIMIT} orders then "too many attempts": ${outcomes.join(", ")}`);
   await ctx.close();
 });
 
@@ -296,8 +314,7 @@ await scenario("slow 3G, full purchase", async () => {
   await page.locator("#size-group").getByRole("button", { name: "L/XL" }).click();
   await page.getByRole("button", { name: "Add to bag" }).click();
   await fillCheckout(page, nextPhone());
-  await placeButton(page).click();
-  const r = await outcome(page, 60000);
+  const r = await submit(page, 60000);
   const s = (Date.now() - t0) / 1000;
   metric("slow 3G: product page → thank-you page", `${s.toFixed(1)} s`);
   if (!r.done) add("slow 3G", `purchase did not complete: ${r.message}`);

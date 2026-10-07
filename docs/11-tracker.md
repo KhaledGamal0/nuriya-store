@@ -61,7 +61,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | No duplicate orders from double taps or retries | DONE | One key per checkout attempt; tested in DB (3 taps at once) and in the browser |
 | Stock reserved when ordering, no overselling | DONE | Row locks; "two buyers, last piece" test. Releasing stock on cancel comes with admin (P5) |
 | Price or fee changed during checkout is refused, never charged silently | DONE | |
-| Rate limits and fake-order protection | DONE | 10 attempts / device / 10 min; 3 orders / phone / 24 h; blocklist; bot trap field |
+| Rate limits and fake-order protection | DONE | 30 attempts / device / 10 min (shared carrier IPs); 3 orders / phone / 24 h; blocklist; bot trap field |
 | WhatsApp confirmation link for each COD order | DONE | In the order e-mail (pre-written message). Automatic sending later |
 | Order e-mail to the shop | PARTIAL + KHALED | Code done and tested; needs Resend key (`RESEND_API_KEY`, `ORDER_ALERT_EMAIL` secrets). Hourly Order watch alerts if any order is not e-mailed |
 | Thank-you page render loop (blocked taps after ordering) | FIXED | Oct 7: bag `clear()` was re-created and re-ran forever; audit now detects render loops |

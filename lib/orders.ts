@@ -9,7 +9,10 @@ const PRODUCT_SLUG = "quiet-confidence";
 
 /** Business limits. Defaults agreed Oct 7 2026; change here (later: in admin). */
 export const LIMITS = {
-  checkoutPerDevice: { max: 10, windowSec: 600 }, // attempts per IP per 10 minutes
+  // Attempts per IP per 10 minutes. 30, not 10: Egyptian mobile carriers put many customers behind one
+  // shared address (CGNAT), and a launch drop must not block real people. The per-phone limit is the
+  // real protection; this one stops scripts. (Stress test, Oct 7 2026.)
+  checkoutPerDevice: { max: 30, windowSec: 600 },
   ordersPerPhonePerDay: 3,
   trackPerDevice: { max: 20, windowSec: 600 },
 } as const;
