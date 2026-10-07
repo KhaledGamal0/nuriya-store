@@ -27,6 +27,9 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Menu panel (compact) | DONE | Redesigned after review on Oct 7 |
 | Size guide page, delivery and returns page (EN/AR) | DONE | |
 | One consistent control style, no stray circles | DONE | `docs/12-ui-standards.md` |
+| Desktop header text links, two-photo hero, even gallery grid | DONE | Oct 7 polish |
+| Checkout: live validation, errors clear when fixed, focus first error, summary on top for phones | DONE | |
+| Automated UI/UX audit on every push (phone + desktop, accessibility, tap targets, flows) | DONE | `scripts/ui-audit.mjs`, results on the `ui-report` branch — 0 findings on Oct 7 |
 | 404 page | DONE | |
 | Sold-out state and "notify me" | P2 / LATER | Sold out in P2, notify me later |
 | Reviews / customer photos | LATER | |
@@ -111,6 +114,6 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 |---|---|---|
 | GitHub repo, CI (install, tests, build, typecheck) | DONE | |
 | Vercel hosting with live link | DONE | nuriya-store.vercel.app |
-| Lockfile committed | P2 | |
+| Lockfile committed | DONE | Next.js 16.4.0, React 19.3.0 |
 | Database (Neon) | P2 + KHALED | Needs a free Neon account |
 | Real-phone test, test orders, courier dry run | P7 | |

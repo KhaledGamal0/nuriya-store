@@ -38,6 +38,7 @@ Check current docs before using any API (Next.js, Paymob, Better Auth change oft
 ## How to work
 - One phase at a time from `docs/10-build-plan.md`. Before coding a phase: restate its tasks, list anything missing from Khaled, then build.
 - End of every phase: run tests, lint, typecheck, build, Lighthouse on mobile; tick the acceptance checklist in `docs/10-build-plan.md`; deploy a preview; give Khaled the preview link + what to check on his phone.
+- Every push runs `.github/workflows/ui-audit.yml`: real browser on phone and desktop, screenshots, axe accessibility, tap targets, sideways scroll, console errors and the full buy flow. Read `report.md` and the screenshots on the `ui-report` branch (`git fetch origin ui-report`) and fix findings before calling work done.
 - Update `docs/02-decisions.md` whenever Khaled decides something. Update `docs/10-build-plan.md` progress. Commit small, clear commits.
 - Never invent product facts (fabric, care, stock). Use `TODO(khaled)` placeholders and list them.
 - When Khaled sends existing files for a fix: give each change as **FROM / TO** blocks he can copy-replace, keep fixes small and don't affect screens that already work.
