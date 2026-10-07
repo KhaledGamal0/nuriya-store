@@ -81,6 +81,14 @@ async function checks(page, vp, where) {
   for (const v of axe.violations) add(vp, where, `a11y:${v.id}`, `${v.impact} · ${v.help} · ${v.nodes.length}× e.g. ${v.nodes[0]?.target.join(" ")}`);
 }
 
+async function step(vp, name, fn) {
+  try {
+    await fn();
+  } catch (e) {
+    add(vp, name, "audit-step-failed", String(e.message).split("\n")[0].slice(0, 200));
+  }
+}
+
 async function shot(page, name) {
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/shots/${name}.png`, fullPage: true });
@@ -102,52 +110,72 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   }
 
   // Interactions
-  where = "menu-open";
-  await page.goto(BASE + "/", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Open menu" }).click();
-  await checks(page, vp, where);
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: `${OUT}/shots/${vp}-menu-open.png` });
-  await page.keyboard.press("Escape");
+  await step(vp, "menu-open", async () => {
+    where = "menu-open";
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    if (vp === "mobile") {
+      await page.getByRole("button", { name: "Open menu" }).click();
+      await checks(page, vp, where);
+      await page.waitForTimeout(400);
+      await page.screenshot({ path: `${OUT}/shots/${vp}-menu-open.png` });
+      await page.keyboard.press("Escape");
+    } else {
+      for (const name of ["Cream", "Burgundy", "Size guide", "Instagram"])
+        if (!(await page.locator(".hdr").getByRole("link", { name }).isVisible())) add(vp, where, "flow", `header link "${name}" not visible on desktop`);
+    }
+  });
 
-  where = "add-without-size";
-  await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Add to bag" }).click();
-  if (!(await page.getByText("Choose a size first.").isVisible())) add(vp, where, "flow", "no message when adding without a size");
-  await page.screenshot({ path: `${OUT}/shots/${vp}-add-without-size.png` });
+  await step(vp, "add-without-size", async () => {
+    where = "add-without-size";
+    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Add to bag" }).click();
+    if (!(await page.getByText("Choose a size first.").isVisible())) add(vp, where, "flow", "no message when adding without a size");
+    await page.screenshot({ path: `${OUT}/shots/${vp}-add-without-size.png` });
+  });
 
-  where = "size-finder";
-  await page.getByRole("button", { name: "Find my size" }).click();
-  await checks(page, vp, where);
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: `${OUT}/shots/${vp}-size-finder.png` });
-  await page.getByRole("button", { name: /^Select / }).click();
+  await step(vp, "size-finder", async () => {
+    where = "size-finder";
+    await page.getByRole("button", { name: "Find my size" }).click();
+    await checks(page, vp, where);
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${OUT}/shots/${vp}-size-finder.png` });
+    await page.getByRole("button", { name: /^Select / }).click();
+  });
 
-  where = "bag-open";
-  await page.getByRole("button", { name: "Add to bag" }).click();
-  await page.waitForTimeout(400);
-  await checks(page, vp, where);
-  await page.screenshot({ path: `${OUT}/shots/${vp}-bag-open.png` });
+  await step(vp, "bag-open", async () => {
+    where = "bag-open";
+    await page.getByRole("button", { name: "Add to bag" }).click();
+    await page.waitForTimeout(400);
+    await checks(page, vp, where);
+    await page.screenshot({ path: `${OUT}/shots/${vp}-bag-open.png` });
+  });
 
-  where = "checkout-errors";
-  await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Place order" }).click();
-  await page.waitForTimeout(800);
-  if (!(await page.getByText("Enter an Egyptian mobile number", { exact: false }).isVisible())) add(vp, where, "flow", "no phone error after submitting an empty form");
-  await checks(page, vp, where);
-  await shot(page, `${vp}-checkout-errors`);
+  await step(vp, "checkout-errors", async () => {
+    where = "checkout-errors";
+    await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Place order" }).click();
+    await page.waitForTimeout(500);
+    if (!(await page.getByText("Enter an Egyptian mobile number", { exact: false }).first().isVisible())) add(vp, where, "flow", "no phone error after submitting an empty form");
+    const focused = await page.evaluate(() => document.activeElement?.id);
+    if (focused !== "phone") add(vp, where, "flow", `focus should move to the first error (phone), it is on "${focused}"`);
+    await checks(page, vp, where);
+    await shot(page, `${vp}-checkout-errors`);
+  });
 
-  where = "checkout-filled";
-  await page.getByLabel("Mobile number").fill("010 1234 5678");
-  await page.getByLabel("Full name").fill("Nour Ahmed");
-  await page.getByLabel("Area").selectOption("alexandria");
-  await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");
-  if (!(await page.evaluate(() => document.body.innerText.includes("1,290 EGP")))) add(vp, where, "flow", "total did not update to 1,290 EGP for Alexandria");
-  await shot(page, `${vp}-checkout-filled`);
-  await page.getByRole("button", { name: "Place order" }).click();
-  await page.waitForURL(/\/checkout\/done/, { timeout: 10000 }).catch(() => add(vp, where, "flow", "placing a valid order did not reach the confirmation page"));
-  where = "order-placed";
-  await shot(page, `${vp}-order-placed`);
+  await step(vp, "checkout-filled", async () => {
+    where = "checkout-filled";
+    await page.getByLabel("Mobile number").fill("010 1234 5678");
+    await page.getByLabel("Full name").fill("Nour Ahmed");
+    await page.getByLabel("Area").selectOption("alexandria");
+    await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");
+    if (await page.locator(".f-err").count()) add(vp, where, "flow", "errors still showing after every field was fixed");
+    if (!(await page.evaluate(() => document.body.innerText.includes("1,290 EGP")))) add(vp, where, "flow", "total did not update to 1,290 EGP for Alexandria");
+    await shot(page, `${vp}-checkout-filled`);
+    await page.getByRole("button", { name: "Place order" }).click();
+    await page.waitForURL(/\/checkout\/done/, { timeout: 10000 }).catch(() => add(vp, where, "flow", "placing a valid order did not reach the confirmation page"));
+    where = "order-placed";
+    await shot(page, `${vp}-order-placed`);
+  });
 
   await ctx.close();
 }
