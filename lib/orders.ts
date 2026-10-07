@@ -170,7 +170,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
         }
         await tx`
           INSERT INTO order_events (order_id, type, data)
-          VALUES (${saved.id}, 'created', ${tx.json({ source: "web", payment: order.payment, totalPiasters: total, status })})`;
+          VALUES (${saved.id}, 'created', ${JSON.stringify({ source: "web", payment: order.payment, totalPiasters: total, status })}::jsonb)`;
 
         return { ok: true as const, number, payment: order.payment, existing: false, soldOutNow };
       });
