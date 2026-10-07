@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
@@ -118,9 +118,11 @@ export function CheckoutForm() {
 
       <form
         ref={formRef}
-        action={action}
         noValidate
         onSubmit={(e) => {
+          // Submitted by hand (not the form's action prop) so React does not clear the fields:
+          // if the server says no, the shopper keeps everything they typed.
+          e.preventDefault();
           const form = new FormData(e.currentTarget);
           const next: FieldErrors = {};
           for (const f of FIELDS) {
@@ -128,10 +130,11 @@ export function CheckoutForm() {
             if (msg) next[f] = msg;
           }
           if (Object.keys(next).length) {
-            e.preventDefault();
             setErrors(next);
             focusFirst(next);
+            return;
           }
+          startTransition(() => action(form));
         }}
       >
         <h1>Checkout</h1>
@@ -195,6 +198,12 @@ export function CheckoutForm() {
             </label>
           </div>
         </fieldset>
+
+        {state?.unavailable && (
+          <p className="form-err" role="alert">
+            {state.message}
+          </p>
+        )}
 
         {errors.cart && (
           <p className="form-err" role="alert">

@@ -94,7 +94,23 @@ async function loadAreas(): Promise<Area[]> {
   return rows.map((r) => ({ id: r.slug, nameEn: r.nameEn, nameAr: r.nameAr, feePiasters: r.fee, zoneId: r.zone }));
 }
 
-async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
+// Neon pauses an idle database after 5 minutes; the first query wakes it (well under a second).
+// One quiet retry covers that wake-up and any brief network blip before we give up.
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (first) {
+    await new Promise((r) => setTimeout(r, 400));
+    try {
+      return await fn();
+    } catch {
+      throw first;
+    }
+  }
+}
+
+async function timed<T>(label: string, run: () => Promise<T>): Promise<T> {
+  const fn = () => withRetry(run);
   if (!process.env.STORE_DEBUG) return fn();
   const t0 = Date.now();
   console.info(`[store] ${label} start`);

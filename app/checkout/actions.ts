@@ -4,10 +4,21 @@ import { redirect } from "next/navigation";
 import { newOrderNumber, validateCheckout, type FieldErrors } from "@/lib/checkout";
 import { getAreas, getCatalog } from "@/lib/store";
 
-export type CheckoutState = { errors: FieldErrors; message?: string } | null;
+export type CheckoutState = { errors: FieldErrors; message?: string; unavailable?: boolean } | null;
+
+const UNAVAILABLE_MESSAGE =
+  "We couldn't place your order just now. Nothing was charged. Please try again in a minute, or message us on Instagram @nuriya.eg.";
 
 export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<CheckoutState> {
-  const [catalog, areas] = await Promise.all([getCatalog(), getAreas()]);
+  let catalog: Awaited<ReturnType<typeof getCatalog>>;
+  let areas: Awaited<ReturnType<typeof getAreas>>;
+  try {
+    [catalog, areas] = await Promise.all([getCatalog(), getAreas()]);
+  } catch (err) {
+    // Database unreachable (after one retry). Never fall back to built-in prices for a real order.
+    console.error("checkout.unavailable", err instanceof Error ? err.message : err);
+    return { errors: {}, message: UNAVAILABLE_MESSAGE, unavailable: true };
+  }
   const result = validateCheckout({
     phone: form.get("phone"),
     name: form.get("name"),

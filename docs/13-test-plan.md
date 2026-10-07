@@ -36,6 +36,9 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | SEO: titles, descriptions, share images, product data, sitemap, robots, 404, checkout noindex | ui-audit techChecks | server |
 | Accessibility (WCAG 2.2 AA), tap targets ≥ 44 px, no sideways scroll, no console errors | ui-audit on every page and state | browser |
 | Speed budget (LCP, CLS, JS size, scores) | `scripts/lighthouse.mjs` | Lighthouse |
+| Database down: shop pages still open, health reports 503 without leaking details, checkout shows a calm message, keeps the typed fields, never confirms an order | `scripts/outage-check.mjs` (UI audit, last step) | browser |
+| Live site up (pages every 15 min, database every 6 h) | `uptime.yml` | scheduled |
+| Backup can actually be restored | `db-backup.yml` restores each dump into a fresh Postgres | scheduled |
 
 ## Added in later phases
 - P3: order saved with items and events, stock reserved in one transaction, two buyers cannot buy the last piece (concurrency test), rate limits, order tracking page.

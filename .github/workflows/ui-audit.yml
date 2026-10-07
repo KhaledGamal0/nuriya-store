@@ -53,6 +53,13 @@ jobs:
         run: node scripts/ui-audit.mjs
       - name: Lighthouse (mobile, simulated 4G)
         run: node scripts/lighthouse.mjs
+      - name: Database-down drill
+        run: |
+          pkill -f "next start" || true
+          sleep 2
+          DATABASE_URL=postgresql://nuriya:nuriya@localhost:5999/nuriya npx next start -p 3000 > ui-report/server-outage.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000 >/dev/null && break; sleep 2; done
+          node scripts/outage-check.mjs
       - name: Publish report to the ui-report branch
         if: always()
         run: |

@@ -11,7 +11,7 @@ Custom e-commerce website + admin dashboard for **Nuriya** (Cairo women's clothi
 Owner: Khaled Gamal. Live: https://nuriya-store.vercel.app. Status and next steps: `docs/11-tracker.md`.
 
 ## Environment
-See `.env.example`. Production database: Neon (set `DATABASE_URL` in Vercel and as a GitHub secret, then run the **Database deploy** workflow with "seed").
+See `.env.example`. Production database: Neon (set `DATABASE_URL` in Vercel and as a GitHub secret, then run the **Database deploy** workflow with "seed"). Full steps: `docs/14-operations.md`.
 
 ## Read in this order
 | File | What it holds |
@@ -29,6 +29,7 @@ See `.env.example`. Production database: Neon (set `DATABASE_URL` in Vercel and 
 | `docs/11-tracker.md` | Master tracker: every business need and its status |
 | `docs/12-ui-standards.md` | UI rules applied to every screen |
 | `docs/13-test-plan.md` | Every business case and the automated test that covers it |
+| `docs/14-operations.md` | Hosting and database setup, backups, uptime checks, what to do if something is down |
 | `CLAUDE.md` | The project brain — Claude Code reads it automatically every session |
 | `data/shipping-zones.json` | Shipping fees as seed data for the database |
 

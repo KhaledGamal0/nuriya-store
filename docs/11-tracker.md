@@ -103,7 +103,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Content Security Policy | P6 | |
 | Rate limiting | P3 | |
 | Admin 2FA and audit log | P5 | |
-| Error monitoring (Sentry), backups | P6 | |
+| Daily encrypted database backup, restore proven on every run | DONE | `db-backup.yml`; needs `BACKUP_PASSPHRASE` secret — see `14-operations.md` |
+| Error monitoring (Sentry) | P6 | |
 
 ## H. Performance, SEO, accessibility
 | Need | Status | Notes |
@@ -132,5 +133,9 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Lockfile committed | DONE | Next.js 16.4.0, React 19.3.0 |
 | Database schema, migrations, seed, storefront reads from DB | DONE | `db/migrations`, `lib/store.ts`; 7 database tests in CI |
 | Pages static, refreshed on data change (`refreshStorefront`, `POST /api/revalidate`) | DONE | Replaced 60 s ISR, which left prefetches hanging |
-| Production database on Neon | KHALED | Create Neon project, set Vercel + GitHub secrets, run "Database deploy" |
+| Production database on Neon | KHALED | Frankfurt project, Vercel + GitHub secrets, function region fra1, run "Database deploy" — steps in `14-operations.md` |
+| Shop stays up if the database is down; checkout refuses calmly and keeps the typed fields | DONE | Pre-built pages + one retry for Neon wake-up; "Database-down drill" in the UI audit |
+| Uptime check every 15 min, database every 6 h, email on failure | DONE | `uptime.yml`; set repo variable `SITE_URL` when the domain is live |
+| Operations runbook (setup, backups, restore, rollback, outages) | DONE | `docs/14-operations.md` |
+| Move Neon to Launch plan (7-day restore) when real orders start | KHALED | Free plan has a 6-hour restore window |
 | Real-phone test, test orders, courier dry run | P7 | |

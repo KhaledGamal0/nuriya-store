@@ -1,0 +1,36 @@
+name: Uptime check
+
+# Opens the live shop like a customer would. If anything is down, this run fails and GitHub
+# emails you (Settings → Notifications → Actions: "failed workflows only").
+# Every 15 min: shop pages only (pre-built, so this never wakes or bills the database).
+# Every 6 hours: also /api/health, which runs one tiny query against Neon.
+# Set the repository VARIABLE (not secret) SITE_URL, e.g. https://nuriya-store.vercel.app
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+    - cron: "7 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: ${{ vars.SITE_URL || 'https://nuriya-store.vercel.app' }}
+    steps:
+      - name: Shop pages
+        run: |
+          fail=0
+          for p in / /quiet-confidence/cream /quiet-confidence/burgundy /checkout /returns; do
+            code=$(curl -s -o /dev/null -w "%{http_code} %{time_total}" --retry 2 --retry-delay 5 --max-time 20 "$SITE$p")
+            echo "$p → $code"
+            [ "${code%% *}" = "200" ] || { echo "::error::$p returned $code"; fail=1; }
+          done
+          exit $fail
+      - name: Database health
+        if: github.event.schedule != '*/15 * * * *'
+        run: |
+          body=$(curl -s --retry 2 --retry-delay 5 --max-time 30 "$SITE/api/health")
+          echo "$body"
+          echo "$body" | grep -q '"ok":true' || { echo "::error::Database health check failed: $body"; exit 1; }
+          echo "$body" | grep -q '"database":"connected"' || echo "::warning::Site is not using the database yet: $body"

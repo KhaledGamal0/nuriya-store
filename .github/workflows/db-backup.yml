@@ -1,0 +1,64 @@
+name: Database backup
+
+# Daily copy of the production database, kept 30 days, ENCRYPTED (this repository is public and
+# the database will hold customer names, phones and addresses).
+# Each run also restores the copy into a throwaway Postgres to prove the backup actually works.
+# Needs secrets: DATABASE_URL (Neon DIRECT string) and BACKUP_PASSPHRASE (long random text you keep
+# in your password manager — without it the backups cannot be opened).
+# To open one: download the artifact, then
+#   gpg --batch --passphrase "<BACKUP_PASSPHRASE>" -d nuriya-YYYY-MM-DD.dump.gpg > nuriya.dump
+#   pg_restore --no-owner -d "<target database>" nuriya.dump
+on:
+  schedule:
+    - cron: "30 0 * * *" # 03:30 Cairo, quietest hour
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      restore:
+        image: postgres:17
+        env:
+          POSTGRES_USER: check
+          POSTGRES_PASSWORD: check
+          POSTGRES_DB: check
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U check" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check secrets
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::warning::DATABASE_URL or BACKUP_PASSPHRASE secret is not set yet. Nothing to back up."
+            echo "SKIP=1" >> "$GITHUB_ENV"
+          fi
+      - name: Dump (Postgres 17 tools)
+        if: env.SKIP != '1'
+        run: |
+          echo "STAMP=$(date -u +%F)" >> "$GITHUB_ENV"
+          docker run --rm --network host -e DATABASE_URL -v "$PWD:/out" postgres:17 \
+            sh -c 'pg_dump --format=custom --no-owner --no-privileges -d "$DATABASE_URL" -f /out/nuriya.dump'
+          ls -lh nuriya.dump
+      - name: Prove it restores
+        if: env.SKIP != '1'
+        run: |
+          docker run --rm --network host -v "$PWD:/in" postgres:17 \
+            sh -c 'pg_restore --no-owner -d postgresql://check:check@localhost:5432/check /in/nuriya.dump && psql postgresql://check:check@localhost:5432/check -tAc "SELECT count(*) FROM variants"' | tee rows.txt
+          [ "$(tail -1 rows.txt)" -gt 0 ] || { echo "::error::Restored backup has no products"; exit 1; }
+      - name: Encrypt
+        if: env.SKIP != '1'
+        run: |
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
+            --symmetric --cipher-algo AES256 -o "nuriya-$STAMP.dump.gpg" nuriya.dump
+          shred -u nuriya.dump
+      - uses: actions/upload-artifact@v4
+        if: env.SKIP != '1'
+        with:
+          name: nuriya-db-${{ env.STAMP }}
+          path: nuriya-*.dump.gpg
+          retention-days: 30
