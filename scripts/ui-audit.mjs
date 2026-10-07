@@ -125,6 +125,46 @@ async function refreshCheck(browser) {
   }
 }
 
+// Server-level checks: security headers, caching, SEO tags, sitemap, robots, 404 status.
+async function techChecks() {
+  const f = (where, detail, kind = "tech") => add("server", where, kind, detail);
+  const home = await fetch(BASE + "/");
+  const h = (n) => home.headers.get(n) ?? "";
+  if (!h("strict-transport-security").includes("max-age")) f("/", "missing Strict-Transport-Security header", "security");
+  if (h("x-frame-options") !== "DENY") f("/", "missing X-Frame-Options: DENY", "security");
+  if (h("x-content-type-options") !== "nosniff") f("/", "missing X-Content-Type-Options: nosniff", "security");
+  if (!h("referrer-policy")) f("/", "missing Referrer-Policy", "security");
+  if (h("x-powered-by")) f("/", "X-Powered-By header leaks the framework", "security");
+  const cc = h("cache-control");
+  if (!/s-maxage|max-age=\d{3,}/.test(cc)) f("/", `home page is not cacheable by the CDN (Cache-Control: ${cc || "none"})`, "speed");
+  for (const path of ["/", "/quiet-confidence/cream", "/quiet-confidence/burgundy", "/size-guide", "/returns"]) {
+    const html = await (await fetch(BASE + path)).text();
+    const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
+    if (!title || title.length > 70) f(path, `page title missing or too long: "${title}"`, "seo");
+    if (!/<meta name="description" content="[^"]{20,}/.test(html)) f(path, "meta description missing or too short", "seo");
+    if (!/<meta property="og:image"/.test(html)) f(path, "no share image (og:image)", "seo");
+    if (!/<html lang="en"/.test(html)) f(path, "html lang attribute missing", "seo");
+    if (path.startsWith("/quiet-confidence/")) {
+      const ld = html.match(/<script type="application\/ld\+json">([^<]*)<\/script>/)?.[1];
+      try {
+        const data = JSON.parse(ld ?? "");
+        if (data["@type"] !== "Product" || data.offers?.priceCurrency !== "EGP" || !(data.offers?.price > 0)) f(path, "product structured data incomplete", "seo");
+      } catch {
+        f(path, "product structured data missing or invalid", "seo");
+      }
+    }
+  }
+  const robots = await (await fetch(BASE + "/robots.txt")).text();
+  if (!/Disallow: \/checkout/.test(robots) || !/Sitemap:/.test(robots)) f("/robots.txt", "robots.txt should block /checkout and list the sitemap", "seo");
+  const sitemap = await (await fetch(BASE + "/sitemap.xml")).text();
+  for (const path of ["/quiet-confidence/cream", "/quiet-confidence/burgundy", "/size-guide", "/returns"]) if (!sitemap.includes(path)) f("/sitemap.xml", `sitemap is missing ${path}`, "seo");
+  const missing = await fetch(BASE + "/no-such-page");
+  if (missing.status !== 404) f("/no-such-page", `unknown page returns ${missing.status}, should be 404`, "seo");
+  const checkout = await (await fetch(BASE + "/checkout")).text();
+  if (!/noindex/.test(checkout)) f("/checkout", "checkout should not be indexed by search engines", "seo");
+}
+await techChecks().catch((e) => add("server", "tech", "audit-step-failed", String(e.message).slice(0, 160)));
+
 const browser = await chromium.launch();
 for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   const ctx = await browser.newContext({ ...opts, reducedMotion: "reduce" });
