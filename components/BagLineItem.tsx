@@ -5,7 +5,6 @@ import { useStore } from "./StoreProvider";
 import { formatEgp } from "@/lib/money";
 import { MAX_QTY_PER_LINE } from "@/lib/checkout";
 import type { BagLine } from "./BagProvider";
-import { preview } from "@/lib/blur";
 
 type Props = {
   line: BagLine;
@@ -20,7 +19,7 @@ export function BagLineItem({ line, onQty, onRemove }: Props) {
   const editable = Boolean(onQty && onRemove);
   return (
     <div className="ln">
-      <div className="ln-img" style={preview(image.src)}>
+      <div className="ln-img">
         <Image src={image.src} alt="" fill sizes="72px" loading="eager" />
       </div>
       <div className="ln-m">

@@ -16,7 +16,7 @@ export function colorFromSlug(slug: string): ColorId | null {
 }
 export const SIZES: readonly SizeId[] = ["S/M", "L/XL"];
 
-export type ProductImage = { src: string; alt: string; width: number; height: number };
+export type ProductImage = { src: string; alt: string; width: number; height: number; preview?: string };
 
 export type Colorway = {
   id: ColorId;

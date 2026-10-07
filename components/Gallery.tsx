@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { ProductImage } from "@/lib/catalog";
 import { Dialog, CloseButton } from "./Dialog";
-import { preview } from "@/lib/blur";
 
 function Arrow({ dir }: { dir: "prev" | "next" }) {
   return (
@@ -15,6 +14,9 @@ function Arrow({ dir }: { dir: "prev" | "next" }) {
 }
 
 /** Product photos: swipe on phones, grid on desktop. Tap any photo to open it full screen. */
+/** The photo's tiny preview, softly scaled up, as the frame background until the real photo arrives. */
+const frame = (p?: string) => (p ? { backgroundImage: `url(${p})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined);
+
 export function Gallery({ images, label }: { images: readonly ProductImage[]; label: string }) {
   const strip = useRef<HTMLDivElement>(null);
   const viewer = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
             type="button"
             className="gal-i"
             key={img.src}
-            style={preview(img.src)}
+            style={frame(img.preview)}
             onClick={() => {
               setViewIndex(i);
               setOpen(true);
@@ -108,7 +110,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
           }}
         >
           {images.map((img) => (
-            <div className="vw-i" key={img.src} style={preview(img.src)}>
+            <div className="vw-i" key={img.src} style={frame(img.preview)}>
               {/* Same size and quality as the gallery, so on phones the photo is already downloaded: opens instantly. */}
               {open && <Image src={img.src} alt={img.alt} fill sizes="100vw" quality={65} loading="eager" />}
             </div>

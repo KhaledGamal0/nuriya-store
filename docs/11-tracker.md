@@ -73,7 +73,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Aggressive pre-launch testing: fuzz (5,000 random checkouts), crowd (30 browsers, 200 DB orders at once), chaos (offline, lost answer, tampering, bots, slow 3G, 320 px) | DONE | `tests/fuzz.test.ts`, `tests/load.test.ts`, `scripts/stress.mjs` — every push |
 | Arabic numerals in phone numbers accepted | FIXED | Oct 7: ٠١٠… was refused before |
 | Internet drop mid-order shows a calm message and keeps the form | FIXED | Oct 7: used to show the error page |
-| Photo loading: all product/home photos load immediately (first at top priority, rest low priority — lazy loading left gallery photos blank on iPhone); frames show a soft gradient of the photo's colours until it arrives; no fade (an unloaded photo can never be invisible) | DONE | `lib/blur.ts`; audit swipes every gallery photo and scrolls the home page, fails on any blank photo |
+| Photos prepared ahead of time (every size as WebP in public/img, served as static files from the CDN, cached 1 year) — the blank moments were Vercel converting each photo live on first request, and every photo change made new cold addresses | DONE | `scripts/make-images.py`, `lib/image-loader.ts` |
+| Photo loading: all product/home photos load immediately (first at top priority, rest low priority — lazy loading left gallery photos blank on iPhone); frames show a tiny blurred copy of the photo until it arrives; no fade (an unloaded photo can never be invisible) | DONE | `lib/blur.ts`; audit swipes every gallery photo and scrolls the home page, fails on any blank photo |
 | Scrolling: words blur-in softly, photos/cards glide up slightly (scroll-driven CSS, no JS, never starts blank) | DONE | |
 | Order tracking page for customers | DONE | `/track` — needs order number + phone; never shows the address |
 | Order emails / SMS | P6 | Email optional (phone-first) |

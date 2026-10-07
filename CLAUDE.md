@@ -32,7 +32,7 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 
 ## Running it
 `npm ci` · `npm run dev` · `npm test` (business rules + database tests when `DATABASE_URL` is set) · `npm run db:migrate` · `npm run db:seed` · `npm run build` · `npm run typecheck`. CI (`.github/workflows/ci.yml`) starts a real Postgres and runs all of them on every push; its logs are on the `ci-logs` branch. Env vars: see `.env.example`.
-- Photos: a changed photo always gets a NEW file name (cached 30 days). After adding photos run `python3 scripts/make-blur.py` (blur-up previews; a test fails if forgotten).
+- Photos: a changed photo always gets a NEW file name (cached 30 days). After adding photos run `python3 scripts/make-images.py` (prepares every size as WebP in public/img + tiny previews; served as static files, never resized live; a test fails if forgotten).
 - Schema changes = a NEW file `db/migrations/000N_name.sql` (never edit an applied one) + matching `lib/db/schema.ts` columns. After any data change call `refreshStorefront()`.
 
 ## Stack

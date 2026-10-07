@@ -400,7 +400,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
 await (async () => {
   const ctx = await browser.newContext({ ...VIEWPORTS.mobile, reducedMotion: "no-preference" });
   const page = await ctx.newPage();
-  await page.route("**/_next/image**", async (route) => {
+  await page.route("**/img/**", async (route) => {
     await new Promise((r) => setTimeout(r, 4000));
     await route.continue().catch(() => {});
   });
@@ -410,7 +410,7 @@ await (async () => {
     await page.waitForTimeout(1200);
     await page.screenshot({ path: `${OUT}/shots/loading-${name}.png` });
   }
-  await page.unroute("**/_next/image**");
+  await page.unroute("**/img/**");
   // Swipe through every gallery photo like a customer: each one must actually load (no blank grey frames).
   for (const path of ["/quiet-confidence/white", "/quiet-confidence/burgundy"]) {
     await page.goto(BASE + path, { waitUntil: "load" });
@@ -432,7 +432,8 @@ await (async () => {
   const blankHome = await page.evaluate(() =>
     [...document.querySelectorAll("main img")].filter((i) => {
       const r = i.getBoundingClientRect();
-      return r.width > 0 && getComputedStyle(i).display !== "none" && (!i.complete || i.naturalWidth === 0 || getComputedStyle(i).opacity === "0");
+      const hoverOnly = i.matches(".pc-ph img + img"); // second card photo shows on mouse hover only (desktop)
+      return !hoverOnly && r.width > 0 && getComputedStyle(i).display !== "none" && (!i.complete || i.naturalWidth === 0);
     }).length,
   );
   if (blankHome) add("mobile", "loading", "flow", `${blankHome} home photo(s) still blank after scrolling the page`);
