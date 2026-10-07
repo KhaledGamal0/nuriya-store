@@ -353,6 +353,10 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     where = "order-saved";
     orderNo = new URL(page.url()).searchParams.get("o");
     if (!orderNo || !(await page.getByText(`Order ${orderNo}`).isVisible())) add(vp, where, "flow", "confirmation page does not show the order number");
+    const shown = await page.evaluate(() => document.body.innerText);
+    for (const [what, text] of [["greeting", "Thank you, Nour."], ["total", "1,290 EGP"], ["area", "Alexandria"], ["next steps", "What happens next"], ["phone", PHONES[vp]]]) {
+      if (!shown.includes(text)) add(vp, where, "flow", `confirmation page does not show the ${what} ("${text}")`);
+    }
     if (!db) return;
     const phone = PHONES[vp].replace(/\s/g, "");
     const rows = await db`SELECT number, status, total_piasters FROM orders WHERE customer_phone = ${phone}`;

@@ -8,6 +8,7 @@ import { getSql, hasDatabase } from "@/lib/db";
 import { hashIp, placeOrder as saveOrder, type PlaceResult, type RefusalReason } from "@/lib/orders";
 import { sendPendingOrderEmails } from "@/lib/notify";
 import { refreshStorefront } from "@/lib/refresh";
+import type { Receipt } from "@/lib/receipt";
 
 /** `notice` is a message for the whole form (not one field); the bag and every typed field are kept. */
 export type CheckoutState = {
@@ -15,7 +16,7 @@ export type CheckoutState = {
   message?: string;
   notice?: string;
   /** Set only after the order is saved in the database. The browser then opens the thank-you page. */
-  saved?: { number: string; payment: "cod" | "card" };
+  saved?: Receipt;
 } | null;
 
 const UNAVAILABLE =
@@ -87,5 +88,21 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
   // TODO(phase 4): card → create a Paymob intention for the saved total and send the shopper to Paymob's hosted page.
   // Returned, not redirect(): a server-action redirect left the page's transition pending, so the next
   // link tap did nothing and the title never updated. A normal client navigation is reliable.
-  return { errors: {}, saved: { number: saved.number, payment: saved.payment } };
+  // The saved order's totals equal result.order's: the transaction refuses any difference.
+  const o = result.order;
+  return {
+    errors: {},
+    saved: {
+      number: saved.number,
+      payment: saved.payment,
+      name: o.name,
+      phone: o.phone,
+      area: o.area.nameEn,
+      address: o.address,
+      lines: o.lines.map((l) => ({ color: l.color, size: l.size, qty: l.qty, linePiasters: l.linePiasters })),
+      subtotalPiasters: o.subtotalPiasters,
+      shippingPiasters: o.shippingPiasters,
+      totalPiasters: o.totalPiasters,
+    },
+  };
 }

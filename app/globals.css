@@ -411,3 +411,28 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 .track-result ul { list-style: none; padding: 0; margin: var(--s2) 0 0; display: grid; gap: var(--s1); font-size: 14px; }
 .track-result li { display: flex; justify-content: space-between; gap: var(--s2); }
 .track-result li.big { padding-top: var(--s1); border-top: 1px solid var(--line); font-weight: 500; }
+
+/* Order confirmation */
+.ok { padding-block: var(--s5) var(--s6); display: grid; gap: var(--s5); }
+.ok-head { display: grid; gap: var(--s2); max-width: 640px; }
+.ok-head h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1; }
+.ok-lead { font-size: 15px; color: var(--ink-2); }
+.ok-lead b { color: var(--ink); font-weight: 500; white-space: nowrap; }
+.ok-no { display: flex; align-items: center; gap: var(--s2); font-size: 13px; color: var(--ink-2); }
+.ok-no p { margin: 0; letter-spacing: 0.04em; }
+.ok-copy { min-height: 44px; padding: 0 var(--s2); border: 0; border-radius: var(--r); background: none; color: var(--ink); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ok-grid { display: grid; gap: var(--s5); }
+@media (min-width: 900px) { .ok-grid { grid-template-columns: 1.1fr 1fr; gap: var(--s6); align-items: start; } }
+.ok-next { display: grid; gap: var(--s3); }
+.ok-next h2, .ok-sum h2 { font-size: 28px; }
+.ok-next ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); counter-reset: step; }
+.ok-next li { display: grid; grid-template-columns: 32px 1fr; gap: 2px var(--s2); counter-increment: step; }
+.ok-next li::before { content: counter(step); grid-row: span 2; font-family: var(--display); font-size: 28px; line-height: 1; color: var(--ink); }
+.ok-next li b { font-weight: 500; font-size: 15px; }
+.ok-next li span { font-size: 14px; color: var(--ink-2); }
+.ok-actions { display: grid; gap: var(--s1); }
+@media (min-width: 600px) { .ok-actions { grid-template-columns: auto auto; justify-content: start; } .ok-actions .btn { width: auto; padding-inline: var(--s4); } }
+.ok-sum { position: static; }
+.ok-to { display: grid; gap: 4px; padding-top: var(--s2); border-top: 1px solid rgba(60, 14, 24, 0.12); font-size: 14px; }
+.ok-to h3 { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); font-family: inherit; margin-top: var(--s1); }
+.ok-to p { margin: 0; }

@@ -9,6 +9,7 @@ import { BagLineItem } from "./BagLineItem";
 import { formatEgp } from "@/lib/money";
 import { areasByFee } from "@/lib/shipping";
 import { useStore } from "./StoreProvider";
+import { keepReceipt } from "@/lib/receipt";
 import { fieldError, type FieldErrors } from "@/lib/checkout";
 
 const FIELDS = ["phone", "name", "area", "address"] as const;
@@ -76,6 +77,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   useEffect(() => {
     if (state?.saved) {
       // Saved in the database: open the thank-you page (replace, so Back doesn't return to a filled form).
+      keepReceipt(state.saved);
       router.replace(`/checkout/done?o=${state.saved.number}&p=${state.saved.payment}`);
       return; // keep the button locked while the page changes
     }
