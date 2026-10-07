@@ -96,6 +96,35 @@ async function shot(page, name) {
   await page.screenshot({ path: `${OUT}/shots/${name}.png`, fullPage: true });
 }
 
+// Price change in the database -> refresh -> the product page shows the new price; browsing stays fast.
+async function refreshCheck(browser) {
+  if (!process.env.DATABASE_URL) return;
+  const { default: postgres } = await import("postgres");
+  const sql = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
+  const refresh = (secret) => fetch(BASE + "/api/revalidate", { method: "POST", headers: { authorization: `Bearer ${secret}` } });
+  const ctx = await browser.newContext(VIEWPORTS.mobile);
+  const page = await ctx.newPage();
+  try {
+    if ((await refresh("wrong")).status !== 401) add("mobile", "refresh", "security", "refresh endpoint accepted a wrong secret");
+    await sql`UPDATE products SET price_piasters = 125000 WHERE slug = 'quiet-confidence'`;
+    if ((await refresh(process.env.REVALIDATE_SECRET)).status !== 200) add("mobile", "refresh", "flow", "refresh endpoint rejected the right secret");
+    await page.goto(BASE + "/quiet-confidence/cream");
+    await page.waitForTimeout(1500);
+    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle", timeout: 20000 });
+    if (!(await page.getByText("1,250 EGP").first().isVisible())) add("mobile", "refresh", "flow", "new price did not show after refresh");
+    for (const path of ["/", "/returns", "/quiet-confidence/burgundy", "/size-guide", "/"]) {
+      const t0 = Date.now();
+      await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 20000 }).catch(() => add("mobile", "refresh", "flow", `${path} did not settle after a refresh`));
+      if (Date.now() - t0 > 8000) add("mobile", "refresh", "speed", `${path} took ${Date.now() - t0}ms after a refresh`);
+    }
+  } finally {
+    await sql`UPDATE products SET price_piasters = 120000 WHERE slug = 'quiet-confidence'`;
+    await refresh(process.env.REVALIDATE_SECRET);
+    await sql.end();
+    await ctx.close();
+  }
+}
+
 const browser = await chromium.launch();
 for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   const ctx = await browser.newContext({ ...opts, reducedMotion: "reduce" });
@@ -256,6 +285,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
 
   await ctx.close();
 }
+await refreshCheck(browser).catch((e) => add("mobile", "refresh", "audit-step-failed", String(e.message).slice(0, 160)));
 await browser.close();
 
 const byKind = {};

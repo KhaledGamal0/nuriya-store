@@ -5,8 +5,6 @@ import { getCatalog } from "@/lib/store";
 
 export const metadata: Metadata = { title: "Size guide", description: "Nuriya sizes S/M and L/XL, measured flat in centimeters." };
 
-export const revalidate = 60;
-
 export default async function SizeGuidePage() {
   const catalog = await getCatalog();
   return (

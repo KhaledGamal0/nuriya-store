@@ -9,8 +9,6 @@ export const metadata: Metadata = {
   description: "Delivery fees across Egypt, payment options, and how returns work at Nuriya.",
 };
 
-export const revalidate = 60;
-
 export default async function ReturnsPage() {
   const areas = await getAreas();
   return (

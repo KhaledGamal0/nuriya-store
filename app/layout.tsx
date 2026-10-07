@@ -28,9 +28,6 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-/** Re-read prices, stock and delivery fees from the database at most once a minute. */
-export const revalidate = 60;
-
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const [catalog, areas] = await Promise.all([getCatalog(), getAreas()]);
   return (

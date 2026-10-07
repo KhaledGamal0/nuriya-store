@@ -13,8 +13,6 @@ import { SizeTable } from "@/components/SizeTable";
 type Params = { params: Promise<{ color: string }> };
 
 export const dynamicParams = false;
-export const revalidate = 60;
-
 export function generateStaticParams() {
   return COLORS.map((color) => ({ color }));
 }
