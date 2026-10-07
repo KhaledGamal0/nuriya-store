@@ -44,7 +44,8 @@ jobs:
           npm run db:migrate
           npm run db:seed
           npm run build
-          npx next start -p 3000 &
+          mkdir -p ui-report
+          npx next start -p 3000 > ui-report/server.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://localhost:3000 >/dev/null && break; sleep 2; done
       - name: Audit
         run: node scripts/ui-audit.mjs
