@@ -27,13 +27,24 @@ export function ProductPurchase({ color }: { color: ColorId }) {
     } catch {}
   };
 
-  // Phones: once the main button scrolls out of view, show a slim buy bar.
+  // Phones: once the main button has scrolled up out of view, show a slim buy bar.
+  // A scroll check (not IntersectionObserver) so fast swipes that jump past the button still work.
   useEffect(() => {
-    const btn = addRef.current;
-    if (!btn) return;
-    const io = new IntersectionObserver(([e]) => setShowBar(!e!.isIntersecting && e!.boundingClientRect.top < 0));
-    io.observe(btn);
-    return () => io.disconnect();
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const btn = addRef.current;
+      if (btn) setShowBar(btn.getBoundingClientRect().bottom < 0);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
   }, []);
   const [needSize, setNeedSize] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);

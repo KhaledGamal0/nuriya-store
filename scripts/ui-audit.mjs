@@ -186,9 +186,9 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
     await page.evaluate(() => window.scrollTo(0, 1400));
     await page.waitForTimeout(700);
-    const box = await page.locator(".buybar").boundingBox();
-    if (!box || box.y + box.height > 844 + 1 || box.y < 844 - box.height - 1) add(vp, where, "flow", `buy bar is not pinned to the bottom of the screen (y=${box?.y})`);
     if ((await page.locator(".buybar").getAttribute("data-on")) !== "true") add(vp, where, "flow", "buy bar did not appear after scrolling past Add to bag");
+    const box = await page.locator(".buybar").boundingBox();
+    if (box && Math.abs(box.y + box.height - 844) > 1) add(vp, where, "flow", `buy bar is not sitting on the bottom edge of the screen (bottom=${Math.round(box.y + box.height)})`);
     await page.screenshot({ path: `${OUT}/shots/${vp}-buy-bar.png` });
   });
 
