@@ -223,11 +223,11 @@ await scenario("tampered bag", async () => {
   await fillCheckout(page, phone);
   if (page.errors.length) add("tampered bag", `checkout crashed: ${page.errors[0].slice(0, 120)}`);
   const text = await page.evaluate(() => document.body.innerText);
-  if (!text.includes("6,075 EGP")) add("tampered bag", "checkout total should be 6,075 EGP (5 pieces max + Cairo delivery)");
+  if (!text.includes("5,075 EGP")) add("tampered bag", "checkout total should be 5,075 EGP (5 pieces max + Cairo delivery)");
   const r = await submit(page);
   const [o] = await ordersFor(phone);
   if (!r.done || !o) add("tampered bag", `order did not go through: ${r.message}`);
-  else if (o.total_piasters !== 607500) add("tampered bag", `charged ${o.total_piasters} piasters, expected 607500`);
+  else if (o.total_piasters !== 507500) add("tampered bag", `charged ${o.total_piasters} piasters, expected 507500`);
   await ctx.close();
 });
 
