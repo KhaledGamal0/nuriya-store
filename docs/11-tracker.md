@@ -129,6 +129,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Photos already downloaded paint together with their frame (decoding=sync on gallery, viewer, home cards) — no colour flash on repeat views or when opening the viewer | DONE | |
 | Launch offer 1,000 EGP (was 1,200, shown struck through on home + product pages; checkout charges the server price) | DONE | migration 0007, `components/Price.tsx` |
 | Order tracking page | PAUSED (Oct 7, Khaled) | /track → home; `findOrder` kept + tested |
+| WhatsApp confirm button in the order e-mail opens a fully formatted message (bold order number, items, totals, payment, delivery address, reply YES) | DONE | `whatsappLink`, `fuzz.test.ts` |
 | Health e-mails: daily early warning before any limit (Neon, Vercel domain, certificate, backups, GitHub inactivity, Resend, stock) + full weekly report every Sunday | DONE | `health-report.yml`, `scripts/health-report.mjs` |
 | Database changes refresh the live site automatically (after the migration AND the Vercel deploy of the same commit) | DONE | `db-deploy.yml` |
 | Live photo speed measured on the real site after every deploy (first-time iPhone visitor, 5G + 4G, empty cache) | DONE | `.github/workflows/live-photos.yml` → `live-photos` branch |

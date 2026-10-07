@@ -35,11 +35,35 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ENTITIES[c] ?? c);
 const site = siteUrl;
 const prettyPhone = (p: string) => (p.length === 11 ? `${p.slice(0, 3)} ${p.slice(3, 7)} ${p.slice(7)}` : p);
 
-/** WhatsApp link that opens a chat with the customer, confirmation message already typed. */
-export function whatsappLink(o: Pick<OrderForEmail, "number" | "customer_name" | "customer_phone" | "total_piasters" | "area_name" | "payment_method">): string {
-  const first = o.customer_name.split(" ")[0];
-  const pay = o.payment_method === "cod" ? "cash on delivery" : "paid by card";
-  const text = `Hi ${first}, this is Nuriya. Thank you for your order ${o.number} (${formatEgp(o.total_piasters)}, ${pay}, delivery to ${o.area_name}). Can you confirm it so we prepare it for the courier?`;
+/** WhatsApp link that opens a chat with the customer, the full order already typed and formatted
+ * (WhatsApp: *bold*, _italic_). The shop only checks it and taps Send. */
+export function whatsappLink(o: Omit<OrderForEmail, "id" | "created_at">): string {
+  // Customer-typed text must not switch WhatsApp formatting on or off.
+  const plain = (t: string) => t.replace(/[*_~`]/g, "").replace(/\s+/g, " ").trim();
+  const first = plain(o.customer_name).split(" ")[0] ?? "";
+  const cod = o.payment_method === "cod";
+  const text = [
+    `Hi ${first}, this is *Nuriya* \u{1F90D}`,
+    `Thank you for your order. Please check the details below:`,
+    ``,
+    `*Order ${o.number}*`,
+    ``,
+    `*Items*`,
+    ...o.items.map((i) => `• ${i.qty} × ${plain(i.product_name)} — ${plain(i.color_name)}, ${i.size}  ·  ${formatEgp(i.line_piasters)}`),
+    ``,
+    `Subtotal: ${formatEgp(o.subtotal_piasters)}`,
+    `Delivery (${plain(o.area_name)}): ${formatEgp(o.shipping_piasters)}`,
+    `*Total: ${formatEgp(o.total_piasters)}*`,
+    `*Payment:* ${cod ? "cash on delivery" : "paid by card"}`,
+    ``,
+    `*Delivery to*`,
+    plain(o.customer_name),
+    prettyPhone(o.customer_phone),
+    `${plain(o.area_name)} — ${plain(o.address)}`,
+    ``,
+    `Please reply *YES* to confirm, or tell us if anything needs changing.`,
+    cod ? `_You can check your order with the courier before you pay._` : `_You can check your order with the courier before you accept it._`,
+  ].join("\n");
   return `https://wa.me/2${o.customer_phone}?text=${encodeURIComponent(text)}`;
 }
 

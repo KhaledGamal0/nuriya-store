@@ -142,8 +142,16 @@ test("order e-mail and WhatsApp link: hostile names and addresses cannot inject 
   assert.equal(mail.html.includes("<script>"), false);
   assert.equal(mail.html.includes("<img src=x"), false);
   assert.ok(mail.html.includes("&lt;script&gt;"));
-  const link = whatsappLink({ number: "NUR-TEST22", customer_name: "Nour & <Co> #1", customer_phone: "01012345678", total_piasters: 127500, area_name: "Cairo", payment_method: "cod" });
+  const link = whatsappLink({
+    number: "NUR-TEST22", customer_name: "Nour *bold* & <Co> #1", customer_phone: "01012345678", area_name: "Cairo", address: "12 _St_ #4",
+    payment_method: "cod", subtotal_piasters: 100000, shipping_piasters: 7500, total_piasters: 107500,
+    items: [{ product_name: "Quiet Confidence", color_name: "White", size: "S/M", qty: 1, line_piasters: 100000 }],
+  });
   assert.match(link, /^https:\/\/wa\.me\/201012345678\?text=[^\s<>&#]*$/);
+  const msg = decodeURIComponent(link.split("?text=")[1]!);
+  for (const part of ["*Order NUR-TEST22*", "1 × Quiet Confidence — White, S/M", "*Total: 1,075 EGP*", "Delivery (Cairo): 75 EGP", "010 1234 5678", "12 St #4", "cash on delivery"])
+    assert.ok(msg.includes(part), `WhatsApp message is missing "${part}"`);
+  assert.ok(!msg.includes("*bold*"), "customer text must not add WhatsApp formatting");
 });
 
 test("order e-mail shows stock left, flags low and sold-out sizes, and says what to collect in cash", () => {
