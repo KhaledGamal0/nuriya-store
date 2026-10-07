@@ -54,8 +54,12 @@ async function checks(page, vp, where) {
     if (hdr) {
       const wrap = hdr.getBoundingClientRect();
       const kids = [...hdr.children].map((k) => {
-        const svg = k.querySelector("svg") ?? k;
-        const b = svg.getBoundingClientRect();
+        const first = [...k.querySelectorAll("a, button")].find((el) => el.getBoundingClientRect().width > 0) ?? k;
+        const target = first.tagName === "A" && !first.querySelector("svg") ? first : first.querySelector("svg") ?? first;
+        const sides = [...k.querySelectorAll("a, button")].filter((el) => el.getBoundingClientRect().width > 0);
+        const last = sides[sides.length - 1] ?? k;
+        const lastTarget = last.tagName === "A" && !last.querySelector("svg") ? last : last.querySelector("svg") ?? last;
+        const b = { left: target.getBoundingClientRect().left, right: lastTarget.getBoundingClientRect().right, top: target.getBoundingClientRect().top, height: target.getBoundingClientRect().height };
         return { left: Math.round(b.left - wrap.left), right: Math.round(wrap.right - b.right), cy: Math.round(b.top + b.height / 2) };
       });
       const pad = parseFloat(getComputedStyle(hdr).paddingLeft);
@@ -87,7 +91,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   const ctx = await browser.newContext({ ...opts, reducedMotion: "reduce" });
   const page = await ctx.newPage();
   let where = "";
-  page.on("console", (m) => m.type() === "error" && add(vp, where, "console-error", m.text().slice(0, 160)));
+  page.on("console", (m) => m.type() === "error" && !(where === "not-found" && m.text().includes("404")) && add(vp, where, "console-error", m.text().slice(0, 160)));
   page.on("pageerror", (e) => add(vp, where, "page-error", e.message.slice(0, 160)));
 
   for (const [name, path] of PAGES) {
@@ -138,7 +142,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   await page.getByLabel("Full name").fill("Nour Ahmed");
   await page.getByLabel("Area").selectOption("alexandria");
   await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");
-  if (!(await page.getByText("1,290 EGP").isVisible())) add(vp, where, "flow", "total did not update to 1,290 EGP for Alexandria");
+  if (!(await page.evaluate(() => document.body.innerText.includes("1,290 EGP")))) add(vp, where, "flow", "total did not update to 1,290 EGP for Alexandria");
   await shot(page, `${vp}-checkout-filled`);
   await page.getByRole("button", { name: "Place order" }).click();
   await page.waitForURL(/\/checkout\/done/, { timeout: 10000 }).catch(() => add(vp, where, "flow", "placing a valid order did not reach the confirmation page"));

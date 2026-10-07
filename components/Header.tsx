@@ -20,14 +20,23 @@ export function Header() {
     <>
       <header className="hdr">
         <div className="wrap hdr-in">
-          <button type="button" className="ib" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-haspopup="dialog">
-            <svg width="20" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-              <path d="M0 1h20M0 11h20" />
-            </svg>
-          </button>
+          <div className="hdr-side">
+            <button type="button" className="ib hdr-menu" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-haspopup="dialog">
+              <svg width="20" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M0 1h20M0 11h20" />
+              </svg>
+            </button>
+            <Link className="hdr-link" href="/quiet-confidence/cream">Cream</Link>
+            <Link className="hdr-link" href="/quiet-confidence/burgundy">Burgundy</Link>
+            <Link className="hdr-link" href="/size-guide">Size guide</Link>
+          </div>
           <Link href="/" className="logo-link" aria-label="Nuriya, home">
             <Logo className="logo" />
           </Link>
+          <div className="hdr-side hdr-side-r">
+          <a className="hdr-link" href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
+            Instagram
+          </a>
           <button
             type="button"
             className="ib ib-r"
@@ -45,6 +54,7 @@ export function Header() {
               </span>
             )}
           </button>
+          </div>
         </div>
       </header>
 

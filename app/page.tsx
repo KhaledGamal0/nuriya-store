@@ -9,14 +9,27 @@ export default function Home() {
   return (
     <>
       <section className="hero" aria-label="Quiet Confidence">
-        <Image
-          className="hero-img"
-          src="/images/cream-on-model.jpg"
-          alt="A girl wearing the cream Quiet Confidence quarter-zip with wide-leg jeans"
-          fill
-          priority
-          sizes="100vw"
-        />
+        <div className="hero-imgs">
+          <div>
+            <Image
+              className="hero-img"
+              src="/images/cream-on-model.jpg"
+              alt="A girl wearing the cream Quiet Confidence quarter-zip with wide-leg jeans"
+              fill
+              priority
+              sizes="(min-width: 900px) 50vw, 100vw"
+            />
+          </div>
+          <div>
+            <Image
+              className="hero-img"
+              src="/images/burgundy-hanger.jpg"
+              alt="The burgundy Quiet Confidence quarter-zip with a white collar"
+              fill
+              sizes="50vw"
+            />
+          </div>
+        </div>
         <div className="wrap hero-c">
           <h1>
             Not loud.

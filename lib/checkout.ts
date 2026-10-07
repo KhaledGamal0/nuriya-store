@@ -74,26 +74,49 @@ function cleanText(raw: unknown, max: number): string {
   return typeof raw === "string" ? raw.replace(/\s+/g, " ").trim().slice(0, max) : "";
 }
 
+export const MESSAGES = {
+  phone: "Enter an Egyptian mobile number, like 010 1234 5678.",
+  name: "Enter your full name.",
+  area: "Choose your area.",
+  address: "Add your street, building and floor.",
+  payment: "Choose how you want to pay.",
+  cart: "Your bag is empty or has an item we could not find.",
+} as const;
+
+/** Check one field. Used live in the browser and again on the server. */
+export function fieldError(field: "phone" | "name" | "area" | "address", value: unknown): string | undefined {
+  switch (field) {
+    case "phone":
+      return normalizePhone(value) ? undefined : MESSAGES.phone;
+    case "name":
+      return cleanText(value, 80).length >= 3 ? undefined : MESSAGES.name;
+    case "area":
+      return getArea(value) ? undefined : MESSAGES.area;
+    case "address":
+      return cleanText(value, 300).length >= 10 ? undefined : MESSAGES.address;
+  }
+}
+
 export function validateCheckout(input: CheckoutInput): CheckoutResult {
   const errors: FieldErrors = {};
 
   const phone = normalizePhone(input.phone);
-  if (!phone) errors.phone = "Enter an Egyptian mobile number, like 010 1234 5678.";
+  if (!phone) errors.phone = MESSAGES.phone;
 
   const name = cleanText(input.name, 80);
-  if (name.length < 3) errors.name = "Enter your full name.";
+  if (name.length < 3) errors.name = MESSAGES.name;
 
   const area = getArea(input.areaId);
-  if (!area) errors.area = "Choose your area.";
+  if (!area) errors.area = MESSAGES.area;
 
   const address = cleanText(input.address, 300);
-  if (address.length < 10) errors.address = "Add your street, building and floor.";
+  if (address.length < 10) errors.address = MESSAGES.address;
 
   const payment = input.payment === "card" ? "card" : input.payment === "cod" ? "cod" : null;
-  if (!payment) errors.payment = "Choose how you want to pay.";
+  if (!payment) errors.payment = MESSAGES.payment;
 
   const cart = parseCart(input.cart);
-  if (!cart) errors.cart = "Your bag is empty or has an item we could not find.";
+  if (!cart) errors.cart = MESSAGES.cart;
 
   if (!phone || !area || !payment || !cart || Object.keys(errors).length > 0) return { ok: false, errors };
 

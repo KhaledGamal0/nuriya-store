@@ -1,26 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
 import { formatEgp } from "@/lib/money";
 import { AREAS, areasByFee } from "@/lib/shipping";
+import { fieldError, type FieldErrors } from "@/lib/checkout";
 
 const GROUPS = areasByFee();
+const FIELDS = ["phone", "name", "area", "address"] as const;
+type Field = (typeof FIELDS)[number];
 
-function Field({
-  id,
-  label,
-  error,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  children: ReactNode;
-}) {
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: ReactNode }) {
   return (
     <div className="f" data-bad={error ? "true" : "false"}>
       <label htmlFor={id}>{label}</label>
@@ -34,12 +27,69 @@ function Field({
   );
 }
 
+function Summary({ feePiasters }: { feePiasters?: number }) {
+  const bag = useBag();
+  return (
+    <>
+      <div>
+        {bag.lines.map((line) => (
+          <BagLineItem key={`${line.color}-${line.size}`} line={line} />
+        ))}
+      </div>
+      <dl>
+        <div>
+          <dt>Subtotal</dt>
+          <dd>{formatEgp(bag.subtotalPiasters)}</dd>
+        </div>
+        <div>
+          <dt>Delivery</dt>
+          <dd>{feePiasters === undefined ? "Choose area" : formatEgp(feePiasters)}</dd>
+        </div>
+        <div className="big">
+          <dt>Total</dt>
+          <dd>{formatEgp(bag.subtotalPiasters + (feePiasters ?? 0))}</dd>
+        </div>
+      </dl>
+    </>
+  );
+}
+
 export function CheckoutForm() {
   const bag = useBag();
   const [state, action, pending] = useActionState<CheckoutState, FormData>(placeOrder, null);
   const [areaId, setAreaId] = useState("");
-  const errors = state?.errors ?? {};
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const formRef = useRef<HTMLFormElement>(null);
   const fee = AREAS.find((a) => a.id === areaId)?.feePiasters;
+
+  // Server errors replace local ones after each submit.
+  useEffect(() => {
+    if (state?.errors) {
+      setErrors(state.errors);
+      focusFirst(state.errors);
+    }
+  }, [state]);
+
+  function focusFirst(errs: FieldErrors) {
+    const first = FIELDS.find((f) => errs[f]);
+    if (first) formRef.current?.querySelector<HTMLElement>(`#${first}`)?.focus();
+  }
+
+  // Check a field when the shopper leaves it; clear its error as soon as it becomes valid.
+  function check(field: Field, value: string, onlyClear = false) {
+    const msg = fieldError(field, value);
+    setErrors((prev) => {
+      if (onlyClear && !prev[field]) return prev;
+      return { ...prev, [field]: onlyClear && msg ? prev[field] : msg };
+    });
+  }
+
+  const live = (field: Field) => ({
+    onBlur: (e: { currentTarget: { value: string } }) => e.currentTarget.value && check(field, e.currentTarget.value),
+    onChange: (e: { currentTarget: { value: string } }) => check(field, e.currentTarget.value, true),
+    "aria-invalid": errors[field] ? true : undefined,
+    "aria-describedby": errors[field] ? `${field}-err` : undefined,
+  });
 
   if (bag.lines.length === 0) {
     return (
@@ -52,11 +102,36 @@ export function CheckoutForm() {
     );
   }
 
-  const err = (k: keyof typeof errors) => (errors[k] ? { "aria-invalid": true, "aria-describedby": `${k}-err` } : {});
+  const total = formatEgp(bag.subtotalPiasters + (fee ?? 0));
 
   return (
     <div className="co">
-      <form action={action} noValidate>
+      <details className="sum sum-m">
+        <summary>
+          <span>Order summary</span>
+          <b>{total}</b>
+        </summary>
+        <Summary feePiasters={fee} />
+      </details>
+
+      <form
+        ref={formRef}
+        action={action}
+        noValidate
+        onSubmit={(e) => {
+          const form = new FormData(e.currentTarget);
+          const next: FieldErrors = {};
+          for (const f of FIELDS) {
+            const msg = fieldError(f, form.get(f));
+            if (msg) next[f] = msg;
+          }
+          if (Object.keys(next).length) {
+            e.preventDefault();
+            setErrors(next);
+            focusFirst(next);
+          }
+        }}
+      >
         <h1>Checkout</h1>
         <p className="small" style={{ marginTop: "var(--s1)" }}>
           No account needed. We confirm every order on WhatsApp.
@@ -66,17 +141,27 @@ export function CheckoutForm() {
         <fieldset className="fs">
           <legend>Contact</legend>
           <Field id="phone" label="Mobile number" error={errors.phone}>
-            <input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="010 1234 5678" required {...err("phone")} />
+            <input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="010 1234 5678" required {...live("phone")} />
           </Field>
           <Field id="name" label="Full name" error={errors.name}>
-            <input id="name" name="name" autoComplete="name" required {...err("name")} />
+            <input id="name" name="name" autoComplete="name" required {...live("name")} />
           </Field>
         </fieldset>
 
         <fieldset className="fs">
           <legend>Delivery</legend>
           <Field id="area" label="Area" error={errors.area}>
-            <select id="area" name="area" required value={areaId} onChange={(e) => setAreaId(e.target.value)} {...err("area")}>
+            <select
+              id="area"
+              name="area"
+              required
+              value={areaId}
+              {...live("area")}
+              onChange={(e) => {
+                setAreaId(e.target.value);
+                check("area", e.target.value, true);
+              }}
+            >
               <option value="">Choose your area</option>
               {GROUPS.map((g) => (
                 <optgroup key={g.feePiasters} label={`${formatEgp(g.feePiasters)} delivery`}>
@@ -90,7 +175,7 @@ export function CheckoutForm() {
             </select>
           </Field>
           <Field id="address" label="Address" error={errors.address}>
-            <textarea id="address" name="address" autoComplete="street-address" placeholder="Street, building, floor, apartment" required {...err("address")} />
+            <textarea id="address" name="address" autoComplete="street-address" placeholder="Street, building, floor, apartment" required {...live("address")} />
           </Field>
         </fieldset>
 
@@ -109,41 +194,23 @@ export function CheckoutForm() {
           </div>
         </fieldset>
 
-        {state?.message && (
+        {errors.cart && (
           <p className="form-err" role="alert">
-            {errors.cart ?? state.message}
+            {errors.cart}
           </p>
         )}
 
         <button className="btn" type="submit" disabled={pending} style={{ marginTop: "var(--s4)" }}>
-          {pending ? "Placing your order…" : "Place order"}
+          {pending ? "Placing your order…" : `Place order · ${total}`}
         </button>
         <p className="small" style={{ marginTop: "var(--s2)" }}>
           Check your order with the courier before you accept. After the courier leaves, returns and exchanges are closed.
         </p>
       </form>
 
-      <aside className="sum" aria-label="Order summary">
+      <aside className="sum sum-d" aria-label="Order summary">
         <h2>Summary</h2>
-        <div>
-          {bag.lines.map((line) => (
-            <BagLineItem key={`${line.color}-${line.size}`} line={line} />
-          ))}
-        </div>
-        <dl>
-          <div>
-            <dt>Subtotal</dt>
-            <dd>{formatEgp(bag.subtotalPiasters)}</dd>
-          </div>
-          <div>
-            <dt>Delivery</dt>
-            <dd>{fee === undefined ? "Choose area" : formatEgp(fee)}</dd>
-          </div>
-          <div className="big">
-            <dt>Total</dt>
-            <dd>{formatEgp(bag.subtotalPiasters + (fee ?? 0))}</dd>
-          </div>
-        </dl>
+        <Summary feePiasters={fee} />
       </aside>
     </div>
   );
