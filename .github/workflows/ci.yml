@@ -31,16 +31,24 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install
+        id: install
         run: mkdir -p ci-logs && npm ci --no-audit --no-fund 2>&1 | tee ci-logs/1-install.log; exit ${PIPESTATUS[0]}
+      # Every check below runs even when an earlier one fails, so one push shows ALL problems in ci-logs.
+      - name: Type check (whole project, including tests)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: (npx next typegen || true; npm run typecheck) 2>&1 | tee ci-logs/5-typecheck.log; exit ${PIPESTATUS[0]}
       - name: Database migrations and seed (run twice to prove they are repeatable)
+        id: db
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: (npm run db:migrate && npm run db:seed && npm run db:migrate && npm run db:seed) 2>&1 | tee ci-logs/2-db.log; exit ${PIPESTATUS[0]}
       - name: Unit and database tests
+        if: ${{ !cancelled() && steps.db.outcome == 'success' }}
         run: npm test 2>&1 | tee ci-logs/3-test.log; exit ${PIPESTATUS[0]}
       - name: Build with database
+        if: ${{ !cancelled() && steps.db.outcome == 'success' }}
         run: npm run build 2>&1 | tee ci-logs/4-build.log; exit ${PIPESTATUS[0]}
-      - name: Type check
-        run: npm run typecheck 2>&1 | tee ci-logs/5-typecheck.log; exit ${PIPESTATUS[0]}
-      - name: Build without database (how the live site runs until Neon is connected)
+      - name: Build without database
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: rm -rf .next && DATABASE_URL= npm run build 2>&1 | tee ci-logs/6-build-no-db.log; exit ${PIPESTATUS[0]}
       - name: Publish logs to the ci-logs branch
         if: always() && github.event_name == 'push'
