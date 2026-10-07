@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,7 +10,6 @@ import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
 import { preview } from "@/lib/blur";
-import { FadeImage } from "@/components/FadeImage";
 
 type Params = { params: Promise<{ color: string }> };
 
@@ -99,7 +99,7 @@ export default async function ProductPage({ params }: Params) {
           return (
             <Link key={x} className="also" href={productPath(x)}>
               <span className="also-img" style={preview(o.images[0]!.src)}>
-                <FadeImage src={o.images[0]!.src} alt="" fill sizes="64px" loading="eager" fetchPriority="low" />
+                <Image src={o.images[0]!.src} alt="" fill sizes="64px" loading="eager" fetchPriority="low" />
               </span>
               <span>
                 <b>Also in {o.name.toLowerCase()}</b>

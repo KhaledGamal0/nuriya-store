@@ -1,6 +1,6 @@
 """Builds lib/blur.ts: for every photo in public/images, a soft two-tone gradient (top colour → bottom
 colour of that photo). Shown in the photo's frame while it loads, so the space never looks empty or
-pixelated; the photo then fades in on top. Run after adding or changing photos:
+pixelated; the photo appears on top as soon as it arrives. Run after adding or changing photos:
     python3 scripts/make-blur.py
 The test "every photo has a preview" fails if this was forgotten."""
 import glob, os

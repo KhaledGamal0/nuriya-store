@@ -400,12 +400,17 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
   @media (prefers-reduced-motion: no-preference) {
     /* Content below the first screen settles gently into place as it scrolls in (driven by the scroll itself,
        no JavaScript). It starts 50% visible, so nothing ever looks blank. Above-the-fold content is untouched. */
-    .reveal, .pc, .page-sec, .acc, .also, .ok-next, .ok-sum, .track-result {
+    /* Words: a soft blur-in. Photos and cards: a small glide up, never blurred (always sharp, light on phones). */
+    .reveal, .page-sec, .ok-next, .track-result {
+      animation: reveal-soft linear both; animation-timeline: view(); animation-range: entry 0% entry 40%;
+    }
+    .pc, .acc, .also, .ok-sum {
       animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 35%;
     }
   }
 }
-@keyframes reveal { from { opacity: 0.5; transform: translateY(18px); } }
+@keyframes reveal { from { opacity: 0.6; transform: translateY(16px); } }
+@keyframes reveal-soft { from { opacity: 0.35; filter: blur(6px); transform: translateY(12px); } }
 
 /* Add to bag confirmation */
 .btn[data-added="true"] { background: var(--burg); }
@@ -457,9 +462,4 @@ input[type="range"] { width: 100%; accent-color: var(--ink); min-height: 44px; m
 .ok-to h3 { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); font-family: inherit; margin-top: var(--s1); }
 .ok-to p { margin: 0; }
 
-/* Photos below the first screen fade in once loaded, over their frame's colour preview (lib/blur.ts).
-   Safety net: if the page's code is slow to start, the photo shows anyway after 3 s. */
-.fade { opacity: 0; transition: opacity 0.45s var(--ease); animation: fade-safety 0s 3s forwards; }
-.fade[data-loaded] { opacity: 1; animation: none; }
-@keyframes fade-safety { to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .fade { opacity: 1; transition: none; animation: none; } }
+

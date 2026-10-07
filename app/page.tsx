@@ -4,7 +4,6 @@ import { getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 import { productPath } from "@/lib/catalog";
 import { preview } from "@/lib/blur";
-import { FadeImage } from "@/components/FadeImage";
 
 const craftCommon = { alt: "", fill: true, quality: 65, sizes: "100vw", loading: "eager" as const, fetchPriority: "low" as const };
 const { props: craftTall } = getImageProps({ ...craftCommon, src: "/images/craft-sleeve-tall.jpg" });
@@ -51,7 +50,7 @@ export default async function Home() {
             return (
               <Link className="pc" href={productPath(c)} key={c}>
                 <div className="pc-ph" style={preview(first.src)}>
-                  <FadeImage src={first.src} alt={first.alt} fill quality={65} sizes="(min-width: 900px) 600px, 50vw" loading="eager" fetchPriority="low" />
+                  <Image src={first.src} alt={first.alt} fill quality={65} sizes="(min-width: 900px) 600px, 50vw" loading="eager" fetchPriority="low" />
                   <Image src={second.src} alt="" fill quality={65} sizes="(min-width: 900px) 600px, 50vw" />
                 </div>
                 <div className="pc-t">

@@ -428,9 +428,15 @@ await (async () => {
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(3500);
-  // Every visible fading photo must have been marked loaded by its own load event (not only by the 3 s safety net).
-  const stuck = await page.evaluate(() => [...document.querySelectorAll("img.fade")].filter((i) => i.getBoundingClientRect().width > 0 && i.complete && !i.hasAttribute("data-loaded")).length);
-  if (stuck) add("mobile", "loading", "flow", `${stuck} loaded photo(s) were never marked loaded (fade-in broken)`);
+  // After scrolling the whole home page, every photo on screen must be loaded and visible (no blank frames).
+  const blankHome = await page.evaluate(() =>
+    [...document.querySelectorAll("main img")].filter((i) => {
+      const r = i.getBoundingClientRect();
+      return r.width > 0 && getComputedStyle(i).display !== "none" && (!i.complete || i.naturalWidth === 0 || getComputedStyle(i).opacity === "0");
+    }).length,
+  );
+  if (blankHome) add("mobile", "loading", "flow", `${blankHome} home photo(s) still blank after scrolling the page`);
+  await page.screenshot({ path: `${OUT}/shots/mobile-home-scrolled.png`, fullPage: true });
   await ctx.close();
 })().catch((e) => add("mobile", "loading", "audit-step-failed", String(e.message).slice(0, 160)));
 await refreshCheck(browser).catch((e) => add("mobile", "refresh", "audit-step-failed", String(e.message).slice(0, 160)));

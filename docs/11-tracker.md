@@ -73,7 +73,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Aggressive pre-launch testing: fuzz (5,000 random checkouts), crowd (30 browsers, 200 DB orders at once), chaos (offline, lost answer, tampering, bots, slow 3G, 320 px) | DONE | `tests/fuzz.test.ts`, `tests/load.test.ts`, `scripts/stress.mjs` — every push |
 | Arabic numerals in phone numbers accepted | FIXED | Oct 7: ٠١٠… was refused before |
 | Internet drop mid-order shows a calm message and keeps the form | FIXED | Oct 7: used to show the error page |
-| Smooth photo loading: frames show a soft two-tone gradient of the photo's own colours, photos fade in (0.45 s); first photo of each page shows immediately (no fade) | DONE | `lib/blur.ts`, `components/FadeImage.tsx`; slow-internet screenshots in the UI audit (`shots/loading-*.png`) |
+| Photo loading: all product/home photos load immediately (first at top priority, rest low priority — lazy loading left gallery photos blank on iPhone); frames show a soft gradient of the photo's colours until it arrives; no fade (an unloaded photo can never be invisible) | DONE | `lib/blur.ts`; audit swipes every gallery photo and scrolls the home page, fails on any blank photo |
+| Scrolling: words blur-in softly, photos/cards glide up slightly (scroll-driven CSS, no JS, never starts blank) | DONE | |
 | Order tracking page for customers | DONE | `/track` — needs order number + phone; never shows the address |
 | Order emails / SMS | P6 | Email optional (phone-first) |
 | Referral 10% code | LATER + KHALED | How to track it is undecided |
