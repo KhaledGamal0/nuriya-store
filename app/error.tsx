@@ -12,7 +12,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
   return (
     <div className="wrap done">
       <h1>Something went wrong on our side.</h1>
-      <p style={{ color: "var(--ink-2)" }}>Please try again. If it keeps happening, message us on Instagram and we will help you order.</p>
+      <p style={{ color: "var(--ink-2)" }}>Please try again. If it keeps happening, message us on Instagram and we will help.</p>
       <div style={{ display: "flex", gap: "var(--s1)", flexWrap: "wrap" }}>
         <button type="button" className="btn" style={{ width: "auto" }} onClick={reset}>
           Try again
