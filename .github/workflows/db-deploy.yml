@@ -67,10 +67,33 @@ jobs:
             s=$(gh api repos/${{ github.repository }}/commits/${{ github.sha }}/statuses -q '[.[]|select(.context=="Vercel")][0].state')
             echo "Vercel: ${s:-not started}"
             [ "$s" = success ] && exit 0
-            [ "$s" = failure ] || [ "$s" = error ] && { echo "::warning::Vercel deploy failed; refreshing the current live site anyway."; exit 0; }
+            if [ "$s" = failure ] || [ "$s" = error ]; then
+              # Usually the build ran before this migration (new columns not there yet). Build it again now.
+              echo "REDEPLOY=1" >> "$GITHUB_ENV"; exit 0
+            fi
             sleep 15
           done
           echo "::warning::Vercel deploy still running after 15 minutes; refreshing anyway."
+      - name: Build the site again now that the database is updated
+        if: env.REDEPLOY == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          id=$(gh api repos/${{ github.repository }}/commits/${{ github.sha }}/statuses -q '[.[]|select(.context=="Vercel" and .state=="failure")][0].description' | grep -o 'dpl_[A-Za-z0-9]*' | head -1)
+          [ -n "$id" ] && [ -n "$VERCEL_TOKEN" ] || { echo "::error::Vercel build failed and could not be retried automatically. Vercel → Deployments → Redeploy."; exit 1; }
+          info=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v13/deployments/$id")
+          name=$(echo "$info" | jq -r .name); team=$(echo "$info" | jq -r '.team.id // .ownerId // empty')
+          new=$(curl -s -X POST -H "Authorization: Bearer $VERCEL_TOKEN" -H "content-type: application/json" \
+            "https://api.vercel.com/v13/deployments?forceNew=1${team:+&teamId=$team}" \
+            -d "{\"name\":\"$name\",\"deploymentId\":\"$id\",\"target\":\"production\"}" | jq -r '.id // empty')
+          [ -n "$new" ] || { echo "::error::Vercel did not accept the rebuild. Vercel → Deployments → Redeploy."; exit 1; }
+          for i in $(seq 1 60); do
+            st=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v13/deployments/$new${team:+?teamId=$team}" | jq -r .readyState)
+            echo "rebuild: $st"; [ "$st" = READY ] && exit 0; [ "$st" = ERROR ] && { echo "::error::Rebuild failed too. Check Vercel → Deployments."; exit 1; }
+            sleep 15
+          done
+          echo "::error::Rebuild still running after 15 minutes."; exit 1
       - name: Refresh the live site from the updated database
         if: env.NO_DB != '1'
         env:
