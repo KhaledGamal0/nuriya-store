@@ -96,6 +96,44 @@ async function step(vp, name, fn) {
   }
 }
 
+// ---------- Every photo on every screen ----------
+const photos = [];
+/** Scroll the whole page and swipe every gallery like a customer, then require that every photo a person
+ * could see has really loaded. (The second card photo shows on mouse hover only, so it is skipped.) */
+async function photoCheck(page, vp, where, { scroll = true, scope = "body" } = {}) {
+  if (scroll) {
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    for (let y = 0; y < height; y += 450) {
+      await page.evaluate((v) => window.scrollTo(0, v), y);
+      await page.waitForTimeout(120);
+    }
+    const slides = await page.locator(".gal-i").count();
+    for (let i = 0; i < slides; i++) {
+      await page.evaluate((k) => {
+        const g = document.querySelector(".gal");
+        if (g) g.scrollTo({ left: k * g.clientWidth });
+      }, i);
+      await page.waitForTimeout(150);
+    }
+  }
+  await page.waitForTimeout(1500);
+  const r = await page.evaluate((sel) => {
+    let checked = 0;
+    const bad = [];
+    for (const img of document.querySelectorAll(`${sel} img`)) {
+      if (img.matches(".pc-ph img + img") || img.closest("dialog:not([open])") || getComputedStyle(img).display === "none") continue;
+      const b = img.getBoundingClientRect();
+      if (!b.width || !b.height) continue;
+      checked++;
+      if (!(img.complete && img.naturalWidth > 0)) bad.push((img.getAttribute("alt") || img.currentSrc || img.src).slice(0, 50));
+    }
+    return { checked, bad };
+  }, scope);
+  photos.push({ vp, where, checked: r.checked, bad: r.bad.length });
+  if (r.bad.length) add(vp, where, "photo", `${r.bad.length} of ${r.checked} photos did not load: ${r.bad.join(" | ")}`);
+  if (scroll) await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 async function shot(page, name) {
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/shots/${name}.png`, fullPage: true });
@@ -192,6 +230,8 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     await page.goto(BASE + path, { waitUntil: "networkidle" });
     await checks(page, vp, name);
     await shot(page, `${vp}-${name}`);
+    await photoCheck(page, vp, name);
+    await page.screenshot({ path: `${OUT}/shots/${vp}-${name}-full.png`, fullPage: true });
   }
 
   // Header hides on scroll down and returns on scroll up
@@ -250,6 +290,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     if (!label?.startsWith("2 /")) add(vp, where, "flow", `next arrow did not move to photo 2 (shows "${label}")`);
     await checks(page, vp, where);
     await page.screenshot({ path: `${OUT}/shots/${vp}-photo-viewer.png` });
+    await photoCheck(page, vp, where, { scroll: false, scope: "dialog[open]" });
     await page.keyboard.press("Escape");
     await page.waitForTimeout(500);
     if (await page.locator("dialog[open]").count()) add(vp, where, "flow", "Escape did not close the photo viewer");
@@ -287,6 +328,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     if (!(await page.locator("dialog[open]").count())) add(vp, where, "flow", "bag did not open after adding");
     await checks(page, vp, where);
     await page.screenshot({ path: `${OUT}/shots/${vp}-bag-open.png` });
+    await photoCheck(page, vp, where, { scroll: false, scope: "dialog[open]" });
   });
 
   await step(vp, "bag-close", async () => {
@@ -317,6 +359,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     if (focused !== "phone") add(vp, where, "flow", `focus should move to the first error (phone), it is on "${focused}"`);
     await checks(page, vp, where);
     await shot(page, `${vp}-checkout-errors`);
+    await photoCheck(page, vp, "checkout-with-bag", { scroll: false });
   });
 
   await step(vp, "checkout-filled", async () => {
@@ -357,6 +400,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   await step(vp, "order-saved", async () => {
     where = "order-saved";
     orderNo = new URL(page.url()).searchParams.get("o");
+    await photoCheck(page, vp, "thank-you");
     if (!orderNo || !(await page.locator(".ok-no strong").getByText(orderNo, { exact: true }).isVisible())) add(vp, where, "flow", "confirmation page does not show the order number");
     if (!(await page.getByText("Order placed successfully").isVisible())) add(vp, where, "flow", "confirmation page does not say the order was placed");
     const shown = await page.evaluate(() => document.body.innerText);
@@ -428,14 +472,7 @@ await (async () => {
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(3500);
-  // After scrolling the whole home page, every photo on screen must be loaded and visible (no blank frames).
-  const blankHome = await page.evaluate(() =>
-    [...document.querySelectorAll("main img")].filter((i) => {
-      const r = i.getBoundingClientRect();
-      return r.width > 0 && getComputedStyle(i).display !== "none" && (!i.complete || i.naturalWidth === 0 || getComputedStyle(i).opacity === "0");
-    }).length,
-  );
-  if (blankHome) add("mobile", "loading", "flow", `${blankHome} home photo(s) still blank after scrolling the page`);
+  await photoCheck(page, "mobile", "home-after-slow-load");
   await page.screenshot({ path: `${OUT}/shots/mobile-home-scrolled.png`, fullPage: true });
   await ctx.close();
 })().catch((e) => add("mobile", "loading", "audit-step-failed", String(e.message).slice(0, 160)));
@@ -446,6 +483,10 @@ await db?.end();
 const byKind = {};
 for (const f of findings) (byKind[f.kind] ??= []).push(f);
 let md = `# UI/UX audit\n\n${new Date().toISOString()} · ${findings.length} findings\n\n`;
+const photoTotal = photos.reduce((n, p) => n + p.checked, 0);
+const photoBad = photos.reduce((n, p) => n + p.bad, 0);
+md += `## Photos: ${photoTotal} checked on ${photos.length} screens, ${photoBad} not loaded\n`;
+md += photos.map((p) => `- [${p.vp}] ${p.where}: ${p.checked} photos${p.bad ? `, ${p.bad} NOT LOADED` : ", all loaded"}`).join("\n") + "\n\n";
 for (const [kind, list] of Object.entries(byKind)) {
   md += `## ${kind} (${list.length})\n`;
   for (const f of list) md += `- [${f.vp}] ${f.where}: ${f.detail}\n`;
