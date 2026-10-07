@@ -94,8 +94,19 @@ async function loadAreas(): Promise<Area[]> {
   return rows.map((r) => ({ id: r.slug, nameEn: r.nameEn, nameAr: r.nameAr, feePiasters: r.fee, zoneId: r.zone }));
 }
 
+async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  if (!process.env.STORE_DEBUG) return fn();
+  const t0 = Date.now();
+  console.info(`[store] ${label} start`);
+  try {
+    return await fn();
+  } finally {
+    console.info(`[store] ${label} done in ${Date.now() - t0}ms`);
+  }
+}
+
 /** Catalog for this request (deduplicated across components). */
-export const getCatalog = cache(async (): Promise<CatalogData> => (hasDatabase() ? loadCatalog() : staticCatalog()));
+export const getCatalog = cache(async (): Promise<CatalogData> => (hasDatabase() ? timed("catalog", loadCatalog) : staticCatalog()));
 
 /** Active delivery areas with their fees. */
-export const getAreas = cache(async (): Promise<Area[]> => (hasDatabase() ? loadAreas() : [...AREAS]));
+export const getAreas = cache(async (): Promise<Area[]> => (hasDatabase() ? timed("areas", loadAreas) : [...AREAS]));

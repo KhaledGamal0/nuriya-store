@@ -45,8 +45,19 @@ jobs:
           npm run db:seed
           npm run build
           mkdir -p ui-report
-          npx next start -p 3000 > ui-report/server.log 2>&1 &
+          STORE_DEBUG=1 npx next start -p 3000 > ui-report/server.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://localhost:3000 >/dev/null && break; sleep 2; done
+      - name: Probe pages after the 60 s refresh window
+        run: |
+          sleep 65
+          for p in / /quiet-confidence/cream /returns; do
+            curl -s -o /dev/null -m 25 -w "html $p %{http_code} %{time_total}s\n" "http://localhost:3000$p" | tee -a ui-report/probe.log
+            curl -s -o /dev/null -m 25 -H "RSC: 1" -H "Next-Router-Prefetch: 1" -w "rsc  $p %{http_code} %{time_total}s\n" "http://localhost:3000$p" | tee -a ui-report/probe.log
+          done
+          sleep 5
+          for p in / /quiet-confidence/cream /returns; do
+            curl -s -o /dev/null -m 25 -H "RSC: 1" -w "rsc2 $p %{http_code} %{time_total}s\n" "http://localhost:3000$p" | tee -a ui-report/probe.log
+          done
       - name: Audit
         run: node scripts/ui-audit.mjs
       - name: Publish report to the ui-report branch
