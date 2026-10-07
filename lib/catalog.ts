@@ -54,7 +54,6 @@ export const PRODUCT = {
         { src: "/images/cream-hd-model.jpg", alt: "Smiling girl in the white Quiet Confidence quarter-zip with a burgundy collar, wide-leg jeans and an iced coffee", width: 1500, height: 1875 },
         { src: "/images/cream-hd-chest.jpg", alt: "Close-up of the white quarter-zip: burgundy collar, ring-pull zip and burgundy QUIET CONFIDENCE embroidery", width: 1170, height: 1462 },
         { src: "/images/cream-hd-sleeve.jpg", alt: "White cuff embroidered in burgundy: do what you love, love what you do", width: 1170, height: 1462 },
-        { src: "/images/cream-styled.jpg", alt: "White quarter-zip styled with pleated trousers and a belt", width: 1360, height: 1700 },
       ],
     },
     burgundy: {
@@ -63,12 +62,9 @@ export const PRODUCT = {
       swatch: "#7A2B3C",
       detail: "Burgundy body, white collar and white embroidery.",
       images: [
-        { src: "/images/burgundy-hd-lean.jpg", alt: "Girl in the burgundy Quiet Confidence quarter-zip with a white collar and wide-leg jeans", width: 1300, height: 1625 },
-        { src: "/images/burgundy-hd-flatlay.jpg", alt: "Burgundy quarter-zip laid flat: white collar, Nuriya label, ring-pull zip and white embroidery on the chest and sleeve", width: 1590, height: 1987 },
         { src: "/images/burgundy-hd-collar.jpg", alt: "Burgundy quarter-zip worn with jeans, hand at the white collar", width: 1300, height: 1625 },
+        { src: "/images/burgundy-hd-flatlay.jpg", alt: "Burgundy quarter-zip laid flat: white collar, Nuriya label, ring-pull zip and white embroidery on the chest and sleeve", width: 1590, height: 1987 },
         { src: "/images/burgundy-hd-full.jpg", alt: "Full-length look: burgundy quarter-zip, wide-leg jeans and white trainers", width: 1480, height: 1850 },
-        { src: "/images/burgundy-styled.jpg", alt: "Burgundy quarter-zip styled with a long coat and light trousers", width: 1360, height: 1700 },
-        { src: "/images/burgundy-hanger.jpg", alt: "Burgundy quarter-zip with a white collar on a hanger", width: 1600, height: 2000 },
       ],
     },
   } satisfies Record<ColorId, Colorway>,

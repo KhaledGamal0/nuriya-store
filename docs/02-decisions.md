@@ -49,3 +49,4 @@
 - Pages static + on-demand refresh (not timed refresh).
 
 - Oct 7 2026 (Khaled): no scroll reveal/blur effects — text must never rest blurred. Content is always sharp.
+- Oct 7 2026 (Khaled): removed 4 photos (burgundy model at the glass, burgundy with coat and scarf, burgundy on hanger, white with pleated trousers). Burgundy opens with the collar photo; White has 3 photos, Burgundy 3.
