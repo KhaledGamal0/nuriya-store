@@ -126,6 +126,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 |---|---|---|
 | Static pages, optimized images (AVIF/WebP), self-hosted fonts | DONE | |
 | Photos prepared ahead of time: every size made once as WebP (`scripts/make-images.py` → `public/img`), served as finished files cached 1 year — no on-demand resizing, so even the first visitor after a photo change gets photos instantly | DONE | `lib/image-loader.ts`; test fails if a size is missing |
+| Database changes refresh the live site automatically (after the migration AND the Vercel deploy of the same commit) | DONE | `db-deploy.yml` |
 | Live photo speed measured on the real site after every deploy (first-time iPhone visitor, 5G + 4G, empty cache) | DONE | `.github/workflows/live-photos.yml` → `live-photos` branch |
 | First screen sharp on arrival (nothing starts invisible); all product photos load at once; phones download the 828 px photo (same look, ~half the bytes of 1200 px) via `lib/sizes.ts` | DONE | audit `first-screen-not-sharp` check; Lighthouse mobile 95–99 all pages |
 | Product structured data, sitemap, robots, page titles | DONE | |

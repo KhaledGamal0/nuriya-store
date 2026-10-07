@@ -3,6 +3,8 @@ name: Database deploy
 # Applies new migrations to the live database whenever db/migrations changes on main
 # (production branch, then the preview branch), and can be run by hand from the Actions tab.
 # The database address comes from Neon via the NEON_API_KEY secret (or a DATABASE_URL secret, if set).
+# Afterwards it refreshes the live site by itself: it waits until Vercel has deployed this commit (that build
+# may have read the database BEFORE the change), then rebuilds the pages from the updated database.
 on:
   push:
     branches: [main]
@@ -16,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  statuses: read
   issues: write
 
 concurrency:
@@ -55,6 +58,33 @@ jobs:
       - name: Seed starting data — production
         if: env.NO_DB != '1' && inputs.seed
         run: npm run db:seed
+      - name: Wait until Vercel has deployed this commit
+        if: env.NO_DB != '1' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 60); do
+            s=$(gh api repos/${{ github.repository }}/commits/${{ github.sha }}/statuses -q '[.[]|select(.context=="Vercel")][0].state')
+            echo "Vercel: ${s:-not started}"
+            [ "$s" = success ] && exit 0
+            [ "$s" = failure ] || [ "$s" = error ] && { echo "::warning::Vercel deploy failed; refreshing the current live site anyway."; exit 0; }
+            sleep 15
+          done
+          echo "::warning::Vercel deploy still running after 15 minutes; refreshing anyway."
+      - name: Refresh the live site from the updated database
+        if: env.NO_DB != '1'
+        env:
+          SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
+        run: |
+          for i in 1 2 3; do
+            TOKEN=$(openssl rand -hex 32)   # one-time token, a new one for every attempt
+            echo "::add-mask::$TOKEN"
+            docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -q -c "INSERT INTO refresh_tokens (token) VALUES ('$TOKEN')"
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Authorization: Bearer $TOKEN" "$SITE/api/revalidate")
+            [ "$code" = "200" ] && { echo "::notice::Live site refreshed."; exit 0; }
+            echo "refresh returned $code, retrying"; sleep 10
+          done
+          echo "::error::Site refresh failed. Run Admin tasks → refresh-site."; exit 1
       # GITHUB_ENV values reach only the NEXT step, so the address and the migration are two steps.
       - name: Database address — preview (masked)
         if: env.NO_DB != '1' && env.NEON_API_KEY != ''

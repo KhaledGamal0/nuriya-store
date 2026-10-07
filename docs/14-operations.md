@@ -69,3 +69,6 @@ Secrets are never pasted into chat, code, issues or screenshots.
 
 ## Later (with Phase 6)
 Sentry error alerts, CSP, and a status line in the admin dashboard showing the last backup and uptime result.
+
+## Database changes refresh the site by themselves
+Every migration pushed to `main` runs `db-deploy.yml`: it applies the change, waits until Vercel has deployed the same commit, then refreshes the live pages from the updated database (one-time token, 3 attempts). Admin tasks (stock, reset) already refresh after their change. If a refresh ever fails, an error shows on the run: use Admin tasks → refresh-site.
