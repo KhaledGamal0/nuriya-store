@@ -1,53 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { formatEgp } from "@/lib/money";
-import { COLORS, PRODUCT, SIZES, isSize, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
+import { useState } from "react";
+import { COLORS, PRODUCT, SIZES, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
 import { useBag } from "./BagProvider";
 import { Dialog, CloseButton } from "./Dialog";
 
 export function ProductPurchase({ color }: { color: ColorId }) {
   const bag = useBag();
-  const [size, setSizeState] = useState<SizeId | null>(null);
-  const addRef = useRef<HTMLButtonElement>(null);
-  const [showBar, setShowBar] = useState(false);
+  // No size is ever pre-selected: the customer always chooses one on purpose.
+  const [size, setSize] = useState<SizeId | null>(null);
 
-  // Keep the chosen size when switching between colours.
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem("nuriya-size");
-      if (isSize(saved)) setSizeState(saved);
-    } catch {}
-  }, []);
-  const setSize = (s: SizeId) => {
-    setSizeState(s);
-    try {
-      sessionStorage.setItem("nuriya-size", s);
-    } catch {}
-  };
-
-  // Phones: show a slim buy bar while reading the product (main button scrolled away), hide it at the footer.
-  // A scroll check (not IntersectionObserver) so fast swipes that jump past the button still work.
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const btn = addRef.current;
-      const footer = document.querySelector("footer");
-      const footerInView = footer ? footer.getBoundingClientRect().top < window.innerHeight : false;
-      if (btn) setShowBar(btn.getBoundingClientRect().bottom < 0 && !footerInView);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(frame);
-    };
-  }, []);
   const [needSize, setNeedSize] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [kg, setKg] = useState(58);
@@ -126,7 +89,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
         )}
       </div>
 
-      <button ref={addRef} type="button" className="btn" onClick={addToBag} data-added={added ? "true" : "false"} aria-live="polite">
+      <button type="button" className="btn" onClick={addToBag} data-added={added ? "true" : "false"} aria-live="polite">
         {added ? (
           <>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -138,19 +101,6 @@ export function ProductPurchase({ color }: { color: ColorId }) {
           "Add to bag"
         )}
       </button>
-
-      <div className="buybar" data-on={showBar ? "true" : "false"} aria-hidden={!showBar} inert={!showBar}>
-        <div className="buybar-t">
-          <b>{formatEgp(PRODUCT.pricePiasters)}</b>
-          <span>
-            {PRODUCT.colors[color].name}
-            {size ? ` · ${size}` : " · choose size"}
-          </span>
-        </div>
-        <button type="button" className="btn" onClick={addToBag}>
-          Add to bag
-        </button>
-      </div>
 
       <Dialog open={guideOpen} onClose={() => setGuideOpen(false)} variant="sheet" labelledBy="fit-title">
         <div className="sheet-h">

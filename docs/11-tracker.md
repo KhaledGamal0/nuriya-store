@@ -39,8 +39,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Page fade between pages, scroll reveal, "Added to bag" confirmation, hover underlines | DONE | |
 | Footer redesign (brand line, Instagram, Shop/Help/Follow, payment methods) | DONE | |
 | Full-screen photo viewer (tap, arrows, keyboard, counter), tappable gallery bars | DONE | |
-| Sticky buy bar on phones after scrolling past Add to bag | DONE | |
-| Chosen size kept when switching colour; "Also in …" card | DONE | |
+| Sticky buy bar on phones | REMOVED | Oct 7: page below the button is too short for it to help; it overlapped the footer |
+| No size pre-selected (Khaled, Oct 7); "Also in …" card | DONE | |
 | Every page opens at the top | DONE | Audit check |
 | Delivery and returns page: policy cards, EN/AR switch with real RTL, readable fees | DONE | |
 | Sold-out state and "notify me" | P2 / LATER | Sold out in P2, notify me later |

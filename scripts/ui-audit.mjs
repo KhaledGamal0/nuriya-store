@@ -170,29 +170,12 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     if (await page.locator("dialog[open]").count()) add(vp, where, "flow", "Escape did not close the photo viewer");
   });
 
-  await step(vp, "size-kept-across-colors", async () => {
-    where = "size-kept-across-colors";
+  await step(vp, "no-size-preselected", async () => {
+    where = "no-size-preselected";
     await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
     await page.locator("#size-group").getByRole("button", { name: "L/XL" }).click();
-    await page.locator(".opts").first().getByRole("link", { name: "Burgundy" }).click();
-    await page.waitForURL(/burgundy/);
-    await page.waitForTimeout(500);
-    if ((await page.locator("#size-group").getByRole("button", { name: "L/XL" }).getAttribute("aria-pressed")) !== "true") add(vp, where, "flow", "chosen size was lost when switching colour");
-    await page.evaluate(() => sessionStorage.removeItem("nuriya-size"));
-  });
-
-  if (vp === "mobile") await step(vp, "buy-bar", async () => {
-    where = "buy-bar";
-    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
-    await page.evaluate(() => window.scrollTo(0, 1400));
-    await page.waitForTimeout(700);
-    if ((await page.locator(".buybar").getAttribute("data-on")) !== "true") add(vp, where, "flow", "buy bar did not appear after scrolling past Add to bag");
-    const box = await page.locator(".buybar").boundingBox();
-    if (box && Math.abs(box.y + box.height - 844) > 1) add(vp, where, "flow", `buy bar is not sitting on the bottom edge of the screen (bottom=${Math.round(box.y + box.height)})`);
-    await page.screenshot({ path: `${OUT}/shots/${vp}-buy-bar.png` });
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(700);
-    if ((await page.locator(".buybar").getAttribute("data-on")) === "true") add(vp, where, "flow", "buy bar still covers the footer at the bottom of the page");
+    await page.goto(BASE + "/quiet-confidence/burgundy", { waitUntil: "networkidle" });
+    if (await page.locator('#size-group [aria-pressed="true"]').count()) add(vp, where, "flow", "a size was pre-selected when opening a product page");
   });
 
   await step(vp, "add-without-size", async () => {

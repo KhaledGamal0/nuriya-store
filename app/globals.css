@@ -210,13 +210,6 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .also-img img { object-fit: cover; }
 .also b { font-weight: 500; font-size: 14px; display: block; }
 .also span { font-size: 13px; color: var(--ink-2); }
-.buybar { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; padding: var(--s1) var(--g) calc(var(--s1) + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(20, 16, 17, 0.06); display: flex; gap: var(--s2); align-items: center; transform: translateY(110%); visibility: hidden; transition: transform 0.35s var(--ease), visibility 0s 0.35s; }
-.buybar[data-on="true"] { transform: none; visibility: visible; transition: transform 0.35s var(--ease); }
-.buybar-t { display: grid; font-size: 13px; line-height: 1.3; flex: none; }
-.buybar-t b { font-weight: 500; font-variant-numeric: tabular-nums; }
-.buybar-t span { color: var(--ink-2); }
-.buybar .btn { min-height: 48px; }
-@media (min-width: 900px) { .buybar { display: none; } }
 .t-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
 .price { font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .o-h { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 12px; min-height: 24px; }
