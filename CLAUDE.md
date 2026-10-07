@@ -12,6 +12,7 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 7. `docs/08-design-direction.md` — the design concept; `docs/09-review-samples-and-stack.md` — what to avoid
 8. `docs/10-build-plan.md` — **phases, tasks and acceptance checklists. Work only on the current phase.**
 9. `docs/11-tracker.md` — **master tracker of every business need. Update it in the same commit as the work.**
+11. `docs/13-test-plan.md` — **which test covers which business case. Add a test for every new rule.**
 10. `docs/12-ui-standards.md` — **UI rules for every screen (one radius, no stray circles, hover only on mouse devices).**
 
 ## Non-negotiables

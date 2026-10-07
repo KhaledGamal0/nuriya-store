@@ -111,7 +111,9 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Static pages, optimized images (AVIF/WebP), self-hosted fonts | DONE | |
 | Product structured data, sitemap, robots, page titles | DONE | |
 | Keyboard, screen reader, focus, reduced motion | DONE | Full audit in P6 |
-| Lighthouse ≥ 95 on mobile | P6 | Measure on the live site |
+| Lighthouse measured on every push | DONE | Oct 7: Perf 92–97, A11y/Best practices/SEO 100, CLS 0. LCP ~3 s on simulated 4G (budget 2 s) — re-measure on the live CDN |
+| Friendly error pages (page and whole-site) | DONE | `app/error.tsx`, `app/global-error.tsx` |
+| Written test plan mapping every business case to a test | DONE | `docs/13-test-plan.md` |
 | Own domain | KHALED | Buy domain, then connect to Vercel |
 
 ## I. Marketing and analytics

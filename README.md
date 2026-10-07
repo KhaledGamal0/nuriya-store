@@ -28,6 +28,7 @@ See `.env.example`. Production database: Neon (set `DATABASE_URL` in Vercel and 
 | `docs/10-build-plan.md` | Phases, tasks, acceptance checklists, progress log |
 | `docs/11-tracker.md` | Master tracker: every business need and its status |
 | `docs/12-ui-standards.md` | UI rules applied to every screen |
+| `docs/13-test-plan.md` | Every business case and the automated test that covers it |
 | `CLAUDE.md` | The project brain — Claude Code reads it automatically every session |
 | `data/shipping-zones.json` | Shipping fees as seed data for the database |
 
