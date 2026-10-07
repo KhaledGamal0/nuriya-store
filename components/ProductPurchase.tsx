@@ -12,6 +12,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
   const [needSize, setNeedSize] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [kg, setKg] = useState(58);
+  const [added, setAdded] = useState(false);
   const fit = sizeForWeight(kg);
 
   function addToBag() {
@@ -21,7 +22,11 @@ export function ProductPurchase({ color }: { color: ColorId }) {
       return;
     }
     bag.add(color, size);
-    bag.openBag();
+    setAdded(true);
+    window.setTimeout(() => {
+      setAdded(false);
+      bag.openBag();
+    }, 450);
   }
 
   return (
@@ -77,8 +82,17 @@ export function ProductPurchase({ color }: { color: ColorId }) {
         )}
       </div>
 
-      <button type="button" className="btn" onClick={addToBag}>
-        Add to bag
+      <button type="button" className="btn" onClick={addToBag} data-added={added ? "true" : "false"} aria-live="polite">
+        {added ? (
+          <>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
+            Added to bag
+          </>
+        ) : (
+          "Add to bag"
+        )}
       </button>
 
       <Dialog open={guideOpen} onClose={() => setGuideOpen(false)} variant="sheet" labelledBy="fit-title">

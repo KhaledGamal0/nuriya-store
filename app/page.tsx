@@ -43,7 +43,7 @@ export default function Home() {
       </section>
 
       <section className="wrap sec" id="shop" aria-labelledby="shop-title" style={{ scrollMarginTop: "var(--header)" }}>
-        <div className="sec-h">
+        <div className="sec-h reveal">
           <h2 id="shop-title">{PRODUCT.name}</h2>
           <span className="small">{COLORS.length} colors</span>
         </div>
@@ -52,7 +52,7 @@ export default function Home() {
             const color = PRODUCT.colors[c];
             const first = color.images[0]!;
             return (
-              <Link className="pc" href={`/quiet-confidence/${c}`} key={c}>
+              <Link className="pc reveal" href={`/quiet-confidence/${c}`} key={c}>
                 <div className="pc-ph">
                   <Image src={first.src} alt={first.alt} fill sizes="(min-width: 900px) 600px, 50vw" />
                   <Image src={hover[c]!} alt="" fill sizes="(min-width: 900px) 600px, 50vw" />
@@ -71,7 +71,7 @@ export default function Home() {
 
       <section className="ed" aria-label="Craft">
         <Image src="/images/sleeve.jpg" alt="Embroidered sleeve: do what you love, love what you do" fill sizes="100vw" />
-        <p>
+        <p className="reveal">
           Every stitch,
           <br />
           every detail.

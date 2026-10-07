@@ -109,6 +109,18 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     await shot(page, `${vp}-${name}`);
   }
 
+  // Header hides on scroll down and returns on scroll up
+  await step(vp, "header-scroll", async () => {
+    where = "header-scroll";
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    await page.mouse.wheel(0, 900);
+    await page.waitForTimeout(600);
+    if ((await page.locator(".hdr").getAttribute("data-hidden")) !== "true") add(vp, where, "flow", "header did not hide when scrolling down");
+    await page.mouse.wheel(0, -300);
+    await page.waitForTimeout(600);
+    if ((await page.locator(".hdr").getAttribute("data-hidden")) !== "false") add(vp, where, "flow", "header did not come back when scrolling up");
+  });
+
   // Interactions
   await step(vp, "menu-open", async () => {
     where = "menu-open";
@@ -145,7 +157,8 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   await step(vp, "bag-open", async () => {
     where = "bag-open";
     await page.getByRole("button", { name: "Add to bag" }).click();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(1000);
+    if (!(await page.locator("dialog[open]").count())) add(vp, where, "flow", "bag did not open after adding");
     await checks(page, vp, where);
     await page.screenshot({ path: `${OUT}/shots/${vp}-bag-open.png` });
   });

@@ -32,6 +32,9 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Automated UI/UX audit on every push (phone + desktop, accessibility, tap targets, flows) | DONE | `scripts/ui-audit.mjs`, results on the `ui-report` branch — 0 findings on Oct 7 |
 | 404 page | DONE | |
 | Panels slide out smoothly when closing (all browsers) | DONE | |
+| Header hides on scroll down, returns on scroll up; current page underlined | DONE | |
+| Page fade between pages, scroll reveal, "Added to bag" confirmation, hover underlines | DONE | |
+| Footer redesign (brand line, Instagram, Shop/Help/Follow, payment methods) | DONE | |
 | Delivery and returns page: policy cards, EN/AR switch with real RTL, readable fees | DONE | |
 | Sold-out state and "notify me" | P2 / LATER | Sold out in P2, notify me later |
 | Reviews / customer photos | LATER | |

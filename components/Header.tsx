@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { Dialog, CloseButton } from "./Dialog";
 import { useBag } from "./BagProvider";
@@ -15,10 +16,30 @@ export function Header() {
   const bag = useBag();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
+  const pathname = usePathname();
+  const current = (href: string) => (pathname === href ? "page" : undefined);
+
+  // Hide the header while scrolling down, bring it back on any scroll up.
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const lastY = useRef(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      if (Math.abs(y - lastY.current) < 6) return;
+      setHidden(y > lastY.current && y > 120);
+      lastY.current = y;
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => setHidden(false), [pathname]);
 
   return (
     <>
-      <header className="hdr">
+      <header className="hdr" data-hidden={hidden && !menuOpen && !bag.bagOpen ? "true" : "false"} data-scrolled={scrolled ? "true" : "false"}>
         <div className="wrap hdr-in">
           <div className="hdr-side">
             <button type="button" className="ib hdr-menu" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-haspopup="dialog">
@@ -26,15 +47,15 @@ export function Header() {
                 <path d="M0 1h20M0 11h20" />
               </svg>
             </button>
-            <Link className="hdr-link" href="/quiet-confidence/cream">Cream</Link>
-            <Link className="hdr-link" href="/quiet-confidence/burgundy">Burgundy</Link>
-            <Link className="hdr-link" href="/size-guide">Size guide</Link>
+            <Link className="hdr-link line-link" href="/quiet-confidence/cream" aria-current={current("/quiet-confidence/cream")}>Cream</Link>
+            <Link className="hdr-link line-link" href="/quiet-confidence/burgundy" aria-current={current("/quiet-confidence/burgundy")}>Burgundy</Link>
+            <Link className="hdr-link line-link" href="/size-guide" aria-current={current("/size-guide")}>Size guide</Link>
           </div>
           <Link href="/" className="logo-link" aria-label="Nuriya, home">
             <Logo className="logo" />
           </Link>
           <div className="hdr-side hdr-side-r">
-          <a className="hdr-link" href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
+          <a className="hdr-link line-link" href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
             Instagram
           </a>
           <button
@@ -67,11 +88,11 @@ export function Header() {
         </div>
         <nav className="dlg-b nav" aria-label="Main">
           <p className="nav-label">Shop</p>
-          <Link href="/quiet-confidence/cream" onClick={closeMenu}>Quiet Confidence, cream</Link>
-          <Link href="/quiet-confidence/burgundy" onClick={closeMenu}>Quiet Confidence, burgundy</Link>
+          <Link href="/quiet-confidence/cream" onClick={closeMenu} aria-current={current("/quiet-confidence/cream")}>Quiet Confidence, cream</Link>
+          <Link href="/quiet-confidence/burgundy" onClick={closeMenu} aria-current={current("/quiet-confidence/burgundy")}>Quiet Confidence, burgundy</Link>
           <p className="nav-label">Help</p>
-          <Link href="/size-guide" onClick={closeMenu}>Size guide</Link>
-          <Link href="/returns" onClick={closeMenu}>Delivery and returns</Link>
+          <Link href="/size-guide" onClick={closeMenu} aria-current={current("/size-guide")}>Size guide</Link>
+          <Link href="/returns" onClick={closeMenu} aria-current={current("/returns")}>Delivery and returns</Link>
         </nav>
         <div className="dlg-f">
           <a className="small" href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
