@@ -1,5 +1,12 @@
 # Nuriya Store — project home
 
+```bash
+npm install
+npm run dev      # http://localhost:3000
+npm test         # checkout and pricing rules
+npm run build
+```
+
 Custom e-commerce website + admin dashboard for **Nuriya** (Cairo women's clothing, @nuriya.eg).
 Owner: Khaled Gamal. Status: **PLANNING — nothing built yet. Wait for Khaled's go before starting.**
 

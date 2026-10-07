@@ -1,0 +1,131 @@
+// Server-side checkout rules. The browser only sends WHAT the customer wants (color, size, quantity);
+// every price, fee and total is computed here from the catalog and the shipping table.
+import { PRODUCT, isColor, isSize, type ColorId, type SizeId } from "./catalog.ts";
+import { getArea, type Area } from "./shipping.ts";
+
+export const MAX_QTY_PER_LINE = 5;
+export const MAX_LINES = 8;
+
+export type CartLine = { color: ColorId; size: SizeId; qty: number };
+export type PaymentMethod = "cod" | "card";
+
+export type CheckoutInput = {
+  phone: unknown;
+  name: unknown;
+  areaId: unknown;
+  address: unknown;
+  payment: unknown;
+  cart: unknown;
+};
+
+export type PricedLine = CartLine & { unitPiasters: number; linePiasters: number };
+
+export type ValidOrder = {
+  phone: string;
+  name: string;
+  area: Area;
+  address: string;
+  payment: PaymentMethod;
+  lines: PricedLine[];
+  subtotalPiasters: number;
+  shippingPiasters: number;
+  totalPiasters: number;
+};
+
+export type FieldErrors = Partial<Record<"phone" | "name" | "area" | "address" | "payment" | "cart", string>>;
+
+export type CheckoutResult = { ok: true; order: ValidOrder } | { ok: false; errors: FieldErrors };
+
+/** Egyptian mobile: 010, 011, 012 or 015 + 8 digits. Accepts spaces, dashes and +20 / 0020. */
+export function normalizePhone(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  let digits = raw.replace(/[\s\-().]/g, "");
+  if (digits.startsWith("+20")) digits = "0" + digits.slice(3);
+  else if (digits.startsWith("0020")) digits = "0" + digits.slice(4);
+  else if (digits.startsWith("20") && digits.length === 12) digits = "0" + digits.slice(2);
+  return /^01[0125]\d{8}$/.test(digits) ? digits : null;
+}
+
+/** Parse and clean the cart sent by the browser. Unknown items are rejected; duplicates are merged. */
+export function parseCart(raw: unknown): CartLine[] | null {
+  let data: unknown = raw;
+  if (typeof raw === "string") {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  if (!Array.isArray(data) || data.length === 0 || data.length > MAX_LINES) return null;
+  const merged = new Map<string, CartLine>();
+  for (const item of data) {
+    if (typeof item !== "object" || item === null) return null;
+    const { color, size, qty } = item as Record<string, unknown>;
+    if (!isColor(color) || !isSize(size)) return null;
+    if (typeof qty !== "number" || !Number.isInteger(qty) || qty < 1) return null;
+    const key = `${color}|${size}`;
+    const prev = merged.get(key);
+    merged.set(key, { color, size, qty: Math.min(MAX_QTY_PER_LINE, (prev?.qty ?? 0) + qty) });
+  }
+  return [...merged.values()];
+}
+
+function cleanText(raw: unknown, max: number): string {
+  return typeof raw === "string" ? raw.replace(/\s+/g, " ").trim().slice(0, max) : "";
+}
+
+export function validateCheckout(input: CheckoutInput): CheckoutResult {
+  const errors: FieldErrors = {};
+
+  const phone = normalizePhone(input.phone);
+  if (!phone) errors.phone = "Enter an Egyptian mobile number, like 010 1234 5678.";
+
+  const name = cleanText(input.name, 80);
+  if (name.length < 3) errors.name = "Enter your full name.";
+
+  const area = getArea(input.areaId);
+  if (!area) errors.area = "Choose your area.";
+
+  const address = cleanText(input.address, 300);
+  if (address.length < 10) errors.address = "Add your street, building and floor.";
+
+  const payment = input.payment === "card" ? "card" : input.payment === "cod" ? "cod" : null;
+  if (!payment) errors.payment = "Choose how you want to pay.";
+
+  const cart = parseCart(input.cart);
+  if (!cart) errors.cart = "Your bag is empty or has an item we could not find.";
+
+  if (!phone || !area || !payment || !cart || Object.keys(errors).length > 0) return { ok: false, errors };
+
+  const lines: PricedLine[] = cart.map((line) => ({
+    ...line,
+    unitPiasters: PRODUCT.pricePiasters,
+    linePiasters: PRODUCT.pricePiasters * line.qty,
+  }));
+  const subtotalPiasters = lines.reduce((sum, l) => sum + l.linePiasters, 0);
+  const shippingPiasters = area.feePiasters;
+
+  return {
+    ok: true,
+    order: {
+      phone,
+      name,
+      area,
+      address,
+      payment,
+      lines,
+      subtotalPiasters,
+      shippingPiasters,
+      totalPiasters: subtotalPiasters + shippingPiasters,
+    },
+  };
+}
+
+/** Human-friendly, hard-to-guess order number, e.g. NUR-7K3Q9P. */
+export function newOrderNumber(random: (n: number) => Uint8Array = (n) => crypto.getRandomValues(new Uint8Array(n))): string {
+  const alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const bytes = random(6);
+  let out = "";
+  for (const b of bytes) out += alphabet[b % alphabet.length];
+  return `NUR-${out}`;
+}
