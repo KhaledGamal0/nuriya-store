@@ -19,7 +19,7 @@ const VIEWPORTS = {
 
 const PAGES = [
   ["home", "/"],
-  ["product-cream", "/quiet-confidence/cream"],
+  ["product-white", "/quiet-confidence/white"],
   ["product-burgundy", "/quiet-confidence/burgundy"],
   ["size-guide", "/size-guide"],
   ["returns", "/returns"],
@@ -70,6 +70,9 @@ async function checks(page, vp, where) {
     return out;
   });
   if (r.overflow > 1) add(vp, where, "sideways-scroll", `page is ${r.overflow}px wider than the screen`);
+  // The light colour is called White (Khaled, Oct 7 2026): no screen may say "cream".
+  const said = await page.evaluate(() => (document.body.innerText.match(/\bcream(y)?\b/i) || [null])[0]);
+  if (said) add(vp, where, "wording", `screen says "${said}" — the colour is called White`);
   for (const s of r.small) add(vp, where, "small-tap-target", s);
   for (const s of r.noAlt) add(vp, where, "image-without-alt", s);
   if (r.header && where === "home") {
@@ -110,9 +113,9 @@ async function refreshCheck(browser) {
     if ((await refresh("wrong")).status !== 401) add("mobile", "refresh", "security", "refresh endpoint accepted a wrong secret");
     await sql`UPDATE products SET price_piasters = 125000 WHERE slug = 'quiet-confidence'`;
     if ((await refresh(process.env.REVALIDATE_SECRET)).status !== 200) add("mobile", "refresh", "flow", "refresh endpoint rejected the right secret");
-    await page.goto(BASE + "/quiet-confidence/cream");
+    await page.goto(BASE + "/quiet-confidence/white");
     await page.waitForTimeout(1500);
-    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle", timeout: 20000 });
+    await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "networkidle", timeout: 20000 });
     if (!(await page.getByText("1,250 EGP").first().isVisible())) add("mobile", "refresh", "flow", "new price did not show after refresh");
     for (const path of ["/", "/returns", "/quiet-confidence/burgundy", "/size-guide", "/"]) {
       const t0 = Date.now();
@@ -139,7 +142,7 @@ async function techChecks() {
   if (h("x-powered-by")) f("/", "X-Powered-By header leaks the framework", "security");
   const cc = h("cache-control");
   if (!/s-maxage|max-age=\d{3,}/.test(cc)) f("/", `home page is not cacheable by the CDN (Cache-Control: ${cc || "none"})`, "speed");
-  for (const path of ["/", "/quiet-confidence/cream", "/quiet-confidence/burgundy", "/size-guide", "/returns"]) {
+  for (const path of ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/size-guide", "/returns"]) {
     const html = await (await fetch(BASE + path)).text();
     const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
     if (!title || title.length > 70) f(path, `page title missing or too long: "${title}"`, "seo");
@@ -159,7 +162,9 @@ async function techChecks() {
   const robots = await (await fetch(BASE + "/robots.txt")).text();
   if (!/Disallow: \/checkout/.test(robots) || !/Sitemap:/.test(robots)) f("/robots.txt", "robots.txt should block /checkout and list the sitemap", "seo");
   const sitemap = await (await fetch(BASE + "/sitemap.xml")).text();
-  for (const path of ["/quiet-confidence/cream", "/quiet-confidence/burgundy", "/size-guide", "/returns"]) if (!sitemap.includes(path)) f("/sitemap.xml", `sitemap is missing ${path}`, "seo");
+  for (const path of ["/quiet-confidence/white", "/quiet-confidence/burgundy", "/size-guide", "/returns"]) if (!sitemap.includes(path)) f("/sitemap.xml", `sitemap is missing ${path}`, "seo");
+  const old = await fetch(BASE + "/quiet-confidence/cream", { redirect: "manual" });
+  if (![301, 308].includes(old.status) || !String(old.headers.get("location")).endsWith("/quiet-confidence/white")) f("/quiet-confidence/cream", `old address should redirect permanently to /quiet-confidence/white (got ${old.status} ${old.headers.get("location")})`, "seo");
   const missing = await fetch(BASE + "/no-such-page");
   if (missing.status !== 404) f("/no-such-page", `unknown page returns ${missing.status}, should be 404`, "seo");
   const checkout = await (await fetch(BASE + "/checkout")).text();
@@ -228,14 +233,14 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
       await page.screenshot({ path: `${OUT}/shots/${vp}-menu-open.png` });
       await page.keyboard.press("Escape");
     } else {
-      for (const name of ["Cream", "Burgundy", "Size guide", "Instagram"])
+      for (const name of ["White", "Burgundy", "Size guide", "Instagram"])
         if (!(await page.locator(".hdr").getByRole("link", { name }).isVisible())) add(vp, where, "flow", `header link "${name}" not visible on desktop`);
     }
   });
 
   await step(vp, "photo-viewer", async () => {
     where = "photo-viewer";
-    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+    await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "networkidle" });
     await page.locator(".gal-i").first().click();
     await page.waitForTimeout(500);
     if (!(await page.locator("dialog.dlg-full[open]").count())) add(vp, where, "flow", "tapping a photo did not open the full-screen viewer");
@@ -252,7 +257,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
 
   await step(vp, "no-size-preselected", async () => {
     where = "no-size-preselected";
-    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+    await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "networkidle" });
     await page.locator("#size-group").getByRole("button", { name: "L/XL" }).click();
     await page.goto(BASE + "/quiet-confidence/burgundy", { waitUntil: "networkidle" });
     if (await page.locator('#size-group [aria-pressed="true"]').count()) add(vp, where, "flow", "a size was pre-selected when opening a product page");
@@ -260,7 +265,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
 
   await step(vp, "add-without-size", async () => {
     where = "add-without-size";
-    await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+    await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "Add to bag" }).click();
     if (!(await page.getByText("Choose a size first.").isVisible())) add(vp, where, "flow", "no message when adding without a size");
     await page.screenshot({ path: `${OUT}/shots/${vp}-add-without-size.png` });

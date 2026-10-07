@@ -22,7 +22,7 @@ export function Footer() {
           <nav aria-labelledby="ft-shop">
             <h2 id="ft-shop">Shop</h2>
             <ul>
-              <li><Link className="line-link" href="/quiet-confidence/cream">Cream</Link></li>
+              <li><Link className="line-link" href="/quiet-confidence/white">White</Link></li>
               <li><Link className="line-link" href="/quiet-confidence/burgundy">Burgundy</Link></li>
             </ul>
           </nav>

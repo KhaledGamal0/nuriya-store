@@ -6,6 +6,14 @@ export type ColorId = "cream" | "burgundy";
 export type SizeId = "S/M" | "L/XL";
 
 export const COLORS: readonly ColorId[] = ["cream", "burgundy"];
+
+/** Customer-facing address of each colour. The internal id "cream" stays (stock, SKUs, saved bags);
+ * customers see and link to "white" (Khaled, Oct 7 2026). /quiet-confidence/cream redirects. */
+export const COLOR_SLUG: Record<ColorId, string> = { cream: "white", burgundy: "burgundy" };
+export const productPath = (c: ColorId) => `/quiet-confidence/${COLOR_SLUG[c]}`;
+export function colorFromSlug(slug: string): ColorId | null {
+  return COLORS.find((c) => COLOR_SLUG[c] === slug) ?? null;
+}
 export const SIZES: readonly SizeId[] = ["S/M", "L/XL"];
 
 export type ProductImage = { src: string; alt: string; width: number; height: number };
@@ -39,27 +47,27 @@ export const PRODUCT = {
   colors: {
     cream: {
       id: "cream",
-      name: "Cream",
-      swatch: "#F3F0E8",
-      detail: "Cream body, burgundy collar and burgundy embroidery.",
+      name: "White",
+      swatch: "#FFFFFF",
+      detail: "White body, burgundy collar and burgundy embroidery.",
       images: [
-        { src: "/images/cream-hd-model.jpg", alt: "Smiling girl in the cream Quiet Confidence quarter-zip with a burgundy collar, wide-leg jeans and an iced coffee", width: 1500, height: 1875 },
-        { src: "/images/cream-hd-chest.jpg", alt: "Close-up of the cream quarter-zip: burgundy collar, ring-pull zip and burgundy QUIET CONFIDENCE embroidery", width: 1170, height: 1462 },
-        { src: "/images/cream-hd-sleeve.jpg", alt: "Cream cuff embroidered in burgundy: do what you love, love what you do", width: 1170, height: 1462 },
-        { src: "/images/cream-styled.jpg", alt: "Cream quarter-zip styled with pleated trousers and a belt", width: 1360, height: 1700 },
+        { src: "/images/cream-hd-model.jpg", alt: "Smiling girl in the white Quiet Confidence quarter-zip with a burgundy collar, wide-leg jeans and an iced coffee", width: 1500, height: 1875 },
+        { src: "/images/cream-hd-chest.jpg", alt: "Close-up of the white quarter-zip: burgundy collar, ring-pull zip and burgundy QUIET CONFIDENCE embroidery", width: 1170, height: 1462 },
+        { src: "/images/cream-hd-sleeve.jpg", alt: "White cuff embroidered in burgundy: do what you love, love what you do", width: 1170, height: 1462 },
+        { src: "/images/cream-styled.jpg", alt: "White quarter-zip styled with pleated trousers and a belt", width: 1360, height: 1700 },
       ],
     },
     burgundy: {
       id: "burgundy",
       name: "Burgundy",
       swatch: "#7A2B3C",
-      detail: "Burgundy body, white collar and cream embroidery.",
+      detail: "Burgundy body, white collar and white embroidery.",
       images: [
-        { src: "/images/burgundy-hd-lean.jpg", alt: "Girl in the burgundy Quiet Confidence quarter-zip with a cream collar and wide-leg jeans", width: 1300, height: 1625 },
-        { src: "/images/burgundy-hd-flatlay.jpg", alt: "Burgundy quarter-zip laid flat: cream collar, Nuriya label, ring-pull zip and white embroidery on the chest and sleeve", width: 1590, height: 1987 },
-        { src: "/images/burgundy-hd-collar.jpg", alt: "Burgundy quarter-zip worn with jeans, hand at the cream collar", width: 1300, height: 1625 },
+        { src: "/images/burgundy-hd-lean.jpg", alt: "Girl in the burgundy Quiet Confidence quarter-zip with a white collar and wide-leg jeans", width: 1300, height: 1625 },
+        { src: "/images/burgundy-hd-flatlay.jpg", alt: "Burgundy quarter-zip laid flat: white collar, Nuriya label, ring-pull zip and white embroidery on the chest and sleeve", width: 1590, height: 1987 },
+        { src: "/images/burgundy-hd-collar.jpg", alt: "Burgundy quarter-zip worn with jeans, hand at the white collar", width: 1300, height: 1625 },
         { src: "/images/burgundy-hd-full.jpg", alt: "Full-length look: burgundy quarter-zip, wide-leg jeans and white trainers", width: 1480, height: 1850 },
-        { src: "/images/burgundy-styled.jpg", alt: "Burgundy quarter-zip styled with a long coat and cream trousers", width: 1360, height: 1700 },
+        { src: "/images/burgundy-styled.jpg", alt: "Burgundy quarter-zip styled with a long coat and light trousers", width: 1360, height: 1700 },
         { src: "/images/burgundy-hanger.jpg", alt: "Burgundy quarter-zip with a white collar on a hanger", width: 1600, height: 2000 },
       ],
     },

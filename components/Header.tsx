@@ -59,7 +59,7 @@ export function Header() {
                 <path d="M0 1h20M0 11h20" />
               </svg>
             </button>
-            <Link className="hdr-link line-link" href="/quiet-confidence/cream" aria-current={current("/quiet-confidence/cream")}>Cream</Link>
+            <Link className="hdr-link line-link" href="/quiet-confidence/white" aria-current={current("/quiet-confidence/white")}>White</Link>
             <Link className="hdr-link line-link" href="/quiet-confidence/burgundy" aria-current={current("/quiet-confidence/burgundy")}>Burgundy</Link>
             <Link className="hdr-link line-link" href="/size-guide" aria-current={current("/size-guide")}>Size guide</Link>
           </div>
@@ -100,7 +100,7 @@ export function Header() {
         </div>
         <nav className="dlg-b nav" aria-label="Main">
           <p className="nav-label">Shop</p>
-          <Link href="/quiet-confidence/cream" onClick={closeMenu} aria-current={current("/quiet-confidence/cream")}>Quiet Confidence, cream</Link>
+          <Link href="/quiet-confidence/white" onClick={closeMenu} aria-current={current("/quiet-confidence/white")}>Quiet Confidence, white</Link>
           <Link href="/quiet-confidence/burgundy" onClick={closeMenu} aria-current={current("/quiet-confidence/burgundy")}>Quiet Confidence, burgundy</Link>
           <p className="nav-label">Help</p>
           <Link href="/size-guide" onClick={closeMenu} aria-current={current("/size-guide")}>Size guide</Link>

@@ -6,7 +6,7 @@ import fs from "node:fs/promises";
 import { chromium } from "playwright";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
-const PAGES = ["/", "/quiet-confidence/cream", "/quiet-confidence/burgundy", "/checkout", "/returns"];
+const PAGES = ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/checkout", "/returns"];
 const chrome = chromium.executablePath();
 const rows = [];
 const findings = [];

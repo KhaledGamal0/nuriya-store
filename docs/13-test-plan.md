@@ -63,6 +63,7 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | SQL injection, XSS, NUL bytes, direction overrides, 100k-char inputs, emoji, Arabic text | `fuzz.test.ts` | unit |
 | Tampered cart (qty 999, fake price, unknown items, prototype pollution, oversized cart) | `fuzz.test.ts`; browser "tampered bag" | unit + browser |
 | Hostile names/addresses cannot inject HTML into the shop e-mail or break the WhatsApp link | `fuzz.test.ts` | unit |
+| No screen says "cream"; /quiet-confidence/cream redirects to /white | ui-audit `checks()` on every page and state; techChecks | browser + server |
 | Order e-mail shows stock left, flags low/sold-out, cash to collect, product photo | `fuzz.test.ts` | unit |
 | 200 orders at once: all saved once, complete, correct (books balance) | `load.test.ts` | database |
 | 60 buyers race for 25 pieces: never oversold, reserved = sold | `load.test.ts` | database |

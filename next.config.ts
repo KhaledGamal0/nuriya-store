@@ -19,6 +19,10 @@ const config: NextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [390, 640, 828, 1080, 1280, 1600, 2048],
   },
+  async redirects() {
+    // The colour is called White (Khaled, Oct 7 2026); old links to /cream keep working.
+    return [{ source: "/quiet-confidence/cream", destination: "/quiet-confidence/white", permanent: true }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

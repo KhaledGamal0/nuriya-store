@@ -94,7 +94,7 @@ async function outcome(page, timeout = 30000) {
 
 // ---------- 1. Page load ----------
 await scenario("page load", async () => {
-  const paths = ["/", "/quiet-confidence/cream", "/quiet-confidence/burgundy", "/size-guide", "/returns", "/track", "/checkout", "/api/health"];
+  const paths = ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/size-guide", "/returns", "/track", "/checkout", "/api/health"];
   const total = 2400;
   const times = [];
   let errors = 0;
@@ -295,7 +295,7 @@ await scenario("small 320 px phone", async () => {
   const ctx = await browser.newContext({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   await setBag(page, [{ color: "burgundy", size: "S/M", qty: 2 }]);
-  for (const p of ["/", "/quiet-confidence/cream", "/checkout", "/track", "/returns", "/size-guide"]) {
+  for (const p of ["/", "/quiet-confidence/white", "/checkout", "/track", "/returns", "/size-guide"]) {
     await page.goto(BASE + p, { waitUntil: "networkidle" });
     const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (over > 1) add("320 px", `${p} scrolls sideways by ${over} px`);
@@ -310,7 +310,7 @@ await scenario("slow 3G, full purchase", async () => {
   page.setDefaultNavigationTimeout(90000);
   await cdp.send("Network.emulateNetworkConditions", { offline: false, latency: 400, downloadThroughput: (400 * 1024) / 8, uploadThroughput: (400 * 1024) / 8 });
   const t0 = Date.now();
-  await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "load", timeout: 60000 });
+  await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "load", timeout: 60000 });
   await page.locator("#size-group").getByRole("button", { name: "L/XL" }).click();
   await page.getByRole("button", { name: "Add to bag" }).click();
   await fillCheckout(page, nextPhone());

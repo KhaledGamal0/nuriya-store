@@ -8,7 +8,7 @@ const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const findings = [];
 const add = (where, detail) => findings.push(`- ${where}: ${detail}`);
 
-for (const path of ["/", "/quiet-confidence/cream", "/quiet-confidence/burgundy", "/checkout", "/returns", "/size-guide", "/track"]) {
+for (const path of ["/", "/quiet-confidence/white", "/quiet-confidence/burgundy", "/checkout", "/returns", "/size-guide", "/track"]) {
   const res = await fetch(BASE + path).catch(() => null);
   if (!res || res.status !== 200) add(path, `returned ${res?.status ?? "no response"} while the database was down`);
 }
@@ -23,7 +23,7 @@ const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMo
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 try {
-  await page.goto(BASE + "/quiet-confidence/cream", { waitUntil: "networkidle" });
+  await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "networkidle" });
   await page.locator("#size-group").getByRole("button", { name: "L/XL" }).click();
   await page.getByRole("button", { name: "Add to bag" }).click();
   await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });

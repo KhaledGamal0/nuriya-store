@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
+import { productPath, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
 import { useStore } from "./StoreProvider";
 import { useBag } from "./BagProvider";
 import { Dialog, CloseButton } from "./Dialog";
@@ -49,7 +49,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
             <Link
               key={c}
               className="opt"
-              href={`/quiet-confidence/${c}`}
+              href={productPath(c)}
               replace
               scroll={false}
               onClick={() => {

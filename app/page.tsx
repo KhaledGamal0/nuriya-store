@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
+import { productPath } from "@/lib/catalog";
 
 export default async function Home() {
   const catalog = await getCatalog();
@@ -12,7 +13,7 @@ export default async function Home() {
           <Image
             className="hero-img"
             src="/images/hero-pair.jpg"
-            alt="Two girls in the Quiet Confidence quarter-zip, one in cream with a burgundy collar and one in burgundy with a cream collar"
+            alt="Two girls in the Quiet Confidence quarter-zip, one in white with a burgundy collar and one in burgundy with a white collar"
             fill
             priority
             quality={75}
@@ -42,7 +43,7 @@ export default async function Home() {
             const first = color.images[0]!;
             const second = color.images[1] ?? first;
             return (
-              <Link className="pc reveal" href={`/quiet-confidence/${c}`} key={c}>
+              <Link className="pc reveal" href={productPath(c)} key={c}>
                 <div className="pc-ph">
                   <Image src={first.src} alt={first.alt} fill sizes="(min-width: 900px) 600px, 50vw" />
                   <Image src={second.src} alt="" fill sizes="(min-width: 900px) 600px, 50vw" />
@@ -63,7 +64,7 @@ export default async function Home() {
         <Image
           className="ed-tall"
           src="/images/craft-sleeve-tall.jpg"
-          alt="Cream cuff embroidered in burgundy: do what you love, love what you do"
+          alt="White cuff embroidered in burgundy: do what you love, love what you do"
           fill
           sizes="(min-width: 900px) 1px, 100vw"
         />

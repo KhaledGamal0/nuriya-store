@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { COLORS, isColor } from "@/lib/catalog";
+import { COLORS, colorFromSlug, productPath, COLOR_SLUG } from "@/lib/catalog";
 import { getAreas, getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 import { minFee } from "@/lib/shipping";
@@ -14,25 +14,25 @@ type Params = { params: Promise<{ color: string }> };
 
 export const dynamicParams = false;
 export function generateStaticParams() {
-  return COLORS.map((color) => ({ color }));
+  return COLORS.map((c) => ({ color: COLOR_SLUG[c] }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const { color } = await params;
-  if (!isColor(color)) return {};
+  const color = colorFromSlug((await params).color);
+  if (!color) return {};
   const catalog = await getCatalog();
   const c = catalog.colors[color];
   return {
     title: `${catalog.name} quarter-zip, ${c.name.toLowerCase()}`,
     description: catalog.summary,
     openGraph: { images: [{ url: c.images[0]!.src }] },
-    alternates: { canonical: `/quiet-confidence/${color}` },
+    alternates: { canonical: productPath(color) },
   };
 }
 
 export default async function ProductPage({ params }: Params) {
-  const { color } = await params;
-  if (!isColor(color)) notFound();
+  const color = colorFromSlug((await params).color);
+  if (!color) notFound();
   const [catalog, areas] = await Promise.all([getCatalog(), getAreas()]);
   const c = catalog.colors[color];
   const inStock = c.sizes.some((s) => s.available);
@@ -96,7 +96,7 @@ export default async function ProductPage({ params }: Params) {
         {catalog.colorOrder.filter((x) => x !== color).map((x) => {
           const o = catalog.colors[x];
           return (
-            <Link key={x} className="also" href={`/quiet-confidence/${x}`}>
+            <Link key={x} className="also" href={productPath(x)}>
               <span className="also-img">
                 <Image src={o.images[0]!.src} alt="" fill sizes="64px" />
               </span>
