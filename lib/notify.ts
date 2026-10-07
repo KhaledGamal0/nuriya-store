@@ -1,6 +1,7 @@
 // New-order e-mail to the shop (Resend). Sent AFTER the order is safely saved, never before:
 // if e-mail is down the order is still in the database, notified_at stays empty, the next order
-// retries it, and the hourly "Order watch" workflow raises a phone alert.
+// retries it (for up to 7 days, so a wrong setting fixed later still delivers every waiting order),
+// and the hourly "Order watch" workflow raises a phone alert.
 import type { Sql } from "./db/index.ts";
 import { formatEgp } from "./money.ts";
 
@@ -92,7 +93,7 @@ export async function sendPendingOrderEmails(sql: Sql, opts: { limit?: number; f
   await sql.begin(async (tx) => {
     const due = await tx<{ id: number }[]>`
       SELECT id FROM orders
-      WHERE notified_at IS NULL AND notify_attempts < 10 AND created_at > now() - interval '7 days'
+      WHERE notified_at IS NULL AND notify_attempts < 200 AND created_at > now() - interval '7 days'
       ORDER BY created_at
       LIMIT ${opts.limit ?? 5}
       FOR UPDATE SKIP LOCKED`;
