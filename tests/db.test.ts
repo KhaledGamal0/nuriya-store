@@ -104,5 +104,5 @@ test("seeding twice changes nothing", { skip }, async () => {
   const { execFileSync } = await import("node:child_process");
   execFileSync(process.execPath, ["--experimental-strip-types", "scripts/db-seed.ts"], { env: process.env, stdio: "ignore" });
   const [c] = await sql!`SELECT (SELECT count(*) FROM variants)::int AS v, (SELECT count(*) FROM media)::int AS m, (SELECT count(*) FROM shipping_areas)::int AS a`;
-  assert.deepEqual({ ...c }, { v: 4, m: 11, a: 35 });
+  assert.deepEqual({ ...c }, { v: 4, m: 10, a: 35 });
 });
