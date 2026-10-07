@@ -63,3 +63,4 @@ Arabic RTL storefront (if not done), referral, reviews/UGC, waitlist/drops, aban
 | Date | Phase | Status | Notes |
 |---|---|---|---|
 | 2026-10-07 | Planning | Done | Brand, decisions, shipping, policy, architecture, admin, design direction, review saved |
+| 2026-10-07 | Design | Prototype v1 | Working storefront prototype (home, PDP, bag drawer, fit finder, checkout with Direction fees, confirmation) — `prototype/storefront-template.html`. Direction approved by Khaled: white editorial, plum ink, pink as small accent, full-bleed real photos. Blocked here: npm registry + GitHub push (403) — real Next.js build needs GitHub App install or local Claude Code |

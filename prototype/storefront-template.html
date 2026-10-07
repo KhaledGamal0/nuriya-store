@@ -1,0 +1,557 @@
+<title>Nuriya Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: editorial fashion house — full-bleed photography, white paper, plum ink, one serif voice, everything else quiet. Single light theme by brand choice. */
+:root{
+ --paper:#FFFFFF; --stone:#F6F1EF; --ink:#3C0E18; --ink-2:#683A46; --line:#EADFDD;
+ --blush:#FFE1ED; --rose:#B78074; --burg:#7A2B3C; --cream:#F3F0E8; --on-ink:#FFE1ED;
+ --display:"Instrument Serif",Georgia,"Times New Roman",serif; --body:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;
+ --gut:clamp(16px,4vw,48px); --max:1320px; --ease:cubic-bezier(.22,.61,.36,1);
+ color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;padding:0}
+:focus-visible{outline:2px solid var(--burg);outline-offset:3px;border-radius:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gut)}
+.serif{font-family:var(--display);font-weight:400}
+.label{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+.muted{color:var(--ink-2)}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:0 30px;border-radius:999px;font-weight:500;font-size:14px;letter-spacing:.02em;text-decoration:none;transition:background .25s,color .25s,transform .2s}
+.btn:active{transform:scale(.98)}
+.btn-ink{background:var(--ink);color:var(--paper)}.btn-ink:hover{background:var(--burg)}
+.btn-white{background:var(--paper);color:var(--ink)}
+.btn-ghost{box-shadow:inset 0 0 0 1px currentColor}
+.btn-full{width:100%}
+.link{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+
+/* announcement */
+.ann{background:var(--ink);color:var(--on-ink);font-size:12px;letter-spacing:.06em;overflow:hidden;white-space:nowrap}
+.ann-track{display:inline-flex;gap:56px;padding:9px 0;animation:marq 38s linear infinite}
+.ann-track span{display:inline-flex;gap:56px}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* header */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hdr-in{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:64px}
+.hdr-l{display:flex;gap:28px;align-items:center}
+.hdr-r{display:flex;justify-content:flex-end;gap:24px;align-items:center}
+.navbtn{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.04em;min-height:44px}
+.logo{height:30px;width:auto;color:var(--ink)}
+.logo-link{display:block;padding:8px}
+.desk{display:none}
+@media(min-width:900px){.desk{display:inline-flex}.logo{height:36px}}
+.count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:11px;font-weight:500;transition:transform .3s var(--ease)}
+.count.bump{transform:scale(1.3)}
+
+/* views */
+.view{animation:fadeup .6s var(--ease) both}
+.view[hidden]{display:none!important}
+@keyframes fadeup{from{opacity:.0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* hero */
+.hero{position:relative;display:grid;grid-template-columns:1fr;background:var(--stone);overflow:hidden}
+.hero figure{margin:0;position:relative;overflow:hidden;height:min(86svh,900px);min-height:520px}
+.hero figure img{width:100%;height:100%;object-fit:cover;animation:settle 2.2s var(--ease) both}
+.hero figure+figure{display:none}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(60,14,24,.62));pointer-events:none}
+.hero-txt{position:absolute;z-index:2;left:var(--gut);right:var(--gut);bottom:clamp(28px,6vw,64px);color:var(--paper);display:grid;gap:18px}
+.hero h1{font-size:clamp(46px,7.5vw,104px);line-height:.92;max-width:12ch}
+.hero h1 i{display:block}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px}
+@keyframes settle{from{transform:scale(1.07)}to{transform:none}}
+@media(min-width:900px){.hero{grid-template-columns:1fr 1fr}.hero figure+figure{display:block}.hero figure img{object-position:center 30%}}
+
+/* intro */
+.intro{padding-block:clamp(56px,10vw,128px)}
+.intro p{font-family:var(--display);font-size:clamp(28px,4.2vw,54px);line-height:1.12;max-width:20ch;text-wrap:balance}
+.intro p span{color:var(--rose);font-style:italic}
+
+/* section head */
+.sh{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:22px}
+.sh h2{font-size:clamp(32px,4.5vw,56px);line-height:1}
+
+/* product duo */
+.duo{display:grid;grid-template-columns:1fr;gap:clamp(28px,3vw,20px)}
+@media(min-width:700px){.duo{grid-template-columns:1fr 1fr}}
+.card{display:grid;gap:14px}
+.card-media{position:relative;aspect-ratio:4/5;max-width:100%;overflow:hidden;background:var(--stone);display:block}
+.card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .7s var(--ease),transform 1.4s var(--ease)}
+.card-media img+img{opacity:0}
+.card-media:hover img{transform:scale(1.03)}
+.card-media:hover img+img{opacity:1}
+.card-tag{position:absolute;left:14px;top:14px;z-index:1;background:var(--paper);padding:4px 10px;border-radius:99px;font-size:11px;letter-spacing:.08em}
+.card-row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.card-row h3{font-size:24px;line-height:1.1}
+.price{font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.quick{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.quick span{font-size:12px;color:var(--ink-2);margin-right:4px}
+.qbtn{min-height:40px;min-width:64px;padding:0 14px;border-radius:99px;box-shadow:inset 0 0 0 1px var(--line);font-size:13px;font-weight:500;transition:box-shadow .2s,background .2s,color .2s}
+.qbtn:hover{box-shadow:inset 0 0 0 1px var(--ink)}
+.qbtn.ok{background:var(--ink);color:var(--paper)}
+
+/* two ways */
+.ways{padding-block:clamp(72px,10vw,140px)}
+.ways-grid{display:grid;grid-template-columns:1fr;gap:28px}
+@media(min-width:700px){.ways-grid{grid-template-columns:1fr 1fr}}
+.way figure{margin:0;aspect-ratio:4/5;max-width:100%;overflow:hidden;background:var(--stone)}
+.way figure img{width:100%;height:100%;object-fit:cover}
+.way-meta{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;margin-top:14px}
+.way-meta b{font-family:var(--display);font-weight:400;font-size:26px;line-height:1}
+.meter{height:2px;background:var(--line);position:relative}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--ink);transform-origin:left;animation:grow 1.6s var(--ease) both}
+@keyframes grow{from{transform:scaleX(.2)}}
+.way-meta span{font-variant-numeric:tabular-nums;font-size:13px}
+.ways-note{margin-top:22px;font-size:13px;max-width:52ch}
+
+/* craft rail */
+.craft{background:var(--stone);padding-block:clamp(64px,9vw,120px)}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:78%;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-inline:var(--gut);margin-inline:calc(var(--gut)*-1);scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+@media(min-width:900px){.rail{grid-auto-columns:1fr;grid-auto-flow:row;grid-template-columns:repeat(3,1fr);overflow:visible;margin-inline:0;padding-inline:0}}
+.rail figure{margin:0;scroll-snap-align:start}
+.rail .ph{aspect-ratio:4/5;max-width:100%;overflow:hidden}
+.rail img{width:100%;height:100%;object-fit:cover;transition:transform 1.4s var(--ease)}
+.rail figure:hover img{transform:scale(1.04)}
+.rail figcaption{margin-top:14px;display:grid;gap:2px}
+.rail figcaption b{font-family:var(--display);font-weight:400;font-size:24px}
+.rail figcaption span{font-size:13px;color:var(--ink-2)}
+
+/* story */
+.story{padding-block:clamp(72px,10vw,140px);display:grid;gap:clamp(28px,5vw,72px);grid-template-columns:1fr;align-items:center}
+@media(min-width:900px){.story{grid-template-columns:1.05fr 1fr}}
+.story-imgs{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;align-items:end}
+.story-imgs img{width:100%;object-fit:cover;aspect-ratio:3/4}
+.story-imgs img+img{aspect-ratio:4/5}
+.story-txt{display:grid;gap:20px;max-width:46ch}
+.story-txt h2{font-size:clamp(40px,5.5vw,76px);line-height:.95}
+.story-txt h2 i{color:var(--rose)}
+.ar{font-family:"Noto Naskh Arabic",var(--display);font-size:1.1em}
+
+/* service list */
+.svc{border-top:1px solid var(--line);margin-bottom:clamp(64px,8vw,110px)}
+.svc-row{display:grid;grid-template-columns:1fr;gap:4px 24px;padding:22px 0;border-bottom:1px solid var(--line)}
+@media(min-width:700px){.svc-row{grid-template-columns:220px 1fr auto;align-items:baseline}}
+.svc-row b{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.2}
+.svc-row span{color:var(--ink-2);max-width:60ch}
+
+/* footer */
+footer{background:var(--ink);color:var(--on-ink);padding-block:clamp(56px,8vw,96px) 28px}
+.ft{display:grid;gap:40px;grid-template-columns:1fr}
+@media(min-width:800px){.ft{grid-template-columns:1.4fr 1fr 1fr 1fr}}
+.ft .logo{color:var(--on-ink);height:44px}
+.ft h4{margin:0 0 12px;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--rose)}
+.ft ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:14px}
+.ft a{text-decoration:none}.ft a:hover{text-decoration:underline;text-underline-offset:4px}
+.ft-tag{margin-top:14px;color:var(--rose);letter-spacing:.14em;font-size:13px}
+.ft-bot{margin-top:56px;padding-top:20px;border-top:1px solid rgba(255,225,237,.18);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font-size:12px;color:color-mix(in srgb,var(--on-ink) 70%,transparent)}
+
+/* product page */
+.crumbs{font-size:12px;color:var(--ink-2);padding-block:18px}
+.crumbs a{text-decoration:none}
+.pdp{display:grid;grid-template-columns:1fr;gap:clamp(24px,4vw,64px);padding-bottom:clamp(64px,8vw,110px)}
+@media(min-width:960px){.pdp{grid-template-columns:1.35fr 1fr;align-items:start}}
+.gal{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(var(--gut)*-1)}
+.gal::-webkit-scrollbar{display:none}
+.gal img{width:100%;aspect-ratio:4/5;max-width:100%;object-fit:cover;scroll-snap-align:start;background:var(--stone)}
+@media(min-width:960px){.gal{grid-auto-flow:row;grid-template-columns:1fr 1fr;gap:10px;overflow:visible;margin-inline:0}.gal img:first-child{grid-column:1/-1}}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .3s,width .3s}
+.dots i.on{background:var(--ink);width:18px;border-radius:3px}
+@media(min-width:960px){.dots{display:none}}
+.info{display:grid;gap:22px}
+@media(min-width:960px){.info{position:sticky;top:96px}}
+.info h1{font-size:clamp(40px,4.4vw,60px);line-height:.98}
+.info .sub{color:var(--ink-2);margin-top:8px}
+.pp{font-size:18px;font-weight:500;font-variant-numeric:tabular-nums}
+.opt-h{display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px}
+.opt-h b{font-weight:500}
+.sw{display:flex;gap:12px}
+.sw a{width:44px;height:44px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(60,14,24,.15);display:block;transition:box-shadow .2s}
+.sw a[aria-current=true]{box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--ink)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg button{min-height:52px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);font-weight:500;letter-spacing:.06em;transition:box-shadow .2s,background .2s,color .2s}
+.seg button:hover{box-shadow:inset 0 0 0 1px var(--ink)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper);box-shadow:none}
+.hint{font-size:13px;color:var(--ink-2);display:flex;justify-content:space-between;gap:12px;margin-top:12px}
+.door{display:flex;gap:12px;align-items:flex-start;background:var(--stone);padding:14px 16px;border-radius:10px;font-size:13px}
+.door svg{flex:none;margin-top:3px}
+.acc{border-top:1px solid var(--line)}
+.acc details{border-bottom:1px solid var(--line)}
+.acc summary{list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:58px;cursor:pointer;font-weight:500;font-size:14px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary:after{content:"+";font-size:20px;font-weight:300;transition:transform .3s}
+.acc details[open] summary:after{transform:rotate(45deg)}
+.acc .in{padding:0 0 20px;color:var(--ink-2);font-size:14px;display:grid;gap:10px}
+table.sz{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.sz th,.sz td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+.sz th{font-weight:500;color:var(--ink)}
+
+/* sheet + drawer */
+.scrim{position:fixed;inset:0;background:rgba(60,14,24,.35);opacity:0;pointer-events:none;transition:opacity .35s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;z-index:50;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--paper);transform:translateX(100%);transition:transform .45s var(--ease);display:grid;grid-template-rows:auto 1fr auto;padding-top:env(safe-area-inset-top,0px)}
+.drawer.on{transform:none}
+.dr-h{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+.dr-h h2{font-size:28px}
+.x{width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+.x:hover{background:var(--stone)}
+.dr-b{overflow:auto;padding:8px 20px}
+.line{display:grid;grid-template-columns:84px 1fr auto;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+.line img{width:84px;aspect-ratio:4/5;object-fit:cover;background:var(--stone)}
+.line h4{margin:0;font-family:var(--display);font-weight:400;font-size:20px;line-height:1.1}
+.line small{color:var(--ink-2);font-size:12.5px}
+.qty{display:inline-flex;align-items:center;margin-top:10px;box-shadow:inset 0 0 0 1px var(--line);border-radius:99px}
+.qty button{width:36px;height:36px;font-size:16px}
+.qty output{min-width:22px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
+.rm{font-size:12px;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;align-self:start;min-height:32px}
+.dr-f{padding:18px 20px calc(18px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:grid;gap:12px}
+.tot{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.empty{padding:48px 0;text-align:center;display:grid;gap:16px;justify-items:center}
+.empty p{font-family:var(--display);font-size:28px}
+.sheet{position:fixed;z-index:50;left:50%;bottom:0;width:min(520px,100%);background:var(--paper);border-radius:22px 22px 0 0;transform:translate(-50%,105%);transition:transform .45s var(--ease);padding:12px 24px calc(28px + env(safe-area-inset-bottom,0px))}
+.sheet.on{transform:translate(-50%,0)}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.sheet h2{font-size:32px;margin-bottom:6px}
+.rng{width:100%;accent-color:var(--ink);margin:18px 0 6px}
+.kg{font-family:var(--display);font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
+.res{margin-top:14px;padding:16px;border-radius:12px;background:var(--stone);display:grid;gap:4px}
+.res b{font-family:var(--display);font-weight:400;font-size:26px}
+.menu{position:fixed;inset:0;z-index:60;background:var(--paper);transform:translateY(-100%);transition:transform .55s var(--ease);display:grid;grid-template-rows:auto 1fr auto;padding:env(safe-area-inset-top,0px) var(--gut) calc(28px + env(safe-area-inset-bottom,0px))}
+.menu.on{transform:none}
+.menu nav{display:grid;align-content:center;gap:4px}
+.menu nav a{font-family:var(--display);font-size:clamp(44px,9vw,88px);line-height:1.05;text-decoration:none;transition:color .2s,padding .3s var(--ease)}
+.menu nav a:hover{color:var(--rose);padding-left:12px}
+.menu .m-h{display:flex;justify-content:space-between;align-items:center;height:64px}
+
+/* checkout */
+.co{display:grid;grid-template-columns:1fr;gap:clamp(28px,4vw,64px);padding-block:20px clamp(64px,8vw,110px)}
+@media(min-width:960px){.co{grid-template-columns:1.2fr 1fr;align-items:start}}
+.co h1{font-size:clamp(40px,5vw,64px);line-height:1;margin-bottom:8px}
+.fs{border:0;padding:0;margin:28px 0 0;display:grid;gap:14px}
+.fs legend{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;margin-bottom:14px;padding:0}
+.f{display:grid;gap:6px}
+.f label{font-size:13px;font-weight:500}
+.f input,.f select,.f textarea{min-height:52px;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:var(--paper);font-size:16px;transition:border-color .2s,box-shadow .2s}
+.f textarea{min-height:88px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(60,14,24,.08)}
+.f .err{font-size:12.5px;color:#9b1c2e;min-height:0}
+.f.bad input,.f.bad select{border-color:#9b1c2e}
+.two{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:600px){.two{grid-template-columns:1fr 1fr}}
+.pay{display:grid;gap:10px}
+.pay label{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:16px;border-radius:12px;border:1px solid var(--line);cursor:pointer;transition:border-color .2s,background .2s}
+.pay label:has(input:checked){border-color:var(--ink);background:var(--stone)}
+.pay input{accent-color:var(--ink);width:18px;height:18px}
+.pay small{display:block;color:var(--ink-2);font-size:12.5px}
+.sum{background:var(--stone);border-radius:18px;padding:clamp(20px,3vw,32px);display:grid;gap:14px}
+@media(min-width:960px){.sum{position:sticky;top:96px}}
+.sum .line{grid-template-columns:64px 1fr auto;border-color:rgba(60,14,24,.1)}
+.sum .line img{width:64px}
+.sum dl{margin:0;display:grid;gap:8px;font-variant-numeric:tabular-nums}
+.sum dl div{display:flex;justify-content:space-between;font-size:14px}
+.sum dl div.big{font-size:18px;font-weight:500;padding-top:12px;border-top:1px solid rgba(60,14,24,.12)}
+.sum dd{margin:0}
+
+/* confirmation */
+.done{padding-block:clamp(40px,8vw,100px);display:grid;gap:clamp(28px,5vw,64px);grid-template-columns:1fr;align-items:center}
+@media(min-width:900px){.done{grid-template-columns:1fr 1fr}}
+.done h1{font-size:clamp(48px,7vw,96px);line-height:.95}
+.steps{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:0}
+.steps li{display:grid;grid-template-columns:28px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}
+.steps li i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink-2)}
+.steps li.now i{background:var(--ink);color:var(--paper);box-shadow:none}
+.steps li span small{display:block;color:var(--ink-2);font-size:12.5px}
+.tagcard{position:relative;max-width:420px;justify-self:center}
+.tagcard img{width:100%;border-radius:4px;box-shadow:0 30px 60px -30px rgba(60,14,24,.35);transform:rotate(-2deg);animation:swing 3s var(--ease) both}
+@keyframes swing{from{transform:rotate(-6deg) translateY(-12px)}to{transform:rotate(-2deg)}}
+.ordno{display:inline-block;margin-top:18px;font-variant-numeric:tabular-nums;background:var(--stone);padding:6px 14px;border-radius:99px;font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:99px;font-size:13px;z-index:70;transition:transform .45s var(--ease)}
+.toast.on{transform:translate(-50%,0)}
+.proto{font-size:11px;text-align:center;padding:10px;background:var(--stone);color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="ann" aria-label="Store information"><div class="ann-track"><span><b>Delivery across Egypt from 75 EGP</b><b>Cash on delivery or card</b><b>Open it and check it before you accept</b><b>Free returns at the door</b></span><span aria-hidden="true"><b>Delivery across Egypt from 75 EGP</b><b>Cash on delivery or card</b><b>Open it and check it before you accept</b><b>Free returns at the door</b></span></div></div>
+
+<header class="hdr"><div class="wrap hdr-in">
+ <div class="hdr-l">
+  <button class="navbtn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><svg width="20" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M0 1h20M0 11h13"/></svg><span class="desk">Menu</span></button>
+  <a class="navbtn desk" href="#cream" style="text-decoration:none">Shop</a>
+ </div>
+ <a class="logo-link" href="#home" aria-label="Nuriya home">{{LOGO}}</a>
+ <div class="hdr-r">
+  <a class="navbtn desk" href="https://www.instagram.com/nuriya.eg" target="_blank" rel="noopener" style="text-decoration:none">Instagram</a>
+  <button class="navbtn" id="bagBtn" aria-label="Open bag"><span class="desk">Bag</span><svg class="mob" width="19" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 7h15l-1.1 13H3.1z"/><path d="M6 9V5a3.5 3.5 0 0 1 7 0v4"/></svg><span class="count" id="bagCount">0</span></button>
+ </div>
+</div></header>
+
+<main>
+<!-- HOME -->
+<section class="view" id="v-home" aria-label="Home">
+ <div class="hero">
+  <figure><img src="{{IMG:hero}}" alt="A girl in the cream Quiet Confidence quarter-zip and wide-leg jeans, outside in the Cairo sun" fetchpriority="high"></figure>
+  <figure><img src="{{IMG:hanger}}" alt="The burgundy Quiet Confidence quarter-zip with a white collar on a hanger"></figure>
+  <div class="hero-txt">
+   <p class="label">The Quiet Confidence quarter-zip</p>
+   <h1>Not loud.<i>Just unforgettable.</i></h1>
+   <div class="hero-cta"><a class="btn btn-white" href="#cream">Shop cream</a><a class="btn btn-ghost" href="#burgundy" style="color:var(--paper)">Shop burgundy</a></div>
+  </div>
+ </div>
+
+ <div class="wrap intro"><p>One piece, two colorways. Comfy enough for a lecture, <span>polished enough for coffee after.</span></p></div>
+
+ <div class="wrap">
+  <div class="sh"><h2>The collection</h2><a class="link" href="#cream" style="font-size:13px">View the piece</a></div>
+  <div class="duo">
+   <article class="card">
+    <a class="card-media" href="#cream" aria-label="Quiet Confidence, cream"><span class="card-tag">2 sizes</span><img src="{{IMG:cboard}}" alt="Cream quarter-zip styled with pleated trousers" loading="lazy"><img src="{{IMG:chest}}" alt="" loading="lazy"></a>
+    <div class="card-row"><h3>Quiet Confidence <span class="muted">· Cream</span></h3><span class="price">1,200 EGP</span></div>
+    <div class="quick" data-c="cream"><span>Quick add</span><button class="qbtn" data-s="S/M">S/M</button><button class="qbtn" data-s="L/XL">L/XL</button></div>
+   </article>
+   <article class="card">
+    <a class="card-media" href="#burgundy" aria-label="Quiet Confidence, burgundy"><span class="card-tag">2 sizes</span><img src="{{IMG:bboard}}" alt="Burgundy quarter-zip styled with a long coat and cream trousers" loading="lazy"><img src="{{IMG:hanger}}" alt="" loading="lazy"></a>
+    <div class="card-row"><h3>Quiet Confidence <span class="muted">· Burgundy</span></h3><span class="price">1,200 EGP</span></div>
+    <div class="quick" data-c="burgundy"><span>Quick add</span><button class="qbtn" data-s="S/M">S/M</button><button class="qbtn" data-s="L/XL">L/XL</button></div>
+   </article>
+  </div>
+ </div>
+
+ <div class="wrap ways">
+  <div class="sh"><h2>Two ways to wear it</h2><span class="label muted">You voted</span></div>
+  <div class="ways-grid">
+   <div class="way"><figure><img src="{{IMG:cfull}}" alt="Styling board: cream quarter-zip, pleated beige trousers, leather tote, gold watch" loading="lazy"></figure>
+    <div class="way-meta"><b>Old money</b><div class="meter"><i style="width:57%"></i></div><span>57%</span></div></div>
+   <div class="way"><figure><img src="{{IMG:bfull}}" alt="Styling board: burgundy quarter-zip, long black coat, burgundy scarf, cream trousers" loading="lazy"></figure>
+    <div class="way-meta"><b>Casual</b><div class="meter"><i style="width:43%"></i></div><span>43%</span></div></div>
+  </div>
+  <p class="ways-note muted">From our Instagram poll “Old money vs casual”. Pleated trousers, a belt and a leather bag, or jeans, sneakers and a cap. Same piece.</p>
+ </div>
+
+ <section class="craft"><div class="wrap">
+  <div class="sh"><h2>Every stitch, <i>every detail</i></h2></div>
+  <div class="rail">
+   <figure><div class="ph"><img src="{{IMG:chest}}" alt="Raised satin-stitch chest embroidery" loading="lazy"></div><figcaption><b>Raised satin stitch</b><span>QUIET CONFIDENCE across the chest, with our script just above.</span></figcaption></figure>
+   <figure><div class="ph"><img src="{{IMG:sleeve}}" alt="Handwritten sleeve embroidery near the cuff" loading="lazy"></div><figcaption><b>The sleeve line</b><span>“do what you love, love what you do”, stitched near the cuff.</span></figcaption></figure>
+   <figure><div class="ph"><img src="{{IMG:hanger}}" alt="Contrast collar and silver ring-pull zip" loading="lazy"></div><figcaption><b>Collar and ring pull</b><span>A pointed contrast collar and a silver ring-pull zip.</span></figcaption></figure>
+  </div>
+ </div></section>
+
+ <div class="wrap story">
+  <div class="story-imgs"><img src="{{IMG:bagmock}}" alt="Nuriya pink shopping bag" loading="lazy"><img src="{{IMG:labels}}" alt="Pink woven Nuriya size labels" loading="lazy"></div>
+  <div class="story-txt">
+   <p class="label" style="color:var(--rose)">Our story</p>
+   <h2>From <i>Nur</i>, <span class="ar">نور</span>. Light.</h2>
+   <p class="muted">Nuriya started in Cairo as a dream: one soft, oversized piece a girl reaches for first. Modest by design, with long sleeves, a loose cut and a longer curved hem. It does the talking through fabric, embroidery and color, never logos or noise.</p>
+   <p class="serif" style="font-size:22px;line-height:1.3">Thank you for supporting a dream that started with love.</p>
+  </div>
+ </div>
+
+ <div class="wrap"><div class="svc">
+  <div class="svc-row"><b>Delivery</b><span>Across Egypt by courier. 75 EGP in Cairo, Giza and the new cities, 90–165 EGP elsewhere. You see the exact fee at checkout.</span></div>
+  <div class="svc-row"><b>Payment</b><span>Pay cash on delivery, or by card on a secure payment page.</span></div>
+  <div class="svc-row"><b>Check before you accept</b><span>Open your parcel and check the size and item while the courier is still with you. Once you accept and the courier leaves, returns and exchanges are closed.</span></div>
+ </div></div>
+</section>
+
+<!-- PRODUCT -->
+<section class="view" id="v-pdp" aria-label="Product" hidden>
+ <div class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="#home">Home</a> / <span id="crumbC">Cream</span></nav>
+  <div class="pdp">
+   <div><div class="gal" id="gal" tabindex="0" aria-label="Product photos, swipe for more"></div><div class="dots" id="dots" aria-hidden="true"></div></div>
+   <div class="info">
+    <div>
+     <p class="label" style="color:var(--rose)">Quarter-zip · oversized</p>
+     <h1 style="margin-top:10px">Quiet Confidence</h1>
+     <p class="sub">A soft oversized sweatshirt with a contrast collar, silver ring-pull zip and our signature embroidery.</p>
+    </div>
+    <p class="pp">1,200 EGP</p>
+    <div><div class="opt-h"><b>Color</b><span id="cName">Cream</span></div>
+     <div class="sw" role="group" aria-label="Color"><a href="#cream" aria-label="Cream" data-c="cream" style="background:var(--cream)"></a><a href="#burgundy" aria-label="Burgundy" data-c="burgundy" style="background:var(--burg)"></a></div></div>
+    <div><div class="opt-h"><b>Size</b><span>Cut oversized. Between sizes? Size down.</span></div>
+     <div class="seg" role="group" aria-label="Size" id="seg"><button aria-pressed="true" data-s="S/M">S/M</button><button aria-pressed="false" data-s="L/XL">L/XL</button></div>
+     <div class="hint"><button class="link" id="fitBtn">Find my size</button><span>S/M fits 45–65 kg · L/XL 66–80 kg</span></div></div>
+    <button class="btn btn-ink btn-full" id="addBtn">Add to bag · 1,200 EGP</button>
+    <div class="door"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg><span>Open it and check the size while the courier is with you. Pay cash on delivery or by card.</span></div>
+    <div class="acc">
+     <details open><summary>Details</summary><div class="in"><p>Embroidery: “QUIET CONFIDENCE” in raised satin stitch across the chest, the Nuriya script above it, and “do what you love, love what you do” on the left sleeve.</p><p>Pointed polo collar in a contrast color, quarter-zip with silver teeth and a round ring pull, dropped shoulders, ribbed cuffs, curved hem.</p><p id="cwDetail">Cream body, burgundy collar and embroidery.</p></div></details>
+     <details><summary>Size and fit</summary><div class="in"><div style="overflow-x:auto"><table class="sz"><thead><tr><th>Size</th><th>Shoulder</th><th>Chest</th><th>Length</th></tr></thead><tbody><tr><td>S/M</td><td>56 cm</td><td>56 cm</td><td>64 cm</td></tr><tr><td>L/XL</td><td>60 cm</td><td>60 cm</td><td>67 cm</td></tr></tbody></table></div><p>Measured flat. Both sizes are cut oversized for a relaxed fit.</p></div></details>
+     <details><summary>Fabric and care</summary><div class="in"><p>Soft sweatshirt fabric. Exact composition and care instructions coming soon.</p></div></details>
+     <details><summary>Delivery and returns</summary><div class="in"><p>75 EGP in Cairo, Giza and the new cities. 90 EGP in Alexandria, the Delta and Canal cities. 100–125 EGP in Upper Egypt. 135–165 EGP for the New Capital and resort areas.</p><p>Check your order with the courier before you accept. After the courier leaves, returns and exchanges are closed.</p></div></details>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- CHECKOUT -->
+<section class="view" id="v-co" aria-label="Checkout" hidden>
+ <div class="wrap co">
+  <form id="coForm" novalidate>
+   <p class="label" style="color:var(--rose)">Checkout</p>
+   <h1 style="margin-top:10px">Almost yours</h1>
+   <p class="muted">No account needed. We'll confirm your order on WhatsApp.</p>
+   <fieldset class="fs"><legend>Contact</legend>
+    <div class="f" id="f-phone"><label for="phone">Mobile number</label><input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01x xxxx xxxx" required><span class="err" aria-live="polite"></span></div>
+    <div class="f" id="f-name"><label for="name">Full name</label><input id="name" name="name" autocomplete="name" required><span class="err" aria-live="polite"></span></div>
+   </fieldset>
+   <fieldset class="fs"><legend>Delivery</legend>
+    <div class="f" id="f-gov"><label for="gov">Governorate or city</label><select id="gov" name="gov" required><option value="">Choose your area</option></select><span class="err" aria-live="polite"></span></div>
+    <div class="f" id="f-addr"><label for="addr">Address</label><textarea id="addr" name="addr" autocomplete="street-address" placeholder="Street, building, floor, apartment, landmark" required></textarea><span class="err" aria-live="polite"></span></div>
+   </fieldset>
+   <fieldset class="fs"><legend>Payment</legend>
+    <div class="pay">
+     <label><input type="radio" name="pay" value="cod" checked><span>Cash on delivery<small>Pay the courier when it arrives</small></span><span class="muted" style="font-size:12px">Most chosen</span></label>
+     <label><input type="radio" name="pay" value="card"><span>Card<small>Visa, Mastercard and Meeza, on a secure Paymob page</small></span><span></span></label>
+    </div>
+   </fieldset>
+   <div class="door" style="margin-top:24px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>Please check your size and item with the courier before accepting. Once the courier leaves, returns and exchanges are closed.</span></div>
+   <button class="btn btn-ink btn-full" style="margin-top:20px" type="submit" id="placeBtn">Place order</button>
+  </form>
+  <aside class="sum" aria-label="Order summary">
+   <h2 style="font-size:30px">Your bag</h2>
+   <div id="sumLines"></div>
+   <dl><div><dt>Subtotal</dt><dd id="sSub">0 EGP</dd></div><div><dt>Delivery</dt><dd id="sShip">Choose area</dd></div><div class="big"><dt>Total</dt><dd id="sTot">0 EGP</dd></div></dl>
+  </aside>
+ </div>
+</section>
+
+<!-- DONE -->
+<section class="view" id="v-done" aria-label="Order placed" hidden>
+ <div class="wrap done">
+  <div>
+   <p class="label" style="color:var(--rose)">Order received</p>
+   <h1 style="margin-top:12px">Something beautiful is on its way.</h1>
+   <span class="ordno" id="ordNo">NUR-0001</span>
+   <ol class="steps">
+    <li class="now"><i>1</i><span>Order received<small>We have your order and saved your size.</small></span></li>
+    <li><i>2</i><span>Confirmation on WhatsApp<small id="doneMsg">We'll message you to confirm.</small></span></li>
+    <li><i>3</i><span>On its way<small>Delivered by courier within about 3 days.</small></span></li>
+    <li><i>4</i><span>Check it, then accept<small>Open it with the courier still there.</small></span></li>
+   </ol>
+   <a class="btn btn-ghost" href="#home" style="margin-top:28px">Back to the store</a>
+  </div>
+  <div class="tagcard"><img src="{{IMG:thanks}}" alt="Nuriya thank-you card: Thank you for supporting a dream that started with love"></div>
+ </div>
+</section>
+</main>
+
+<footer><div class="wrap">
+ <div class="ft">
+  <div>{{LOGO}}<p class="ft-tag">comfy · everyday pieces</p></div>
+  <div><h4>Shop</h4><ul><li><a href="#cream">Quiet Confidence, cream</a></li><li><a href="#burgundy">Quiet Confidence, burgundy</a></li></ul></div>
+  <div><h4>Help</h4><ul><li><a href="#cream">Size guide</a></li><li><a href="#home">Delivery and returns</a></li><li><a href="https://www.instagram.com/nuriya.eg" target="_blank" rel="noopener">Message us on Instagram</a></li></ul></div>
+  <div><h4>Follow</h4><ul><li><a href="https://www.instagram.com/nuriya.eg" target="_blank" rel="noopener">@nuriya.eg</a></li><li>Tag us to get featured</li></ul></div>
+ </div>
+ <div class="ft-bot"><span>© 2026 Nuriya · Cairo, Egypt</span><span>Not loud. Just unforgettable.</span></div>
+</div></footer>
+<p class="proto">Store prototype · orders are not real · photos are compressed previews</p>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Bag" aria-hidden="true">
+ <div class="dr-h"><h2>Bag</h2><button class="x" data-close aria-label="Close bag"><svg width="16" height="16" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14"/></svg></button></div>
+ <div class="dr-b" id="drBody"></div>
+ <div class="dr-f" id="drFoot"><div class="tot"><span>Subtotal</span><b id="drSub">0 EGP</b></div><p class="muted" style="font-size:12.5px">Delivery fee is added at checkout, from 75 EGP.</p><a class="btn btn-ink btn-full" href="#checkout" data-close>Checkout</a></div>
+</aside>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="fitTitle" aria-hidden="true">
+ <div class="grab"></div>
+ <h2 id="fitTitle">Find my size</h2>
+ <p class="muted" style="font-size:14px">Move the slider to your weight.</p>
+ <label for="kg" class="kg"><span id="kgOut">58</span> <span style="font-size:20px">kg</span></label>
+ <input class="rng" id="kg" type="range" min="40" max="95" value="58">
+ <div class="res" aria-live="polite"><span class="label muted">Your size</span><b id="fitRes">S/M</b><span class="muted" id="fitNote" style="font-size:13px">Relaxed and oversized, the way it's designed.</span></div>
+ <button class="btn btn-ink btn-full" id="fitUse" style="margin-top:18px">Use this size</button>
+</div>
+<nav class="menu" id="menu" aria-label="Menu" aria-hidden="true">
+ <div class="m-h"><span class="label muted">Menu</span><button class="x" data-close aria-label="Close menu"><svg width="16" height="16" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14"/></svg></button></div>
+ <nav><a href="#cream" data-close>Cream</a><a href="#burgundy" data-close>Burgundy</a><a href="#home" data-close>Our story</a><a href="https://www.instagram.com/nuriya.eg" target="_blank" rel="noopener">Instagram</a></nav>
+ <p class="muted" style="font-size:13px">comfy · everyday pieces</p>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const IMG={cream:["{{IMG:cboard}}","{{IMG:chest}}","{{IMG:sleeve}}","{{IMG:hero}}"],burgundy:["{{IMG:bboard}}","{{IMG:hanger}}","{{IMG:bfull}}"]};
+const ALT={cream:["Cream quarter-zip styled with pleated trousers","Chest embroidery close-up","Sleeve embroidery close-up","Cream quarter-zip worn with jeans"],burgundy:["Burgundy quarter-zip styled with a long coat","Burgundy quarter-zip with white collar on a hanger","Burgundy styling board with Pantone chips"]};
+const CW={cream:{n:"Cream",d:"Cream body, burgundy collar and embroidery."},burgundy:{n:"Burgundy",d:"Burgundy body, white collar, cream embroidery."}};
+const PRICE=1200;
+const ZONES=[[75,["Cairo","Giza","Madinaty","El Shorouk","El Obour","6th of October","Hadayek October","Sheikh Zayed"]],[90,["Giza countryside","Alexandria","Beheira","Gharbia","Dakahlia","Qalyubia","Kafr El Sheikh","Monufia","Ismailia","Suez","Port Said","Damietta","Sharqia"]],[100,["Fayoum","Beni Suef"]],[105,["Minya","Assiut","Sohag","Qena","Luxor","Aswan"]],[125,["New Valley"]],[135,["New Administrative Capital"]],[165,["Red Sea (Hurghada)","Sharm El Sheikh","North Coast","Marsa Matrouh"]]];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const egp=n=>n.toLocaleString('en-US')+' EGP';
+let bag=[];try{bag=JSON.parse(localStorage.getItem('nuriya-bag')||'[]')}catch(e){}
+let color='cream',size='S/M';
+const save=()=>{try{localStorage.setItem('nuriya-bag',JSON.stringify(bag))}catch(e){}};
+const total=()=>bag.reduce((a,l)=>a+l.q*PRICE,0);
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),2200)}
+function add(c,s){const l=bag.find(x=>x.c===c&&x.s===s);if(l)l.q=Math.min(5,l.q+1);else bag.push({c,s,q:1});save();render();const n=$('#bagCount');n.classList.add('bump');setTimeout(()=>n.classList.remove('bump'),300);}
+function lineHTML(l,i,small){return `<div class="line"><img src="${IMG[l.c][0]}" alt=""><div><h4>Quiet Confidence</h4><small>${CW[l.c].n} · ${l.s}</small>${small?`<small style="display:block">Qty ${l.q}</small>`:`<div class="qty"><button data-q="${i}" data-d="-1" aria-label="Decrease quantity">−</button><output>${l.q}</output><button data-q="${i}" data-d="1" aria-label="Increase quantity">+</button></div>`}</div><div style="display:grid;justify-items:end;gap:6px"><span class="price">${egp(l.q*PRICE)}</span>${small?'':`<button class="rm" data-rm="${i}">Remove</button>`}</div></div>`}
+function render(){
+ $('#bagCount').textContent=bag.reduce((a,l)=>a+l.q,0);
+ $('#drBody').innerHTML=bag.length?bag.map((l,i)=>lineHTML(l,i)).join(''):`<div class="empty"><p>Your bag is empty</p><a class="btn btn-ink" href="#cream" data-close>Shop the piece</a></div>`;
+ $('#drFoot').hidden=!bag.length;$('#drSub').textContent=egp(total());
+ $('#sumLines').innerHTML=bag.map((l,i)=>lineHTML(l,i,true)).join('')||'<p class="muted">Your bag is empty.</p>';
+ const fee=shipFee();$('#sSub').textContent=egp(total());$('#sShip').textContent=fee==null?'Choose area':egp(fee);$('#sTot').textContent=egp(total()+(fee||0));
+}
+function shipFee(){const v=$('#gov').value;return v?Number(v.split('|')[0]):null}
+// overlays
+let lastFocus=null;
+function open(el){lastFocus=document.activeElement;el.classList.add('on');el.setAttribute('aria-hidden','false');$('#scrim').classList.add('on');const f=el.querySelector('button,a,input');f&&setTimeout(()=>f.focus(),60)}
+function closeAll(){$$('.drawer,.sheet,.menu').forEach(e=>{e.classList.remove('on');e.setAttribute('aria-hidden','true')});$('#scrim').classList.remove('on');$('#menuBtn').setAttribute('aria-expanded','false');lastFocus&&lastFocus.focus&&lastFocus.focus()}
+$('#bagBtn').onclick=()=>open($('#drawer'));
+$('#menuBtn').onclick=()=>{open($('#menu'));$('#menuBtn').setAttribute('aria-expanded','true')};
+$('#scrim').onclick=closeAll;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
+document.addEventListener('click',e=>{
+ const c=e.target.closest('[data-close]');if(c)closeAll();
+ const q=e.target.closest('[data-q]');if(q){const l=bag[+q.dataset.q];l.q=Math.max(1,Math.min(5,l.q+ +q.dataset.d));save();render()}
+ const r=e.target.closest('[data-rm]');if(r){bag.splice(+r.dataset.rm,1);save();render()}
+ const qb=e.target.closest('.qbtn');if(qb){const c2=qb.parentElement.dataset.c;add(c2,qb.dataset.s);qb.classList.add('ok');qb.textContent='Added';setTimeout(()=>{qb.classList.remove('ok');qb.textContent=qb.dataset.s},1400);toast(`${CW[c2].n}, ${qb.dataset.s} added to your bag`)}
+});
+// product
+function setColor(c){color=c;$('#crumbC').textContent=CW[c].n;$('#cName').textContent=CW[c].n;$('#cwDetail').textContent=CW[c].d;
+ $$('.sw a').forEach(a=>a.setAttribute('aria-current',a.dataset.c===c));
+ $('#gal').innerHTML=IMG[c].map((s,i)=>`<img src="${s}" alt="${ALT[c][i]}" ${i?'loading="lazy"':''}>`).join('');
+ $('#dots').innerHTML=IMG[c].map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('');$('#gal').scrollLeft=0}
+$('#gal').addEventListener('scroll',()=>{const g=$('#gal'),i=Math.round(g.scrollLeft/g.clientWidth);$$('#dots i').forEach((d,j)=>d.classList.toggle('on',i===j))},{passive:true});
+$$('#seg button').forEach(b=>b.onclick=()=>{size=b.dataset.s;$$('#seg button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+$('#addBtn').onclick=()=>{add(color,size);open($('#drawer'))};
+// fit finder
+function fit(){const k=+$('#kg').value;$('#kgOut').textContent=k;let s,n;
+ if(k<45){s='S/M';n='It will feel extra roomy. The oversized look still works.'}
+ else if(k<=65){s='S/M';n='Relaxed and oversized, the way it is designed.'}
+ else if(k<=80){s='L/XL';n='Relaxed and oversized, the way it is designed.'}
+ else{s='L/XL';n='It may feel closer to the body than oversized. Message us on Instagram and we will help.'}
+ $('#fitRes').textContent=s;$('#fitNote').textContent=n;return s}
+$('#kg').oninput=fit;$('#fitBtn').onclick=()=>{fit();open($('#sheet'))};
+$('#fitUse').onclick=()=>{const s=fit();$$('#seg button').find(b=>b.dataset.s===s).click();closeAll();toast(`Size ${s} selected`)};
+// checkout
+const gov=$('#gov');ZONES.forEach(([fee,areas])=>{const g=document.createElement('optgroup');g.label=`${fee} EGP delivery`;areas.forEach(a=>{const o=document.createElement('option');o.value=fee+'|'+a;o.textContent=a;g.append(o)});gov.append(g)});
+gov.onchange=render;
+function err(id,msg){const f=$('#f-'+id);f.classList.toggle('bad',!!msg);f.querySelector('.err').textContent=msg||'';return !msg}
+$('#coForm').addEventListener('submit',e=>{e.preventDefault();
+ if(!bag.length){toast('Your bag is empty');return}
+ const ph=$('#phone').value.replace(/[\s-]/g,'');
+ const ok=[err('phone',/^01[0125]\d{8}$/.test(ph)?'':'Enter an Egyptian mobile number, like 010 1234 5678.'),
+  err('name',$('#name').value.trim().length>2?'':'Enter your full name.'),
+  err('gov',gov.value?'':'Choose your area to see the delivery fee.'),
+  err('addr',$('#addr').value.trim().length>8?'':'Add your street, building and floor.')].every(Boolean);
+ if(!ok){document.querySelector('.f.bad input,.f.bad select,.f.bad textarea').focus();return}
+ const card=document.querySelector('input[name=pay]:checked').value==='card';
+ $('#ordNo').textContent='NUR-'+String(Math.floor(1000+Math.random()*9000));
+ $('#doneMsg').textContent=card?'Payment confirmed on the secure page. We will message you on WhatsApp.':`We will message ${ph} on WhatsApp to confirm.`;
+ bag=[];save();render();location.hash='done';
+});
+// router
+function route(){const h=(location.hash||'#home').slice(1);
+ const v=h==='cream'||h==='burgundy'?'pdp':h==='checkout'?'co':h==='done'?'done':'home';
+ const go=()=>{$$('.view').forEach(s=>s.hidden=s.id!=='v-'+v);if(v==='pdp')setColor(h);window.scrollTo({top:0,behavior:'instant'})};
+ document.startViewTransition&&!matchMedia('(prefers-reduced-motion:reduce)').matches?document.startViewTransition(go):go()}
+addEventListener('hashchange',route);render();route();
+</script>
