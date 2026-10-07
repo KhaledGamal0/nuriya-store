@@ -31,6 +31,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Checkout: live validation, errors clear when fixed, focus first error, summary on top for phones | DONE | |
 | Automated UI/UX audit on every push (phone + desktop, accessibility, tap targets, flows) | DONE | `scripts/ui-audit.mjs`, results on the `ui-report` branch — 0 findings on Oct 7 |
 | 404 page | DONE | |
+| Panels slide out smoothly when closing (all browsers) | DONE | |
+| Delivery and returns page: policy cards, EN/AR switch with real RTL, readable fees | DONE | |
 | Sold-out state and "notify me" | P2 / LATER | Sold out in P2, notify me later |
 | Reviews / customer photos | LATER | |
 | Wishlist, search, filters | LATER | Not needed with one product |

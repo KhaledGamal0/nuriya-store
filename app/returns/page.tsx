@@ -26,7 +26,7 @@ export default function ReturnsPage() {
             <li key={g.feePiasters}>
               <div>
                 <b>{g.label}</b>
-                <small>{g.areas.map((a) => a.nameEn).join(" · ")}</small>
+                {!(g.areas.length === 1 && g.areas[0]!.nameEn === g.label) && <small>{g.areas.map((a) => a.nameEn).join(" · ")}</small>}
               </div>
               <span className="fee">{formatEgp(g.feePiasters)}</span>
             </li>
