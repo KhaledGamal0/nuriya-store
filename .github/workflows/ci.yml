@@ -55,6 +55,8 @@ jobs:
         run: |
           cp package-lock.json ci-logs/ 2>/dev/null || true
           cd ci-logs
+          # Report branches are not websites: tell Vercel never to build them.
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
           git init -q -b ci-logs
           git config user.name "ci"
           git config user.email "ci@users.noreply.github.com"

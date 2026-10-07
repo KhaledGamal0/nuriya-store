@@ -66,6 +66,8 @@ jobs:
         run: |
           cp package-lock.json ui-report/ 2>/dev/null || true
           cd ui-report
+          # Report branches are not websites: tell Vercel never to build them.
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
           git init -q -b ui-report
           git config user.name "ui-audit"
           git config user.email "ui-audit@users.noreply.github.com"
