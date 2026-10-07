@@ -37,6 +37,7 @@
 - Phase 3 defaults (announced to Khaled Oct 7, change any time): max 3 orders per phone per 24 h; 30 checkout attempts per device (IP) per 10 min — raised from 10 after the stress test showed shared mobile-carrier addresses (CGNAT) would block real customers during a drop; 20 order lookups per device per 10 min.
 - Oct 7 (Khaled): starting stock Cream S/M 16, Cream L/XL 15, Burgundy S/M 17, Burgundy L/XL 15. Stock tracking on. All test orders deleted (backup kept 90 days).
 - Oct 7 (Khaled): order e-mails go to nuriya.egy@gmail.com (Resend account under that address) and show stock left after each order.
+- Oct 7 (Khaled): domain nuriya.app. Full-HD photos replace the old screenshots in both galleries; kept only the two studio shots that add a look (cream styled, burgundy styled, burgundy hanger).
 - Oct 7 (Khaled): homepage first screen = his two-colour photo (cream + burgundy), replacing the previous two photos.
 - Card payment hidden and refused until Paymob is connected (Phase 4), so no unpaid card order can exist.
 - Order lookup shows status, items, area and totals — never the address or full name.

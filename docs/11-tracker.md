@@ -10,7 +10,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Logo always from the SVG, never typed | DONE | `components/Logo.tsx` |
 | Product copy, details, size chart | DONE | `lib/catalog.ts` |
 | Fabric composition, weight, care instructions | KHALED | Shown as "coming soon" until provided |
-| Original full-quality photos (or a shoot) | KHALED | Current photos are compressed; shot list in `07-roadmap.md` |
+| Original full-quality photos (or a shoot) | DONE | Oct 7: 7 full-HD photos (4 burgundy, 3 cream) replace the compressed screenshots; all 4:5, true colour, light sharpening only. Originals in `brand-assets/photos-hd/` |
+| Own domain | DONE | nuriya.app (Khaled, Oct 7); site address read from Vercel automatically (`lib/site.ts`) |
 | Burgundy sleeve close-up taken from the embroidery reel (1264×1580) | DONE | |
 | Real model photos for both colours, cut clean from Khaled's Instagram screenshots (1290×1612) | DONE | Cream 5 photos, burgundy 6; new hero; originals still sharper |
 | AI styling images received Oct 7 | NOT USED | 7 of 8 misspell the logo (Nariya, Nsriya, Nautiga, Nauljpa) or invent the sleeve embroidery; none is sharper than the HD boards already used. Usable for Instagram only after fixing the logo. |
@@ -127,7 +128,6 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Lighthouse measured on every push | DONE | Oct 7: Perf 92–97, A11y/Best practices/SEO 100, CLS 0. LCP ~3 s on simulated 4G (budget 2 s) — re-measure on the live CDN |
 | Friendly error pages (page and whole-site) | DONE | `app/error.tsx`, `app/global-error.tsx` |
 | Written test plan mapping every business case to a test | DONE | `docs/13-test-plan.md` |
-| Own domain | KHALED | Buy domain, then connect to Vercel |
 
 ## I. Marketing and analytics
 | Need | Status | Notes |

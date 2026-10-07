@@ -4,7 +4,7 @@ name: Uptime check
 # "alert" (the GitHub app notifies your phone) and closes it by itself when the shop is back.
 # Every 15 min: shop pages only (pre-built, so this never wakes or bills the database).
 # Every 6 hours: also /api/health, which runs one tiny query against Neon.
-# Set the repository VARIABLE (not secret) SITE_URL, e.g. https://nuriya-store.vercel.app
+# Set the repository VARIABLE (not secret) SITE_URL, e.g. https://nuriya.app
 permissions:
   contents: read
   issues: write
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      SITE: ${{ vars.SITE_URL || 'https://nuriya-store.vercel.app' }}
+      SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
     steps:
       - uses: actions/checkout@v5
         with:

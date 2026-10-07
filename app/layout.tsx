@@ -7,12 +7,13 @@ import { getAreas, getCatalog } from "@/lib/store";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
+import { siteUrl } from "@/lib/site";
 
 const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: "normal", variable: "--font-display", display: "swap" });
 const body = Poppins({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-body", display: "swap" });
 const arabic = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], variable: "--font-arabic", display: "swap", preload: false });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = siteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

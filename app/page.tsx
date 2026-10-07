@@ -3,8 +3,6 @@ import Link from "next/link";
 import { getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 
-const hover: Record<string, string> = { cream: "/images/cream-model.jpg", burgundy: "/images/burgundy-model.jpg" };
-
 export default async function Home() {
   const catalog = await getCatalog();
   return (
@@ -41,12 +39,13 @@ export default async function Home() {
         <div className="grid">
           {catalog.colorOrder.map((c) => {
             const color = catalog.colors[c];
-            const first = color.images.find((i) => i.src.includes("styled")) ?? color.images[0]!;
+            const first = color.images[0]!;
+            const second = color.images[1] ?? first;
             return (
               <Link className="pc reveal" href={`/quiet-confidence/${c}`} key={c}>
                 <div className="pc-ph">
                   <Image src={first.src} alt={first.alt} fill sizes="(min-width: 900px) 600px, 50vw" />
-                  <Image src={hover[c]!} alt="" fill sizes="(min-width: 900px) 600px, 50vw" />
+                  <Image src={second.src} alt="" fill sizes="(min-width: 900px) 600px, 50vw" />
                 </div>
                 <div className="pc-t">
                   <b>
@@ -61,7 +60,14 @@ export default async function Home() {
       </section>
 
       <section className="ed" aria-label="Craft">
-        <Image src="/images/cream-sleeve.jpg" alt="Embroidered sleeve: do what you love, love what you do" fill sizes="100vw" />
+        <Image
+          className="ed-tall"
+          src="/images/burgundy-hd-flatlay.jpg"
+          alt="Embroidery up close: Nuriya label, QUIET CONFIDENCE on the chest, do what you love, love what you do on the sleeve"
+          fill
+          sizes="(min-width: 900px) 1px, 100vw"
+        />
+        <Image className="ed-wide" src="/images/craft-wide.jpg" alt="" fill sizes="(min-width: 900px) 100vw, 1px" />
         <p className="reveal">
           Every stitch,
           <br />

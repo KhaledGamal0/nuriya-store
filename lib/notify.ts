@@ -4,6 +4,7 @@
 // and the hourly "Order watch" workflow raises a phone alert.
 import type { Sql } from "./db/index.ts";
 import { formatEgp } from "./money.ts";
+import { siteUrl } from "./site.ts";
 
 type Fetch = typeof fetch;
 
@@ -31,7 +32,7 @@ export function emailConfigured(): boolean {
 
 const ENTITIES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ENTITIES[c] ?? c);
-const site = () => (process.env.NEXT_PUBLIC_SITE_URL || "https://nuriya-store.vercel.app").replace(/\/$/, "");
+const site = siteUrl;
 const prettyPhone = (p: string) => (p.length === 11 ? `${p.slice(0, 3)} ${p.slice(3, 7)} ${p.slice(7)}` : p);
 
 /** WhatsApp link that opens a chat with the customer, confirmation message already typed. */

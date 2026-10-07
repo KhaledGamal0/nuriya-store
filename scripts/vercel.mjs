@@ -5,7 +5,7 @@ import { randomBytes } from "node:crypto";
 
 const TOKEN = process.env.VERCEL_TOKEN?.trim();
 const PROJECT = process.env.VERCEL_PROJECT || "nuriya-store";
-const SITE = process.env.SITE_URL || "https://nuriya-store.vercel.app";
+const SITE = process.env.SITE_URL || "https://nuriya.app";
 const note = (m) => console.log(`::notice::${m}`);
 const fail = (m) => {
   console.log(`::error::${m}`);

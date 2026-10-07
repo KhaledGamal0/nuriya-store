@@ -18,14 +18,14 @@ test("seed created the catalog and all delivery areas", { skip }, async () => {
     SELECT (SELECT count(*) FROM products)::int AS products, (SELECT count(*) FROM colorways)::int AS colorways,
            (SELECT count(*) FROM variants)::int AS variants, (SELECT count(*) FROM shipping_areas)::int AS areas,
            (SELECT count(*) FROM media)::int AS media`;
-  assert.deepEqual({ ...c }, { products: 1, colorways: 2, variants: 4, areas: 35, media: 11 });
+  assert.deepEqual({ ...c }, { products: 1, colorways: 2, variants: 4, areas: 35, media: 10 });
 });
 
 test("storefront reads price, photos and fees from the database", { skip }, async () => {
   const { getCatalog, getAreas } = await import("../lib/store.ts");
   const catalog = await getCatalog();
   assert.equal(catalog.pricePiasters, 120_000);
-  assert.equal(catalog.colors.cream.images.length, 5);
+  assert.equal(catalog.colors.cream.images.length, 4);
   assert.equal(catalog.colors.burgundy.images.length, 6);
   assert.ok(catalog.colors.cream.sizes.every((s) => s.available));
   const areas = await getAreas();

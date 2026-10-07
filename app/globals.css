@@ -149,8 +149,15 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 
 .ed { position: relative; aspect-ratio: 4 / 5; max-height: 88svh; width: 100%; overflow: hidden; }
 @media (min-width: 900px) { .ed { aspect-ratio: 16 / 9; } }
-.ed img { object-fit: cover; object-position: center 85%; }
+.ed img { object-fit: cover; object-position: center 60%; }
 .ed p { position: absolute; left: var(--g); bottom: var(--s4); color: var(--paper); font-family: var(--display); font-size: clamp(32px, 4.5vw, 56px); line-height: 1; text-shadow: 0 1px 16px rgba(0, 0, 0, 0.3); }
+/* Phone: the portrait flat-lay. Desktop: a wide crop of the same photo; text sits on plain fabric (right). */
+.ed .ed-wide { display: none; }
+@media (min-width: 900px) {
+  .ed .ed-tall { display: none; }
+  .ed .ed-wide { display: block; }
+  .ed p { left: auto; right: var(--g); text-align: right; }
+}
 
 /* Footer */
 .ftr { background: var(--stone); padding-block: var(--s5) var(--s3); }

@@ -9,7 +9,7 @@ on:
       task:
         description: "What to do"
         type: choice
-        options: ["set-stock", "reset-test-orders"]
+        options: ["set-stock", "reset-test-orders", "refresh-site"]
         default: "set-stock"
       cream_sm:
         description: "set-stock: Cream S/M pieces available to sell now"
@@ -42,7 +42,7 @@ jobs:
     env:
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
       BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
-      SITE: ${{ vars.SITE_URL || 'https://nuriya-store.vercel.app' }}
+      SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
       TASK: ${{ inputs.task }}
       CREAM_SM: ${{ inputs.cream_sm }}
       CREAM_LXL: ${{ inputs.cream_lxl }}
@@ -67,6 +67,7 @@ jobs:
       - name: Database address (masked)
         run: node scripts/neon.mjs env production
       - name: Backup first (encrypted)
+        if: inputs.task != 'refresh-site'
         run: |
           echo "STAMP=$(date -u +%F-%H%M)" >> "$GITHUB_ENV"
           docker run --rm --network host --user "$(id -u):$(id -g)" -e DATABASE_URL -v "$PWD:/out" postgres:17 \
@@ -74,11 +75,13 @@ jobs:
           gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 -o before.dump.gpg before.dump
           rm -f before.dump
       - uses: actions/upload-artifact@v4
+        if: inputs.task != 'refresh-site'
         with:
           name: before-${{ inputs.task }}-${{ env.STAMP }}
           path: before.dump.gpg
           retention-days: 90
       - name: Apply (one transaction)
+        if: inputs.task != 'refresh-site'
         run: |
           if [ "$TASK" = "set-stock" ]; then
             cat > task.sql <<SQL

@@ -21,7 +21,7 @@ const ZONE_LABELS: Record<string, string> = {
 };
 const slug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const kindOf = (src: string) =>
-  src.includes("styled") ? "styled" : src.includes("model") ? "model" : src.includes("hanger") ? "flat" : "detail";
+  src.includes("styled") ? "styled" : /model|lean|collar|full/.test(src) ? "model" : /hanger|flatlay/.test(src) ? "flat" : "detail";
 const SKU_COLOR: Record<string, string> = { cream: "CRM", burgundy: "BRG" };
 
 try {
