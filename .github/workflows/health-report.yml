@@ -18,7 +18,7 @@ on:
         default: true
 
 permissions:
-  contents: read
+  contents: write
   actions: read
   issues: write
 
@@ -68,3 +68,11 @@ jobs:
       - name: Clear the alert when all is well
         if: env.PROBLEMS == '0'
         run: scripts/alert.sh close "Early warning" "All services are healthy again."
+      - name: Keep the latest report on the health-report branch (never deployed)
+        if: always()
+        run: |
+          mkdir -p out && cp report.txt out/ 2>/dev/null || exit 0
+          cd out && echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          git init -q -b health-report && git config user.name ci && git config user.email ci@users.noreply.github.com
+          git add -A && git commit -q -m "Health report ${GITHUB_RUN_ID}"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" health-report

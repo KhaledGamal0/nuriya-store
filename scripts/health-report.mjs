@@ -191,6 +191,7 @@ html += `</table><p style="font-size:12px;color:#683A46;margin-top:20px">Sent by
 
 const text = list.map((r) => `${word[r.level].padEnd(10)} ${r.section} · ${r.label}: ${r.value}`).join("\n");
 console.log(subject + "\n\n" + text);
+writeFileSync("report.txt", subject + "\n\n" + rows.map((r) => `${word[r.level].padEnd(10)} ${r.section} · ${r.label}: ${r.value}`).join("\n") + "\n");
 writeFileSync("report-summary.txt", problems.map((p) => `- ${p.section} · ${p.label}: ${p.value}`).join("\n"));
 
 const send = WEEKLY || problems.length > 0;
