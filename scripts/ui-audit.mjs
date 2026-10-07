@@ -332,6 +332,17 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     await page.waitForURL(/\/checkout\/done/, { timeout: 15000 }).catch(() => add(vp, where, "flow", "placing a valid order did not reach the confirmation page"));
     where = "order-placed";
     await page.waitForLoadState("networkidle");
+    // A page that keeps re-rendering burns the phone's battery and blocks taps. Count DOM changes for 1 s.
+    const mutations = await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          let n = 0;
+          const mo = new MutationObserver((list) => (n += list.length));
+          mo.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true });
+          setTimeout(() => (mo.disconnect(), resolve(n)), 1000);
+        }),
+    );
+    if (mutations > 50) add(vp, where, "render-loop", `thank-you page changed ${mutations} times in 1 s while idle`);
     await page.waitForFunction(() => document.title.length > 0, null, { timeout: 5000 }).catch(() => {});
     await checks(page, vp, where);
     await shot(page, `${vp}-order-placed`);

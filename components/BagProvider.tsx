@@ -77,6 +77,10 @@ export function BagProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Stable, and a no-op on an empty bag. It used to return a NEW empty array and be re-created on every
+  // bag change, so the thank-you page's ClearBag effect re-ran forever and starved navigation.
+  const clear = useCallback(() => setLines((prev) => (prev.length ? [] : prev)), []);
+
   const value = useMemo<BagContext>(
     () => ({
       lines,
@@ -86,13 +90,13 @@ export function BagProvider({ children }: { children: ReactNode }) {
       setQty: (index, qty) =>
         setLines((prev) => prev.map((l, j) => (j === index ? { ...l, qty: Math.max(1, Math.min(MAX_QTY_PER_LINE, qty)) } : l))),
       remove: (index) => setLines((prev) => prev.filter((_, j) => j !== index)),
-      clear: () => setLines([]),
+      clear,
       bagOpen,
       openBag: () => setBagOpen(true),
       closeBag: () => setBagOpen(false),
       toast,
     }),
-    [lines, add, bagOpen, toast, unitPrice],
+    [lines, add, clear, bagOpen, toast, unitPrice],
   );
 
   return (
