@@ -56,6 +56,7 @@ export const PRODUCT = {
       images: [
         { src: "/images/burgundy-styled.jpg", alt: "Burgundy Quiet Confidence quarter-zip styled with a long coat and cream trousers", width: 1360, height: 1700 },
         { src: "/images/burgundy-hanger.jpg", alt: "Burgundy quarter-zip with a white collar on a hanger", width: 1600, height: 2000 },
+        { src: "/images/burgundy-sleeve.jpg", alt: "Cream sleeve embroidery on burgundy: do what you love, love what you do", width: 1264, height: 1580 },
       ],
     },
   } satisfies Record<ColorId, Colorway>,
