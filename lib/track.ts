@@ -7,7 +7,9 @@ type Data = Record<string, string | number>;
 export function track(name: string, data?: Data): void {
   if (typeof window === "undefined") return;
   try {
-    const va = (window as unknown as { va?: (type: "event", e: { name: string; data?: Data }) => void }).va;
-    va?.("event", data ? { name, data } : { name });
+    // Events that happen before the stats script has loaded (e.g. on the first screen) wait in its queue.
+    const w = window as unknown as { va?: (...a: unknown[]) => void; vaq?: unknown[][] };
+    w.va ??= (...a: unknown[]) => void (w.vaq ??= []).push(a);
+    w.va("event", data ? { name, data } : { name });
   } catch {}
 }
