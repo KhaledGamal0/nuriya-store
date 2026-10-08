@@ -1,13 +1,10 @@
 {
   "courier": "Direction",
   "currency": "EGP",
-  "source": "Direction price list image, received 2026-10-07",
+  "source": "Direction price list image, received 2026-10-07. Cairo, Giza and the new cities (all 75 EGP) are one checkout option since Oct 8 2026.",
   "zones": [
     { "id": "cairo-giza", "fee": 75, "areas": [
-      { "en": "Cairo", "ar": "القاهرة" }, { "en": "Giza", "ar": "الجيزة" } ] },
-    { "id": "new-cities", "fee": 75, "areas": [
-      { "en": "Madinaty", "ar": "مدينتي" }, { "en": "El Shorouk", "ar": "الشروق" }, { "en": "El Obour", "ar": "العبور" },
-      { "en": "6th of October", "ar": "أكتوبر" }, { "en": "Hadayek October", "ar": "حدائق أكتوبر" }, { "en": "Sheikh Zayed", "ar": "الشيخ زايد" } ] },
+      { "id": "cairo", "en": "Cairo & Giza", "ar": "القاهرة والجيزة" } ] },
     { "id": "delta-canal", "fee": 90, "areas": [
       { "en": "Giza countryside", "ar": "أرياف الجيزة" }, { "en": "Alexandria", "ar": "الإسكندرية" }, { "en": "Beheira", "ar": "البحيرة" },
       { "en": "Gharbia", "ar": "الغربية" }, { "en": "Dakahlia", "ar": "الدقهلية" }, { "en": "Qalyubia", "ar": "القليوبية" },

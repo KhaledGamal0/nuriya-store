@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ReturnsPolicy } from "@/components/ReturnsPolicy";
-import { areasByFee, minFee } from "@/lib/shipping";
+import { AREA_NOTES, areasByFee, minFee } from "@/lib/shipping";
 import { getAreas } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 import { cardPaymentsEnabled } from "@/lib/orders";
@@ -29,7 +29,9 @@ export default async function ReturnsPage() {
             <li key={g.feePiasters}>
               <div>
                 <b>{g.label}</b>
-                {!(g.areas.length === 1 && g.areas[0]!.nameEn === g.label) && <small>{g.areas.map((a) => a.nameEn).join(" · ")}</small>}
+                {g.areas.length === 1 && g.areas[0]!.nameEn === g.label
+                  ? AREA_NOTES[g.areas[0]!.id] && <small>{AREA_NOTES[g.areas[0]!.id]}</small>
+                  : <small>{g.areas.map((a) => a.nameEn).join(" · ")}</small>}
               </div>
               <span className="fee">{formatEgp(g.feePiasters)}</span>
             </li>

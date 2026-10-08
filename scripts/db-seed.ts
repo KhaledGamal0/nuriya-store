@@ -10,7 +10,7 @@ if (!url) throw new Error("DATABASE_URL is not set");
 const sql = postgres(url, { max: 1, onnotice: () => {} });
 
 const ZONE_LABELS: Record<string, string> = {
-  "cairo-giza": "Cairo and Giza",
+  "cairo-giza": "Cairo & Giza",
   "new-cities": "New cities",
   "delta-canal": "Alexandria, Delta and Canal",
   "upper-north": "Fayoum and Beni Suef",
@@ -74,7 +74,7 @@ try {
       for (const a of z.areas) {
         await tx`
           INSERT INTO shipping_areas (zone_id, slug, name_en, name_ar)
-          VALUES (${zone!.id}, ${slug(a.en)}, ${a.en}, ${a.ar})
+          VALUES (${zone!.id}, ${(a as { id?: string }).id ?? slug(a.en)}, ${a.en}, ${a.ar})
           ON CONFLICT (slug) DO NOTHING`;
       }
     }

@@ -9,8 +9,8 @@ function slug(text: string): string {
 }
 
 export const AREAS: readonly Area[] = zones.zones.flatMap((zone) =>
-  zone.areas.map((area) => ({
-    id: slug(area.en),
+  zone.areas.map((area: { id?: string; en: string; ar: string }) => ({
+    id: area.id ?? slug(area.en),
     nameEn: area.en,
     nameAr: area.ar,
     feePiasters: zone.fee * 100,
@@ -23,8 +23,8 @@ export function getArea(id: unknown): Area | undefined {
 }
 
 const GROUP_LABELS: Record<string, string> = {
-  "cairo-giza": "Cairo, Giza and new cities",
-  "new-cities": "Cairo, Giza and new cities",
+  "cairo-giza": "Cairo & Giza",
+  "new-cities": "Cairo & Giza",
   "delta-canal": "Alexandria, Delta and Canal",
   "upper-north": "Fayoum and Beni Suef",
   upper: "Upper Egypt",
@@ -32,6 +32,16 @@ const GROUP_LABELS: Record<string, string> = {
   "new-capital": "New Administrative Capital",
   resorts: "Red Sea, Sharm and the coast",
 };
+
+/** Which places one checkout option covers, shown under the area picker and on the delivery page. */
+export const AREA_NOTES: Record<string, string> = {
+  cairo: "Includes 6th of October, Sheikh Zayed, Hadayek October, Madinaty, El Shorouk and El Obour.",
+};
+
+/** Checkout picker order: Cairo & Giza first (most orders), then every other area A to Z. */
+export function areasForPicker(list: readonly Area[] = AREAS): Area[] {
+  return [...list].sort((a, b) => (a.id === "cairo" ? -1 : b.id === "cairo" ? 1 : a.nameEn.localeCompare(b.nameEn)));
+}
 
 /** Areas grouped by fee, cheapest first — for the checkout picker and the delivery page. */
 export function areasByFee(list: readonly Area[] = AREAS): { feePiasters: number; label: string; areas: Area[] }[] {

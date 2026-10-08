@@ -13,6 +13,8 @@ Source image: `brand-assets/reference/direction-courier-pricelist.jpg`. Fees in 
 | New Capital | العاصمة الإدارية الجديدة | 135 |
 | Resorts | البحر الأحمر (الغردقة)، شرم الشيخ، الساحل الشمالي، مرسى مطروح | 165 |
 
+**Checkout (Oct 8 2026, Khaled):** Cairo, Giza and the new cities all cost 75 EGP, so checkout shows them as one option, **Cairo & Giza**, with a note listing the new cities. Giza countryside (90) and the New Administrative Capital (135) stay separate. The picker lists every area with its fee: Cairo & Giza first, then A to Z.
+
 ## Courier terms (from the list)
 - Delivery: Cairo & Giza within "90 hours" (likely typo — confirm), other governorates within 72 hours from pickup
 - **No fees** on pickup, partial returns, refused orders, or COD cash collection — only the shipping fee is charged

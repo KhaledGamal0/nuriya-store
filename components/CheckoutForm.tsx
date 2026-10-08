@@ -7,7 +7,7 @@ import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
 import { formatEgp } from "@/lib/money";
-import { areasByFee } from "@/lib/shipping";
+import { AREA_NOTES, areasForPicker } from "@/lib/shipping";
 import { useStore } from "./StoreProvider";
 import { keepReceipt } from "@/lib/receipt";
 import { fieldError, type FieldErrors } from "@/lib/checkout";
@@ -73,7 +73,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   const bag = useBag();
   const router = useRouter();
   const { areas } = useStore();
-  const groups = areasByFee(areas);
+  const picker = areasForPicker(areas);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(submitOrder, null);
   const [areaId, setAreaId] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -208,16 +208,13 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               }}
             >
               <option value="">Choose your area</option>
-              {groups.map((g) => (
-                <optgroup key={g.feePiasters} label={`${formatEgp(g.feePiasters)} delivery`}>
-                  {g.areas.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.nameEn}
-                    </option>
-                  ))}
-                </optgroup>
+              {picker.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.nameEn} · {formatEgp(a.feePiasters)}
+                </option>
               ))}
             </select>
+            {AREA_NOTES.cairo && <p className="small field-note">Cairo &amp; Giza: {AREA_NOTES.cairo.charAt(0).toLowerCase() + AREA_NOTES.cairo.slice(1)}</p>}
           </Field>
           <Field id="address" label="Address" error={errors.address}>
             <textarea id="address" name="address" autoComplete="street-address" placeholder="Street, building, floor, apartment" required {...live("address")} />

@@ -62,8 +62,18 @@ test("shipping table matches the Direction price list", () => {
   assert.equal(getArea("cairo")?.feePiasters, 7_500);
   assert.equal(getArea("sharm-el-sheikh")?.feePiasters, 16_500);
   assert.equal(getArea("new-administrative-capital")?.feePiasters, 13_500);
-  assert.equal(AREAS.length, 35);
+  assert.equal(AREAS.length, 28);
+  assert.equal(getArea("cairo")?.nameEn, "Cairo & Giza");
+  assert.equal(getArea("sheikh-zayed"), undefined, "new cities are part of Cairo & Giza");
   assert.equal(new Set(AREAS.map((a) => a.id)).size, AREAS.length);
+  // Every fee, checked against the Direction price list image.
+  const fees: Record<string, number> = {
+    "giza-countryside": 90, alexandria: 90, beheira: 90, gharbia: 90, dakahlia: 90, qalyubia: 90, "kafr-el-sheikh": 90,
+    monufia: 90, ismailia: 90, suez: 90, "port-said": 90, damietta: 90, sharqia: 90, fayoum: 100, "beni-suef": 100,
+    minya: 105, assiut: 105, sohag: 105, qena: 105, luxor: 105, aswan: 105, "new-valley": 125,
+    "red-sea-hurghada": 165, "north-coast": 165, "marsa-matrouh": 165,
+  };
+  for (const [id, egp] of Object.entries(fees)) assert.equal(getArea(id)?.feePiasters, egp * 100, id);
 });
 
 test("money and size helpers", () => {
