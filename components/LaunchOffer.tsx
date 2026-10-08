@@ -72,7 +72,7 @@ export function LaunchOffer() {
           <p className="lo-t" role="timer" aria-live="off">
             Ends in <b>{left ? left.text : " "}</b>
           </p>
-          <p className="small">Both colours, every size. Cash on delivery across Egypt. After that, back to {formatEgp(sale.after.pricePiasters)}.</p>
+          <p className="small">Both colours, every size. Cash on delivery across Egypt.</p>
           <button
             type="button"
             className="btn"
