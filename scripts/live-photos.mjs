@@ -21,7 +21,7 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
     const files = new Map();
     page.on("response", async (r) => {
       const u = new URL(r.url());
-      if (/\.(webp|jpg)$|_next\/image/.test(u.pathname)) files.set(u.pathname + u.search, { status: r.status(), cache: r.headers()["x-vercel-cache"] ?? "-", t: Date.now() });
+      if (/\.(webp|jpg)$|_next\/image|_vercel\/insights/.test(u.pathname)) files.set(u.pathname + u.search, { status: r.status(), cache: r.headers()["x-vercel-cache"] ?? "-", t: Date.now() });
     });
     const t0 = Date.now();
     await page.goto(SITE + path, { waitUntil: "domcontentloaded" });
