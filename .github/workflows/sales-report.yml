@@ -1,0 +1,38 @@
+name: Sales report
+
+# E-mails ORDER_ALERT_EMAIL a formatted sales report: today and the last 7 days (orders, pieces, money,
+# what sold, prices paid, areas, orders by hour, today's orders, stock). Every night at about 23:50 Cairo,
+# and any time on demand (Actions → Sales report → Run workflow).
+on:
+  schedule:
+    - cron: "50 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ORDER_ALERT_EMAIL: ${{ secrets.ORDER_ALERT_EMAIL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        run: node scripts/neon.mjs env production
+      - name: Sales numbers (no customer phones)
+        run: docker run --rm --network host -e DATABASE_URL -v "$PWD/scripts:/s:ro" postgres:17 psql "$DATABASE_URL" -tA -v ON_ERROR_STOP=1 -f /s/sales.sql > sales.json
+      - name: Write and e-mail the report
+        run: node scripts/sales-report.mjs
+      - name: Keep the latest report on the sales-report branch (never deployed)
+        run: |
+          mkdir -p out && cp report.txt out/ && cd out && echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          git init -q -b sales-report && git config user.name ci && git config user.email ci@users.noreply.github.com
+          git add -A && git commit -q -m "Sales report ${GITHUB_RUN_ID}"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" sales-report

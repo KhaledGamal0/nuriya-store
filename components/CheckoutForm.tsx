@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from "react";
@@ -94,6 +95,14 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   const sendingRef = useRef(false);
   const fee = areas.find((a) => a.id === areaId)?.feePiasters;
 
+  // Count each visit to checkout with something in the bag (once per page view).
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current || bag.lines.length === 0) return;
+    startedRef.current = true;
+    track("Checkout started", { pieces: bag.lines.reduce((n, l) => n + l.qty, 0), value: bag.subtotalPiasters / 100 });
+  }, [bag.lines, bag.subtotalPiasters]);
+
   // Server errors replace local ones after each submit.
   useEffect(() => {
     if (state?.saved) {
@@ -104,6 +113,8 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
     }
     sendingRef.current = false; // the server answered with a problem: allow another try
     if (state?.errors) {
+      const first = Object.keys(state.errors)[0];
+      if (first || state.notice) track("Order refused", { reason: first ?? "notice" });
       setErrors(state.errors);
       focusFirst(state.errors);
     }
@@ -170,8 +181,10 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
           if (Object.keys(next).length) {
             setErrors(next);
             focusFirst(next);
+            track("Checkout problem", { field: Object.keys(next)[0]! });
             return;
           }
+          track("Place order tapped", { pieces: bag.lines.reduce((n, l) => n + l.qty, 0), area: areaId });
           keyRef.current ??= crypto.randomUUID();
           form.set("key", keyRef.current);
           sendingRef.current = true;

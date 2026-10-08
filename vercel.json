@@ -8,7 +8,8 @@
       "ci-logs": false,
       "ui-report": false,
       "live-photos": false,
-      "health-report": false
+      "health-report": false,
+      "sales-report": false
     }
   }
 }

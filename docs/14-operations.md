@@ -79,3 +79,6 @@ Every migration pushed to `main` runs `db-deploy.yml`: it applies the change, wa
 - **Every Sunday 09:00 Cairo:** the full weekly status, even when all is well.
 - Warning levels: Neon ≥ 70% of free running time or storage; domain < 30 days (or auto-renew off and < 60 days); certificate < 14 days; backup older than 36 h; 45+ days without a code change; any stock ≤ 3; Resend ≥ 80% of the free monthly e-mails.
 - After upgrading Neon to Launch, set the repository variable `NEON_PLAN=launch` (the free limits then no longer apply).
+
+## Sales report
+`sales-report.yml` e-mails a formatted sales report every night (~23:50 Cairo) and on demand (Actions → Sales report → Run workflow): today and last 7 days, what sold, prices paid, areas, orders by hour, today's orders, stock. Visitor numbers and the funnel (Add to bag → Checkout started → Place order tapped → Order placed) are in Vercel → Analytics → Events.

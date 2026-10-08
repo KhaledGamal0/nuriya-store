@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { ProductImage } from "@/lib/catalog";
@@ -60,6 +61,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
             onClick={() => {
               setViewIndex(i);
               setOpen(true);
+              track("Photo viewer", { product: label, photo: i + 1 });
             }}
             aria-label={`Open photo ${i + 1} of ${total} full screen`}
           >

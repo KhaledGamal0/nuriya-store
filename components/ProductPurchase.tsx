@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import Link from "next/link";
 import { useState } from "react";
 import { productPath, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
@@ -31,6 +32,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
       return;
     }
     bag.add(color, size);
+    track("Add to bag", { color: catalog.colors[color].name, size });
     setAdded(true);
     window.setTimeout(() => {
       setAdded(false);

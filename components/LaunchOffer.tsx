@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatEgp } from "@/lib/money";
@@ -33,6 +34,7 @@ export function LaunchOffer() {
         sessionStorage.setItem(SEEN, "1");
       } catch {}
       setOpen(true);
+      track("Sale popup", { action: "shown" });
     };
     const t = window.setTimeout(show, 1200);
     return () => window.clearTimeout(t);
@@ -78,6 +80,7 @@ export function LaunchOffer() {
             className="btn"
             onClick={() => {
               setOpen(false);
+              track("Sale popup", { action: "shop" });
               if (onProduct) return;
               if (path !== "/") return router.push("/#shop");
               // Home: the page can't scroll while the popup is open, so glide to the products once it has closed.
@@ -87,7 +90,14 @@ export function LaunchOffer() {
           >
             {onProduct ? "Order now" : "Shop the offer"}
           </button>
-          <button type="button" className="lo-later" onClick={() => setOpen(false)}>
+          <button
+            type="button"
+            className="lo-later"
+            onClick={() => {
+              setOpen(false);
+              track("Sale popup", { action: "later" });
+            }}
+          >
             Maybe later
           </button>
         </div>

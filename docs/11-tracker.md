@@ -134,6 +134,8 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Checkout area picker: one Cairo & Giza option (covers new cities), every option shows its fee, Cairo first then A–Z; all fees match the Direction list | DONE | migration 0010, `checkout.test.ts` |
 | Checkout phone: grouped as typed, Arabic digits / +20 accepted, live "We'll confirm your order on …" check; optional second number saved, in e-mail + WhatsApp | DONE | migration 0011, `checkout.test.ts`, `orders.test.ts`, `fuzz.test.ts` |
 | Visitor stats: Vercel Web Analytics (visitors, pages, referrers incl. Instagram, countries, devices) + "Order placed" event; no cookies | DONE (needs Analytics enabled in Vercel) | `app/layout.tsx` |
+| Shop funnel events (Add to bag, Checkout started, Place order tapped, Checkout problem, Order refused, Order placed, Sale popup, Photo viewer) in Vercel Analytics | DONE | `lib/track.ts` |
+| Nightly sales report e-mail (today + 7 days: orders, pieces, money, what sold, prices paid, areas, by hour, stock) | DONE | `sales-report.yml`, `scripts/sales.sql` |
 | Order tracking page | PAUSED (Oct 7, Khaled) | /track → home; `findOrder` kept + tested |
 | WhatsApp confirm button in the order e-mail opens a fully formatted message (bold order number, items, totals, payment, delivery address, reply YES) | DONE | `whatsappLink`, `fuzz.test.ts` |
 | Health e-mails: daily early warning before any limit (Neon, Vercel domain, certificate, backups, GitHub inactivity, Resend, stock) + full weekly report every Sunday | DONE | `health-report.yml`, `scripts/health-report.mjs` |
