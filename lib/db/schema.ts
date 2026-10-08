@@ -16,6 +16,9 @@ export const products = pgTable("products", {
   compareAtPiasters: integer("compare_at_piasters"),
   offerOrdersLimit: integer("offer_orders_limit"),
   offerStartedAt: timestamp("offer_started_at", { withTimezone: true }),
+  salePricePiasters: integer("sale_price_piasters"),
+  saleStartsAt: timestamp("sale_starts_at", { withTimezone: true }),
+  saleEndsAt: timestamp("sale_ends_at", { withTimezone: true }),
   status: text("status").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 });

@@ -1,0 +1,46 @@
+name: Sale end refresh
+
+# When a timed sale ends (sales end at Cairo midnight), rebuild the shop pages from the database so they
+# show the normal price. Browsers already switch on the exact second by themselves and checkout always
+# charges the database price; this only keeps the pre-built pages tidy. Does nothing on other nights.
+on:
+  schedule:
+    - cron: "3 21 * * *"  # 00:03 Cairo
+    - cron: "25 21 * * *" # backup run, 00:25 Cairo
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        run: node scripts/neon.mjs env production
+      - name: Did a sale just end?
+        run: |
+          n=$(docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c \
+            "SELECT count(*) FROM products WHERE sale_ends_at BETWEEN now() - interval '3 hours' AND now()")
+          echo "sales ended in the last 3 hours: $n"
+          echo "ENDED=$n" >> "$GITHUB_ENV"
+      - name: Refresh the live site
+        if: env.ENDED != '0'
+        run: |
+          for i in 1 2 3; do
+            TOKEN=$(openssl rand -hex 32)
+            echo "::add-mask::$TOKEN"
+            docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -q -c "INSERT INTO refresh_tokens (token) VALUES ('$TOKEN')"
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Authorization: Bearer $TOKEN" "$SITE/api/revalidate")
+            [ "$code" = "200" ] && { echo "::notice::Live site refreshed after the sale ended."; exit 0; }
+            echo "refresh returned $code, retrying"; sleep 10
+          done
+          echo "::error::Refresh failed. Run Admin tasks → refresh-site."; exit 1

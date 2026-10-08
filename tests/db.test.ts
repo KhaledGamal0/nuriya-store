@@ -26,6 +26,7 @@ test("storefront reads price, photos and fees from the database", { skip }, asyn
   const catalog = await getCatalog();
   assert.equal(catalog.pricePiasters, 100_000);
   assert.equal(catalog.compareAtPiasters, 120_000); // offer: old price shown struck through
+  assert.equal(catalog.sale, null, "no timed sale on a fresh database");
   assert.equal(catalog.colors.cream.images.length, 3);
   assert.equal(catalog.colors.burgundy.images.length, 3);
   assert.ok(catalog.colors.cream.sizes.every((s) => s.available));

@@ -131,14 +131,17 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
 
         // Lock the product row: orders queue here for a moment, so the offer count below is exact and an order
         // placed after the offer ended is priced at the new price (price_changed → the customer refreshes).
-        const [offer = noRow("product")] = await tx<{ id: number; limit: number | null; started: Date | null; was: number | null }[]>`
-          SELECT id, offer_orders_limit AS limit, offer_started_at AS started, compare_at_piasters AS was
+        const [offer = noRow("product")] = await tx<{ id: number; limit: number | null; started: Date | null; was: number | null; sale_on: boolean }[]>`
+          SELECT id, offer_orders_limit AS limit, offer_started_at AS started, compare_at_piasters AS was,
+                 coalesce(sale_price_piasters IS NOT NULL AND now() >= sale_starts_at AND now() < sale_ends_at, false) AS sale_on
           FROM products WHERE slug = ${PRODUCT_SLUG} FOR UPDATE`;
 
         // Lock the variants being bought, always in id order (no deadlocks between two buyers).
         const wanted = order.lines.map((l) => `${l.color}|${l.size}`);
         const variants = await tx<VariantRow[]>`
-          SELECT v.id, c.code AS color, v.size, coalesce(v.price_override_piasters, p.price_piasters) AS unit,
+          SELECT v.id, c.code AS color, v.size, coalesce(v.price_override_piasters,
+                   CASE WHEN p.sale_price_piasters IS NOT NULL AND now() >= p.sale_starts_at AND now() < p.sale_ends_at
+                        THEN p.sale_price_piasters ELSE p.price_piasters END) AS unit,
                  p.name_en AS product_name, c.name_en AS color_name,
                  (v.is_active AND c.is_active AND p.status = 'live') AS sellable
           FROM variants v
@@ -189,10 +192,13 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
 
         // Launch offer: after the set number of orders the price goes back to the old price, for everyone after this one.
         let offerEnded = false;
-        if (offer.limit !== null && offer.was !== null) {
+        // Orders placed during a timed sale don't use up the offer (Khaled, Oct 8 2026).
+        if (offer.limit !== null && offer.was !== null && !offer.sale_on) {
           const [{ n } = noRow("offer count")] = await tx<{ n: number }[]>`
-            SELECT count(*)::int AS n FROM orders
-            WHERE created_at >= ${offer.started ?? new Date(0)} AND status NOT IN ('CANCELLED', 'EXPIRED')`;
+            SELECT count(*)::int AS n FROM orders o, products p
+            WHERE p.id = ${offer.id} AND o.created_at >= ${offer.started ?? new Date(0)}
+              AND o.status NOT IN ('CANCELLED', 'EXPIRED')
+              AND NOT (p.sale_starts_at IS NOT NULL AND o.created_at >= p.sale_starts_at AND o.created_at < p.sale_ends_at)`;
           if (n >= offer.limit) {
             await tx`
               UPDATE products SET price_piasters = compare_at_piasters, compare_at_piasters = NULL,

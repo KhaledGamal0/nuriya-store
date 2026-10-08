@@ -84,3 +84,5 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Launch offer: checkout charges 1,000 EGP (server price), old 1,200 shown struck through only | `checkout.test.ts` (109,000 total), `db.test.ts` (price + compare-at), browser totals 1,090 | unit + database + browser |
 | Offer ends after N orders, exactly once, even with orders at the same moment; a bag still at the offer price is refused after it ends | `orders.test.ts` | database |
 | An order takes pieces straight out of stock; a refused order takes nothing | `orders.test.ts`, `load.test.ts`, stress "crowd" | database + browser |
+| Timed sale: charged only inside its window (database clock), struck price = full price, sale orders don't use up the 7-order offer, a sale-priced bag is refused after the end | `orders.test.ts`, `db.test.ts` | database |
+| Sale popup: shows once per visit, focus inside, Escape closes, never on checkout; product page shows price + countdown | ui-audit `saleCheck` | browser |

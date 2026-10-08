@@ -36,6 +36,15 @@ async function loadCatalog(): Promise<CatalogData> {
     db.select().from(sizeChart).where(eq(sizeChart.productId, product.id)),
   ]);
 
+  // Timed sale: decided here for pages, and again by the database clock at checkout (lib/orders.ts).
+  const now = Date.now();
+  const saleStart = product.saleStartsAt ? new Date(product.saleStartsAt).getTime() : NaN;
+  const saleEnd = product.saleEndsAt ? new Date(product.saleEndsAt).getTime() : NaN;
+  const saleOn = product.salePricePiasters != null && saleStart <= now && now < saleEnd;
+  const price = saleOn ? product.salePricePiasters! : product.pricePiasters;
+  const compareAt = saleOn ? (product.compareAtPiasters ?? product.pricePiasters) : (product.compareAtPiasters ?? null);
+  const sale = saleOn ? { endsAt: new Date(saleEnd).toISOString(), after: { pricePiasters: product.pricePiasters, compareAtPiasters: product.compareAtPiasters ?? null } } : null;
+
   const colors = {} as Record<ColorId, ColorwayData>;
   const order: ColorId[] = [];
   for (const cw of cws) {
@@ -50,7 +59,7 @@ async function loadCatalog(): Promise<CatalogData> {
       sizes: SIZES.map((size) => {
         const v = vars.find((x) => x.colorwayId === cw.id && x.size === size);
         const inStock = v ? !v.trackInventory || v.stockOnHand - v.stockReserved > 0 : false;
-        return { size, available: Boolean(v?.isActive) && inStock, pricePiasters: v?.priceOverridePiasters ?? product.pricePiasters };
+        return { size, available: Boolean(v?.isActive) && inStock, pricePiasters: v?.priceOverridePiasters ?? price };
       }),
     };
   }
@@ -70,8 +79,9 @@ async function loadCatalog(): Promise<CatalogData> {
     summary: product.summaryEn,
     details: product.detailsEn,
     fabric: product.fabricEn,
-    pricePiasters: product.pricePiasters,
-    compareAtPiasters: product.compareAtPiasters ?? null,
+    pricePiasters: price,
+    compareAtPiasters: compareAt,
+    sale,
     sizeChart: sizeRows.length ? sizeRows : fallback.sizeChart,
     colorOrder: order.length ? order : COLORS,
     colors,

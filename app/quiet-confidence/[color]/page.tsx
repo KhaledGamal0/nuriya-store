@@ -9,7 +9,8 @@ import { minFee } from "@/lib/shipping";
 import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
-import { Price } from "@/components/Price";
+import { LivePrice } from "@/components/LivePrice";
+import { SaleNote } from "@/components/LaunchOffer";
 import { preview } from "@/lib/blur";
 
 type Params = { params: Promise<{ color: string }> };
@@ -63,9 +64,10 @@ export default async function ProductPage({ params }: Params) {
         <div>
           <div className="t-row">
             <h1>{catalog.name}</h1>
-            <Price now={catalog.pricePiasters} was={catalog.compareAtPiasters} />
+            <LivePrice />
           </div>
           <p className="info-sub">Oversized quarter-zip · {c.name}</p>
+          <SaleNote />
         </div>
         <ProductPurchase color={color} />
         <p className="small">Cash on delivery. Check your order with the courier before you accept.</p>

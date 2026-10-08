@@ -155,6 +155,51 @@ async function shot(page, name) {
   await page.screenshot({ path: `${OUT}/shots/${name}.png`, fullPage: true });
 }
 
+// Launch-day sale: popup appears once, is accessible (focus inside, Escape closes), prices show the sale,
+// the product page shows the countdown line, and nothing shows once the sale is off.
+async function saleCheck(browser) {
+  if (!process.env.DATABASE_URL) return;
+  const { default: postgres } = await import("postgres");
+  const sql = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
+  const refresh = () => fetch(BASE + "/api/revalidate", { method: "POST", headers: { authorization: `Bearer ${process.env.REVALIDATE_SECRET}` } });
+  const f = (detail, kind = "flow") => add("mobile", "sale", kind, detail);
+  const ctx = await browser.newContext(VIEWPORTS.mobile);
+  const page = await ctx.newPage();
+  try {
+    await sql`UPDATE products SET sale_price_piasters = 90000, sale_starts_at = now() - interval '1 minute', sale_ends_at = now() + interval '30 hours' WHERE slug = 'quiet-confidence'`;
+    await refresh();
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    const dlg = page.locator("dialog[open]:has(.lo)");
+    await dlg.waitFor({ timeout: 6000 }).catch(() => f("sale popup did not appear on the home page"));
+    if (await dlg.isVisible()) {
+      await page.waitForTimeout(1300);
+      const text = await dlg.innerText();
+      for (const want of ["25% off everything", "900 EGP", "1,200 EGP", "Ends in", "Shop the offer"]) if (!text.includes(want)) f(`popup does not show "${want}"`);
+      if (!/\d+h \d\dm \d\ds/.test(text)) f("popup countdown is not running");
+      if (!(await page.evaluate(() => document.activeElement?.closest("dialog") !== null))) f("focus did not move into the popup", "a11y");
+      await shot(page, "mobile-sale-popup");
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(500);
+      if (await dlg.isVisible()) f("Escape did not close the popup", "a11y");
+    }
+    await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "networkidle" });
+    await page.waitForTimeout(1800);
+    if (await page.locator("dialog[open]:has(.lo)").count()) f("popup showed again in the same visit");
+    const pdp = await page.evaluate(() => document.querySelector(".info")?.textContent ?? "");
+    if (!pdp.includes("900 EGP")) f("product page does not show the 900 EGP sale price");
+    if (!/Launch day.*ends in/.test(pdp)) f("product page does not show the sale countdown line");
+    await shot(page, "mobile-sale-product");
+    await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
+    await page.waitForTimeout(1500);
+    if (await page.locator("dialog[open]:has(.lo)").count()) f("popup must never show on checkout");
+  } finally {
+    await sql`UPDATE products SET sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL WHERE slug = 'quiet-confidence'`;
+    await refresh();
+    await sql.end();
+    await ctx.close();
+  }
+}
+
 // Price change in the database -> refresh -> the product page shows the new price; browsing stays fast.
 async function refreshCheck(browser) {
   if (!process.env.DATABASE_URL) return;
@@ -475,6 +520,7 @@ await (async () => {
   await page.screenshot({ path: `${OUT}/shots/mobile-home-scrolled.png`, fullPage: true });
   await ctx.close();
 })().catch((e) => add("mobile", "loading", "audit-step-failed", String(e.message).slice(0, 160)));
+await saleCheck(browser).catch((e) => add("mobile", "sale", "audit-step-failed", String(e.message).slice(0, 160)));
 await refreshCheck(browser).catch((e) => add("mobile", "refresh", "audit-step-failed", String(e.message).slice(0, 160)));
 await browser.close();
 await db?.end();

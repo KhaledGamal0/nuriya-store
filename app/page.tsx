@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getCatalog } from "@/lib/store";
 import { productPath } from "@/lib/catalog";
 import { preview } from "@/lib/blur";
-import { Price } from "@/components/Price";
+import { LivePrice } from "@/components/LivePrice";
 import { PHONE_FULL } from "@/lib/sizes";
 
 const craftCommon = { alt: "", fill: true, quality: 65, sizes: PHONE_FULL, loading: "eager" as const, fetchPriority: "low" as const };
@@ -58,7 +58,7 @@ export default async function Home() {
                   <b>
                     {catalog.type}, {color.name.toLowerCase()}
                   </b>
-                  {color.sizes.some((s) => s.available) ? <Price className="" now={catalog.pricePiasters} was={catalog.compareAtPiasters} /> : <span>Sold out</span>}
+                  {color.sizes.some((s) => s.available) ? <LivePrice className="" /> : <span>Sold out</span>}
                 </div>
               </Link>
             );

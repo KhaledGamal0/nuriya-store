@@ -92,6 +92,9 @@ export function sizeForWeight(kg: number): { size: SizeId; note: string } {
 export type SizeOption = { size: SizeId; available: boolean; pricePiasters: number };
 export type ColorwayData = Colorway & { sizes: readonly SizeOption[] };
 export type SizeChartRow = { size: SizeId; shoulderCm: number; chestCm: number; lengthCm: number; weightKg: readonly [number, number] };
+/** When the sale ends, and the prices that apply from that moment (so pages switch on time without a reload). */
+export type SaleInfo = { endsAt: string; after: { pricePiasters: number; compareAtPiasters: number | null } };
+
 export type CatalogData = {
   slug: string;
   name: string;
@@ -102,6 +105,8 @@ export type CatalogData = {
   pricePiasters: number;
   /** Old price shown struck through during an offer (display only; checkout charges pricePiasters). */
   compareAtPiasters: number | null;
+  /** A timed sale running right now (prices above are already the sale prices), or null. */
+  sale: SaleInfo | null;
   sizeChart: readonly SizeChartRow[];
   colorOrder: readonly ColorId[];
   colors: Record<ColorId, ColorwayData>;
@@ -122,11 +127,25 @@ export function staticCatalog(): CatalogData {
     fabric: PRODUCT.fabric,
     pricePiasters: PRODUCT.pricePiasters,
     compareAtPiasters: PRODUCT.compareAtPiasters,
+    sale: null,
     sizeChart: PRODUCT.sizeChart,
     colorOrder: COLORS,
     colors: { cream: colorway("cream"), burgundy: colorway("burgundy") },
   };
 }
+
+/** The catalog as it is once the sale has ended (display only; the server always prices from the database). */
+export function afterSale(c: CatalogData): CatalogData {
+  if (!c.sale) return c;
+  const { pricePiasters, compareAtPiasters } = c.sale.after;
+  const colors = { ...c.colors };
+  for (const id of c.colorOrder)
+    colors[id] = { ...colors[id], sizes: colors[id].sizes.map((s) => ({ ...s, pricePiasters: s.pricePiasters === c.pricePiasters ? pricePiasters : s.pricePiasters })) };
+  return { ...c, pricePiasters, compareAtPiasters, sale: null, colors };
+}
+
+/** Whole-percent saving, e.g. 120000 → 90000 is 25. */
+export const percentOff = (now: number, was: number | null) => (was && was > now ? Math.round((1 - now / was) * 100) : 0);
 
 /** Price of one colour/size, or null when it cannot be sold (sold out, inactive or unknown). */
 export function priceFor(catalog: CatalogData, color: ColorId, size: SizeId): number | null {

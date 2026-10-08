@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { IBM_Plex_Sans_Arabic, Instrument_Serif, Poppins } from "next/font/google";
 import { BagProvider } from "@/components/BagProvider";
+import { LaunchOffer } from "@/components/LaunchOffer";
 import { StoreProvider } from "@/components/StoreProvider";
 import { getAreas, getCatalog } from "@/lib/store";
 import { Header } from "@/components/Header";
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <Header />
           <main id="main">{children}</main>
           <Footer />
+          <LaunchOffer />
         </BagProvider>
         </StoreProvider>
       </body>

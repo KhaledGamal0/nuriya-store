@@ -18,7 +18,7 @@ async function cleanup() {
   await sql!`DELETE FROM customers WHERE phone LIKE '0109%'`;
   await sql!`DELETE FROM rate_limits`;
   await sql!`UPDATE variants SET track_inventory = false, stock_on_hand = 0, stock_reserved = 0, is_active = true`;
-  await sql!`UPDATE products SET price_piasters = 120000, compare_at_piasters = NULL, offer_orders_limit = NULL, offer_started_at = NULL WHERE slug = 'quiet-confidence'`;
+  await sql!`UPDATE products SET price_piasters = 120000, compare_at_piasters = NULL, offer_orders_limit = NULL, offer_started_at = NULL, sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL WHERE slug = 'quiet-confidence'`;
   await sql!`UPDATE shipping_areas SET is_active = true`;
   await sql!`UPDATE shipping_zones SET is_active = true, cod_allowed = true`;
 }
@@ -319,4 +319,26 @@ test("offer count is exact when many orders arrive at once", { skip }, async () 
   assert.equal(ok.length, 3, "exactly 3 orders at the offer price");
   assert.equal(ok.filter((r) => r.ok && r.offerEnded).length, 1, "exactly one order ends the offer");
   assert.ok(results.filter((r) => !r.ok).every((r) => !r.ok && r.reason === "price_changed"));
+});
+
+test("timed sale: charged only inside its window, doesn't use up the 7-order offer, price returns after", { skip }, async () => {
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_orders_limit = 1, offer_started_at = now() - interval '1 hour',
+             sale_price_piasters = 90000, sale_starts_at = now() - interval '1 minute', sale_ends_at = now() + interval '1 hour' WHERE slug = 'quiet-confidence'`;
+  const { getCatalog } = await import("../lib/store.ts");
+  const during = await getCatalog();
+  assert.equal(during.pricePiasters, 90000);
+  assert.equal(during.compareAtPiasters, 120000, "the struck price is the full price");
+  assert.deepEqual(during.sale?.after, { pricePiasters: 100000, compareAtPiasters: 120000 });
+  const saleOrder = await place(await valid(nextPhone()));
+  assert.ok(saleOrder.ok && !saleOrder.offerEnded, "a sale order does not use up the 1-order offer");
+  const [{ unit } = noRow()] = await sql!`SELECT i.unit_piasters AS unit FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.number = ${saleOrder.ok ? saleOrder.number : ""}`;
+  assert.equal(unit, 90000);
+  // A bag priced during the sale is refused once the sale is over.
+  const stale = await valid(nextPhone());
+  await sql!`UPDATE products SET sale_ends_at = now() - interval '1 second' WHERE slug = 'quiet-confidence'`;
+  assert.deepEqual(await place(stale), { ok: false, reason: "price_changed" });
+  const after = await place(await valid(nextPhone()));
+  assert.ok(after.ok && after.offerEnded, "the first order after the sale uses up the 1-order offer");
+  const [p = noRow()] = await sql!`SELECT price_piasters FROM products WHERE slug = 'quiet-confidence'`;
+  assert.equal(p.price_piasters, 120000);
 });
