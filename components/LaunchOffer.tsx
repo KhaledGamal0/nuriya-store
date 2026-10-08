@@ -78,7 +78,11 @@ export function LaunchOffer() {
             className="btn"
             onClick={() => {
               setOpen(false);
-              if (!onProduct) router.push("/#shop");
+              if (onProduct) return;
+              if (path !== "/") return router.push("/#shop");
+              // Home: the page can't scroll while the popup is open, so glide to the products once it has closed.
+              const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+              window.setTimeout(() => document.getElementById("shop")?.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" }), 300);
             }}
           >
             {onProduct ? "Order now" : "Shop the offer"}

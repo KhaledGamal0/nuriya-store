@@ -182,6 +182,17 @@ async function saleCheck(browser) {
       await page.waitForTimeout(500);
       if (await dlg.isVisible()) f("Escape did not close the popup", "a11y");
     }
+    // "Shop the offer" lands on the products section of the home page.
+    const p2 = await ctx.newPage();
+    await p2.goto(BASE + "/", { waitUntil: "networkidle" });
+    const d2 = p2.locator("dialog[open]:has(.lo)");
+    if (await d2.waitFor({ timeout: 6000 }).then(() => true, () => false)) {
+      await d2.getByRole("button", { name: "Shop the offer" }).click();
+      await p2.waitForTimeout(1500);
+      const top = await p2.evaluate(() => document.getElementById("shop")?.getBoundingClientRect().top ?? 9999);
+      if (Math.abs(top) > 120) f(`"Shop the offer" did not bring the products into view (section top at ${Math.round(top)}px)`);
+    }
+    await p2.close();
     await page.goto(BASE + "/quiet-confidence/white", { waitUntil: "networkidle" });
     await page.waitForTimeout(1800);
     if (await page.locator("dialog[open]:has(.lo)").count()) f("popup showed again in the same visit");
