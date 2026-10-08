@@ -208,13 +208,19 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               }}
             >
               <option value="">Choose your area</option>
-              {picker.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nameEn} · {formatEgp(a.feePiasters)}
-                </option>
+              {picker.map((g) => (
+                <optgroup key={g.feePiasters} label={`${g.label} · ${formatEgp(g.feePiasters)}`}>
+                  {g.areas.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.nameEn}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
-            {AREA_NOTES.cairo && <p className="small field-note">Cairo &amp; Giza: {AREA_NOTES.cairo.charAt(0).toLowerCase() + AREA_NOTES.cairo.slice(1)}</p>}
+            {(areaId === "" || areaId === "cairo") && AREA_NOTES.cairo && (
+              <p className="small">Cairo &amp; Giza {AREA_NOTES.cairo.charAt(0).toLowerCase() + AREA_NOTES.cairo.slice(1)}</p>
+            )}
           </Field>
           <Field id="address" label="Address" error={errors.address}>
             <textarea id="address" name="address" autoComplete="street-address" placeholder="Street, building, floor, apartment" required {...live("address")} />

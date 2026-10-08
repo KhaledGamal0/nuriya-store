@@ -38,9 +38,9 @@ export const AREA_NOTES: Record<string, string> = {
   cairo: "Includes 6th of October, Sheikh Zayed, Hadayek October, Madinaty, El Shorouk and El Obour.",
 };
 
-/** Checkout picker order: Cairo & Giza first (most orders), then every other area A to Z. */
-export function areasForPicker(list: readonly Area[] = AREAS): Area[] {
-  return [...list].sort((a, b) => (a.id === "cairo" ? -1 : b.id === "cairo" ? 1 : a.nameEn.localeCompare(b.nameEn)));
+/** Checkout picker: one group per region with its fee in the heading (cheapest first), places A to Z inside. */
+export function areasForPicker(list: readonly Area[] = AREAS): { label: string; feePiasters: number; areas: Area[] }[] {
+  return areasByFee(list).map((g) => ({ ...g, areas: [...g.areas].sort((a, b) => a.nameEn.localeCompare(b.nameEn)) }));
 }
 
 /** Areas grouped by fee, cheapest first — for the checkout picker and the delivery page. */
