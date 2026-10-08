@@ -135,6 +135,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Checkout phone: grouped as typed, Arabic digits / +20 accepted, live "We'll confirm your order on …" check; optional second number saved, in e-mail + WhatsApp | DONE | migration 0011, `checkout.test.ts`, `orders.test.ts`, `fuzz.test.ts` |
 | Visitor stats: Vercel Web Analytics (visitors, pages, referrers incl. Instagram, countries, devices) + "Order placed" event; no cookies | DONE (needs Analytics enabled in Vercel) | `app/layout.tsx` |
 | Shop funnel events numbered 1–6 (Product viewed → Size chosen → Added to bag → Checkout started → Place order tapped → Order placed) + Size helper, Bag opened, Area chosen, Checkout problem, Order refused, Sale popup, Photo viewer | DONE | `lib/track.ts`; live check in `live-photos.mjs` |
+| Visitor city/region event ("Visitor city", once per visit, from Vercel's network location; no IP kept) | DONE | `app/api/place`, `VisitorPlace.tsx` |
 | Nightly sales report e-mail (today + 7 days: orders, pieces, money, what sold, prices paid, areas, by hour, stock) | DONE | `sales-report.yml`, `scripts/sales.sql` |
 | Order tracking page | PAUSED (Oct 7, Khaled) | /track → home; `findOrder` kept + tested |
 | WhatsApp confirm button in the order e-mail opens a fully formatted message (bold order number, items, totals, payment, delivery address, reply YES) | DONE | `whatsappLink`, `fuzz.test.ts` |
