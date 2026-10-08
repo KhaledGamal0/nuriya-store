@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SizeTable } from "@/components/SizeTable";
 import { getCatalog } from "@/lib/store";
 
-export const metadata: Metadata = { title: "Size guide", description: "Nuriya sizes S/M and L/XL, measured flat in centimeters." };
+export const metadata: Metadata = { title: "Size guide", description: "Nuriya sizes S/M and L/XL: shoulder, chest and length in centimeters." };
 
 export default async function SizeGuidePage() {
   const catalog = await getCatalog();
@@ -12,7 +12,7 @@ export default async function SizeGuidePage() {
       <header className="page-h">
         <p className="label">Fit</p>
         <h1>Size guide</h1>
-        <p>Every piece is cut oversized for a relaxed fit. Measurements are taken flat, in centimeters.</p>
+        <p>Every piece is cut oversized for a relaxed fit. Measurements in centimeters; chest is all the way around.</p>
       </header>
 
       <section className="page-sec" aria-labelledby="m-title">

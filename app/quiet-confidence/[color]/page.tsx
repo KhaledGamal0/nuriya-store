@@ -86,7 +86,7 @@ export default async function ProductPage({ params }: Params) {
             <summary>Size and fit</summary>
             <div className="acc-in">
               <SizeTable rows={catalog.sizeChart} />
-              <p>Oversized fit. Between sizes, size down.</p>
+              <p>Centimeters; chest is all the way around. Oversized fit. Between sizes, size down.</p>
             </div>
           </details>
           <details>

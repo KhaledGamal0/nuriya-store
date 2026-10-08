@@ -43,8 +43,8 @@ export const PRODUCT = {
   // TODO(khaled): fabric composition, weight and care instructions.
   fabric: null as string | null,
   sizeChart: [
-    { size: "S/M" as SizeId, shoulderCm: 56, chestCm: 56, lengthCm: 64, weightKg: [45, 65] as const },
-    { size: "L/XL" as SizeId, shoulderCm: 60, chestCm: 60, lengthCm: 67, weightKg: [66, 80] as const },
+    { size: "S/M" as SizeId, shoulderCm: 56, chestCm: 112, lengthCm: 64, weightKg: [45, 65] as const },
+    { size: "L/XL" as SizeId, shoulderCm: 60, chestCm: 120, lengthCm: 67, weightKg: [66, 80] as const },
   ],
   colors: {
     cream: {

@@ -135,3 +135,9 @@ test("second number is optional, must be valid, and different from the main one"
   const same = validateCheckout({ ...good, phone2: good.phone as string });
   assert.ok(!same.ok && same.errors.phone2?.includes("same"));
 });
+
+test("size chart matches Khaled's corrected guide (chest all around)", async () => {
+  const { staticCatalog } = await import("../lib/catalog.ts");
+  const rows = staticCatalog().sizeChart.map((r) => [r.size, r.shoulderCm, r.chestCm, r.lengthCm]);
+  assert.deepEqual(rows, [["S/M", 56, 112, 64], ["L/XL", 60, 120, 67]]);
+});

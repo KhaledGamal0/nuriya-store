@@ -56,3 +56,4 @@
 - Oct 8 2026 (Khaled): checkout area picker simplified: one "Cairo & Giza" option (75 EGP) covers Cairo, Giza and the new cities; fees unchanged and checked against the Direction list; each option shows its fee.
 - Oct 8 2026 (Khaled): checkout phone is grouped as typed (010 1234 5678) with a live confirmation of the number; optional second mobile number ("Another mobile number"), shown in the order e-mail and the WhatsApp message.
 - Oct 8 2026 (Khaled): visitor stats with Vercel Web Analytics (cookie-free, billed per event from the Pro usage credit, about $0.03 per 1,000 page views).
+- Oct 8 2026 (Khaled): size chart corrected: S/M shoulder 56 / chest 112 / length 64; L/XL 60 / 120 / 67 (chest all around; old 56/60 were half-width).
