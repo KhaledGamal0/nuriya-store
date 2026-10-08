@@ -41,5 +41,26 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
     await ctx.close();
   }
 }
+// Shop events: do what a shopper does on the live site and check each action reaches the stats code.
+// The stats script itself is blocked here, so this test never adds fake visits to the real numbers.
+{
+  const ctx = await browser.newContext({ ...devices["iPhone 13"] });
+  await ctx.route("**/_vercel/insights/**", (r) => r.abort());
+  await ctx.addInitScript(() => { try { sessionStorage.setItem("nuriya-sale-seen", "1"); } catch {} });
+  const page = await ctx.newPage();
+  await page.goto(SITE + "/quiet-confidence/white", { waitUntil: "networkidle" });
+  await page.waitForTimeout(800);
+  await page.locator("#size-group").getByRole("button", { name: "S/M" }).click();
+  await page.getByRole("button", { name: "Add to bag" }).click();
+  await page.waitForTimeout(1200);
+  const onProduct = await page.evaluate(() => (window.vaq || []).map((a) => (a[1] && a[1].name) + " " + JSON.stringify((a[1] && a[1].data) || {})));
+  rows.push(`events on product page: ${onProduct.join(" | ") || "none"}`);
+  await page.goto(SITE + "/checkout", { waitUntil: "networkidle" });
+  await page.waitForTimeout(800);
+  await page.getByLabel("Area").selectOption("alexandria");
+  const names = await page.evaluate(() => (window.vaq || []).map((a) => (a[1] && a[1].name) + " " + JSON.stringify((a[1] && a[1].data) || {})));
+  rows.push(`events on checkout page: ${names.join(" | ") || "none"}`);
+  await ctx.close();
+}
 await browser.close();
 console.log(rows.join("\n"));

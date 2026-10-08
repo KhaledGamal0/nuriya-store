@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -73,7 +74,10 @@ export function Header() {
           <button
             type="button"
             className="ib ib-r"
-            onClick={bag.openBag}
+            onClick={() => {
+              bag.openBag();
+              track("Bag opened", { pieces: bag.count });
+            }}
             aria-haspopup="dialog"
             aria-label={bag.count ? `Open bag, ${bag.count} ${bag.count === 1 ? "item" : "items"}` : "Open bag, empty"}
           >

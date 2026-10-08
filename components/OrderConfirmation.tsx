@@ -27,7 +27,7 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
       sessionStorage.setItem(`counted-${number}`, "1");
     } catch {}
     const va = (window as unknown as { va?: (type: "event", e: { name: string; data?: Record<string, string | number> }) => void }).va;
-    va?.("event", { name: "Order placed", data: { total: r.totalPiasters / 100, area: r.area } });
+    va?.("event", { name: "6 · Order placed", data: { total: r.totalPiasters / 100, area: r.area } });
   }, [number]);
 
   const first = receipt?.name.split(" ")[0];

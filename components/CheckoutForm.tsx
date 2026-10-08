@@ -100,7 +100,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   useEffect(() => {
     if (startedRef.current || bag.lines.length === 0) return;
     startedRef.current = true;
-    track("Checkout started", { pieces: bag.lines.reduce((n, l) => n + l.qty, 0), value: bag.subtotalPiasters / 100 });
+    track("4 · Checkout started", { pieces: bag.lines.reduce((n, l) => n + l.qty, 0), value: bag.subtotalPiasters / 100 });
   }, [bag.lines, bag.subtotalPiasters]);
 
   // Server errors replace local ones after each submit.
@@ -184,7 +184,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
             track("Checkout problem", { field: Object.keys(next)[0]! });
             return;
           }
-          track("Place order tapped", { pieces: bag.lines.reduce((n, l) => n + l.qty, 0), area: areaId });
+          track("5 · Place order tapped", { pieces: bag.lines.reduce((n, l) => n + l.qty, 0), area: areaId });
           keyRef.current ??= crypto.randomUUID();
           form.set("key", keyRef.current);
           sendingRef.current = true;
@@ -273,6 +273,8 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               {...live("area")}
               onChange={(e) => {
                 setAreaId(e.target.value);
+                const chosen = areas.find((a) => a.id === e.target.value);
+                if (chosen) track("Area chosen", { area: chosen.nameEn });
                 check("area", e.target.value, true);
               }}
             >

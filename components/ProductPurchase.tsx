@@ -2,7 +2,7 @@
 
 import { track } from "@/lib/track";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { productPath, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
 import { useStore } from "./StoreProvider";
 import { useBag } from "./BagProvider";
@@ -23,8 +23,14 @@ export function ProductPurchase({ color }: { color: ColorId }) {
   const [added, setAdded] = useState(false);
   const fit = sizeForWeight(kg);
 
+  // Which product people look at (counted once per colour per page view).
+  useEffect(() => {
+    track("1 · Product viewed", { color: catalog.colors[color].name });
+  }, [color, catalog]);
+
   function addToBag() {
     if (!size || !isAvailable(size)) {
+      track("Add tapped before choosing a size", { color: catalog.colors[color].name });
       setNeedSize(true);
       const group = document.getElementById("size-group");
       group?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -32,7 +38,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
       return;
     }
     bag.add(color, size);
-    track("Add to bag", { color: catalog.colors[color].name, size });
+    track("3 · Added to bag", { color: catalog.colors[color].name, size });
     setAdded(true);
     window.setTimeout(() => {
       setAdded(false);
@@ -83,6 +89,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
               disabled={!available}
               aria-label={available ? s : `${s}, sold out`}
               onClick={() => {
+                track("2 · Size chosen", { color: catalog.colors[color].name, size: s });
                 setSize(s);
                 setNeedSize(false);
               }}
@@ -139,6 +146,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
           disabled={!isAvailable(fit.size)}
           onClick={() => {
             setSize(fit.size);
+            track("Size helper used", { weight: `${Math.floor(kg / 5) * 5}–${Math.floor(kg / 5) * 5 + 4} kg`, size: fit.size });
             setNeedSize(false);
             setGuideOpen(false);
             bag.toast(`Size ${fit.size} selected`);
