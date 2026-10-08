@@ -1,19 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatEgp } from "@/lib/money";
 import { percentOff } from "@/lib/catalog";
-import { preview } from "@/lib/blur";
-import { PHONE_FULL } from "@/lib/sizes";
 import { Dialog, CloseButton } from "./Dialog";
 import { useStore } from "./StoreProvider";
 import { useCountdown } from "./useCountdown";
 
 const SEEN = "nuriya-sale-seen";
-// A close-up that is not on the first screen, so the popup never looks like part of the page behind it.
-const PHOTO = "/images/craft-sleeve-wide.jpg";
 
 /**
  * Launch-day sale popup. Shown once per visit, a moment after the page has loaded (never delays the page
@@ -56,11 +51,8 @@ export function LaunchOffer() {
   return (
     <Dialog open={open} onClose={() => setOpen(false)} variant="sheet" labelledBy="lo-title">
       <div className="lo">
-        <div className="lo-ph" style={preview(PHOTO)}>
-          {open && <Image src={PHOTO} alt="" fill sizes={`(min-width: 520px) 480px, ${PHONE_FULL}`} quality={65} loading="eager" decoding="sync" />}
-          <div className="lo-x">
-            <CloseButton onClick={() => setOpen(false)} label="Close offer" />
-          </div>
+        <div className="lo-x">
+          <CloseButton onClick={() => setOpen(false)} label="Close offer" />
         </div>
         <div className="lo-b">
           <p className="lo-k">Launch day offer</p>

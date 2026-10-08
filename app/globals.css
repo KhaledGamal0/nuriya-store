@@ -228,13 +228,11 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .sale-note { margin-top: var(--s1); font-size: 13px; font-weight: 500; color: var(--burg); }
 .sale-t { font-variant-numeric: tabular-nums; }
 .dlg-sheet:has(.lo) > .dlg-inner { padding: 0; gap: 0; }
-.lo { display: grid; overflow: hidden; border-radius: var(--r) var(--r) 0 0; }
-.lo-ph { position: relative; height: clamp(160px, 26vh, 240px); }
-.lo-ph img { object-fit: cover; object-position: 50% 50%; }
+.lo { position: relative; display: grid; border-radius: var(--r) var(--r) 0 0; }
 /* Darker scrim than other sheets: the offer clearly sits above the page, not inside it. */
 .dlg:has(.lo)::backdrop { background: rgba(20, 16, 17, 0.62); }
-.lo-x { position: absolute; top: var(--s1); right: var(--s1); background: var(--paper); border-radius: var(--r); }
-.lo-b { display: grid; gap: var(--s2); padding: var(--s3) var(--g) calc(var(--s3) + env(safe-area-inset-bottom, 0px)); text-align: center; justify-items: center; }
+.lo-x { position: absolute; top: var(--s1); right: var(--s1); }
+.lo-b { display: grid; gap: var(--s2); padding: var(--s5) var(--g) calc(var(--s3) + env(safe-area-inset-bottom, 0px)); text-align: center; justify-items: center; }
 .lo-k { font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--burg); }
 .lo h2 { font-size: clamp(34px, 9vw, 44px); line-height: 1; outline: none; }
 .lo-p { display: flex; gap: var(--s1); align-items: baseline; font-size: 22px; font-variant-numeric: tabular-nums; }
