@@ -86,3 +86,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | An order takes pieces straight out of stock; a refused order takes nothing | `orders.test.ts`, `load.test.ts`, stress "crowd" | database + browser |
 | Timed sale: charged only inside its window (database clock), struck price = full price, sale orders don't use up the 7-order offer, a sale-priced bag is refused after the end | `orders.test.ts`, `db.test.ts` | database |
 | Sale popup: shows once per visit, focus inside, Escape closes, never on checkout; product page shows price + countdown | ui-audit `saleCheck` | browser |
+| Phone grouped as typed (Arabic digits, +20, max 11 digits); second number optional, valid and different; saved; in WhatsApp message | `checkout.test.ts`, `orders.test.ts`, `fuzz.test.ts` | unit + database |

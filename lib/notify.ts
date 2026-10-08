@@ -14,6 +14,8 @@ type OrderForEmail = {
   payment_method: "cod" | "card";
   customer_name: string;
   customer_phone: string;
+  /** Optional second number the customer gave. */
+  alt_phone?: string | null;
   area_name: string;
   address: string;
   subtotal_piasters: number;
@@ -58,7 +60,7 @@ export function whatsappLink(o: Omit<OrderForEmail, "id" | "created_at">): strin
     ``,
     `*Delivery to*`,
     plain(o.customer_name),
-    prettyPhone(o.customer_phone),
+    prettyPhone(o.customer_phone) + (o.alt_phone ? ` · ${prettyPhone(o.alt_phone)}` : ""),
     `${plain(o.area_name)} — ${plain(o.address)}`,
     ``,
     `Please reply *YES* to confirm, or tell us if anything needs changing.`,
@@ -93,6 +95,7 @@ export function orderEmail(o: OrderForEmail, stock: StockRow[] = []): { subject:
     "CUSTOMER",
     `  ${o.customer_name}`,
     `  ${prettyPhone(o.customer_phone)}`,
+    ...(o.alt_phone ? [`  Other number: ${prettyPhone(o.alt_phone)}`] : []),
     `  ${o.area_name} — ${o.address}`,
     "",
     `Confirm on WhatsApp: ${wa}`,
@@ -147,6 +150,7 @@ export function orderEmail(o: OrderForEmail, stock: StockRow[] = []): { subject:
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     ${info("Name", `<b style="font-weight:600">${esc(o.customer_name)}</b>`)}
     ${info("Phone", `<a href="tel:${esc(o.customer_phone)}" style="color:#3C0E18">${esc(prettyPhone(o.customer_phone))}</a>`)}
+    ${o.alt_phone ? info("Other number", `<a href="tel:${esc(o.alt_phone)}" style="color:#3C0E18">${esc(prettyPhone(o.alt_phone))}</a>`) : ""}
     ${info("Area", esc(o.area_name))}
     ${info("Address", esc(o.address))}
     ${info("Payment", cod ? `<b style="font-weight:600">Collect ${formatEgp(o.total_piasters)} in cash</b>` : "Paid by card")}
@@ -179,7 +183,7 @@ ${
 
 async function loadOrder(sql: Sql, id: number): Promise<OrderForEmail | null> {
   const [o] = await sql<Omit<OrderForEmail, "items">[]>`
-    SELECT id, number, payment_method, customer_name, customer_phone, area_name, address,
+    SELECT id, number, payment_method, customer_name, customer_phone, alt_phone, area_name, address,
            subtotal_piasters, shipping_piasters, total_piasters, created_at
     FROM orders WHERE id = ${id}`;
   if (!o) return null;

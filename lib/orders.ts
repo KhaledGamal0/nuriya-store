@@ -176,10 +176,10 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
         const [saved = noRow("new order")] = await tx<{ id: number }[]>`
           INSERT INTO orders (number, customer_id, status, payment_method, area_id, address,
                               subtotal_piasters, shipping_piasters, discount_piasters, total_piasters,
-                              idempotency_key, customer_name, customer_phone, area_name, ip_hash)
+                              idempotency_key, customer_name, customer_phone, alt_phone, area_name, ip_hash)
           VALUES (${number}, ${customer.id}, ${status}, ${order.payment}, ${area.id}, ${order.address},
                   ${subtotal}, ${area.fee}, 0, ${total},
-                  ${opts.key}, ${order.name}, ${order.phone}, ${area.name_en}, ${opts.ipHash})
+                  ${opts.key}, ${order.name}, ${order.phone}, ${order.altPhone ?? null}, ${area.name_en}, ${opts.ipHash})
           RETURNING id`;
         for (const { v, line } of items) {
           await tx`

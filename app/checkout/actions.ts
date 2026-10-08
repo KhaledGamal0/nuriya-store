@@ -53,6 +53,7 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
   const result = validateCheckout(
     {
       phone: form.get("phone"),
+      phone2: form.get("phone2"),
       name: form.get("name"),
       areaId: form.get("area"),
       address: form.get("address"),

@@ -15,6 +15,8 @@ export type PaymentMethod = "cod" | "card";
 
 export type CheckoutInput = {
   phone: unknown;
+  /** Optional second mobile number. */
+  phone2?: unknown;
   name: unknown;
   areaId: unknown;
   address: unknown;
@@ -26,6 +28,8 @@ export type PricedLine = CartLine & { unitPiasters: number; linePiasters: number
 
 export type ValidOrder = {
   phone: string;
+  /** Second number to try if the first doesn't answer, or null. */
+  altPhone: string | null;
   name: string;
   area: Area;
   address: string;
@@ -36,7 +40,7 @@ export type ValidOrder = {
   totalPiasters: number;
 };
 
-export type FieldErrors = Partial<Record<"phone" | "name" | "area" | "address" | "payment" | "cart", string>>;
+export type FieldErrors = Partial<Record<"phone" | "phone2" | "name" | "area" | "address" | "payment" | "cart", string>>;
 
 export type CheckoutResult = { ok: true; order: ValidOrder } | { ok: false; errors: FieldErrors };
 
@@ -44,6 +48,16 @@ export type CheckoutResult = { ok: true; order: ValidOrder } | { ok: false; erro
 /** Arabic-Indic (٠١٢…) and Persian (۰۱۲…) digits → 0-9. Many Egyptian phones type these. */
 export function toLatinDigits(s: string): string {
   return s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (d) => String((d.charCodeAt(0) & 0xf) % 10));
+}
+
+/** What the shopper sees while typing: digits only, grouped 010 1234 5678. +20 / 0020 become 0. */
+export function formatPhoneInput(raw: string): string {
+  let d = toLatinDigits(raw).replace(/[^\d+]/g, "");
+  if (d.startsWith("+20")) d = "0" + d.slice(3);
+  else if (d.startsWith("0020")) d = "0" + d.slice(4);
+  else if (/^20\d{10}$/.test(d)) d = "0" + d.slice(2);
+  d = d.replace(/\D/g, "").slice(0, 11);
+  return [d.slice(0, 3), d.slice(3, 7), d.slice(7)].filter(Boolean).join(" ");
 }
 
 export function normalizePhone(raw: unknown): string | null {
@@ -93,6 +107,8 @@ export function cleanText(raw: unknown, max: number): string {
 
 export const MESSAGES = {
   phone: "Enter an Egyptian mobile number, like 010 1234 5678.",
+  phone2: "Enter another Egyptian mobile number, or leave this empty.",
+  phone2Same: "This is the same as your main number. Add a different one, or leave it empty.",
   name: "Enter your full name.",
   area: "Choose your area.",
   address: "Add your street, building and floor.",
@@ -102,10 +118,16 @@ export const MESSAGES = {
 } as const;
 
 /** Check one field. Used live in the browser and again on the server. */
-export function fieldError(field: "phone" | "name" | "area" | "address", value: unknown): string | undefined {
+export function fieldError(field: "phone" | "phone2" | "name" | "area" | "address", value: unknown, main?: unknown): string | undefined {
   switch (field) {
     case "phone":
       return normalizePhone(value) ? undefined : MESSAGES.phone;
+    case "phone2": {
+      if (typeof value !== "string" || value.trim() === "") return undefined; // optional
+      const p = normalizePhone(value);
+      if (!p) return MESSAGES.phone2;
+      return p === normalizePhone(main) ? MESSAGES.phone2Same : undefined;
+    }
     case "name":
       return cleanText(value, 80).length >= 3 ? undefined : MESSAGES.name;
     case "area":
@@ -121,6 +143,9 @@ export function validateCheckout(input: CheckoutInput, ctx: CheckoutContext = ST
 
   const phone = normalizePhone(input.phone);
   if (!phone) errors.phone = MESSAGES.phone;
+  const phone2Error = fieldError("phone2", input.phone2, input.phone);
+  if (phone2Error) errors.phone2 = phone2Error;
+  const altPhone = phone2Error ? null : normalizePhone(input.phone2);
 
   const name = cleanText(input.name, 80);
   if (name.length < 3) errors.name = MESSAGES.name;
@@ -152,6 +177,7 @@ export function validateCheckout(input: CheckoutInput, ctx: CheckoutContext = ST
     ok: true,
     order: {
       phone,
+      altPhone,
       name,
       area,
       address,

@@ -114,3 +114,24 @@ test("an area that is not active is rejected", () => {
   assert.equal(r.ok, false);
   if (!r.ok) assert.ok(r.errors.area);
 });
+
+test("phone input is grouped as typed, Arabic digits and +20 included", async () => {
+  const { formatPhoneInput } = await import("../lib/checkout.ts");
+  assert.equal(formatPhoneInput("01012345678"), "010 1234 5678");
+  assert.equal(formatPhoneInput("0101"), "010 1");
+  assert.equal(formatPhoneInput("+201012345678"), "010 1234 5678");
+  assert.equal(formatPhoneInput("٠١٠١٢٣٤٥٦٧٨"), "010 1234 5678");
+  assert.equal(formatPhoneInput("010-1234-56789999"), "010 1234 5678", "never more than 11 digits");
+  assert.equal(formatPhoneInput("abc"), "");
+});
+
+test("second number is optional, must be valid, and different from the main one", () => {
+  const ok = validateCheckout({ ...good, phone2: "" });
+  assert.ok(ok.ok && ok.order.altPhone === null);
+  const two = validateCheckout({ ...good, phone2: "0122 333 4444" });
+  assert.ok(two.ok && two.order.altPhone === "01223334444");
+  const bad = validateCheckout({ ...good, phone2: "0123" });
+  assert.ok(!bad.ok && bad.errors.phone2);
+  const same = validateCheckout({ ...good, phone2: good.phone as string });
+  assert.ok(!same.ok && same.errors.phone2?.includes("same"));
+});

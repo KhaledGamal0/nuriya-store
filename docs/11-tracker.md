@@ -132,6 +132,7 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Orders take stock straight away (stock_on_hand goes down) | DONE | migration 0008, `orders.test.ts`, `load.test.ts` |
 | Launch-day sale 900 EGP until Sat 10 Oct 00:00 Cairo: popup with countdown, product-page line, prices switch on the second it ends, checkout charges by the database clock | DONE | migration 0009, `LaunchOffer.tsx`, `orders.test.ts`, audit `saleCheck`, `sale-end.yml` |
 | Checkout area picker: one Cairo & Giza option (covers new cities), every option shows its fee, Cairo first then A–Z; all fees match the Direction list | DONE | migration 0010, `checkout.test.ts` |
+| Checkout phone: grouped as typed, Arabic digits / +20 accepted, live "We'll confirm your order on …" check; optional second number saved, in e-mail + WhatsApp | DONE | migration 0011, `checkout.test.ts`, `orders.test.ts`, `fuzz.test.ts` |
 | Order tracking page | PAUSED (Oct 7, Khaled) | /track → home; `findOrder` kept + tested |
 | WhatsApp confirm button in the order e-mail opens a fully formatted message (bold order number, items, totals, payment, delivery address, reply YES) | DONE | `whatsappLink`, `fuzz.test.ts` |
 | Health e-mails: daily early warning before any limit (Neon, Vercel domain, certificate, backups, GitHub inactivity, Resend, stock) + full weekly report every Sunday | DONE | `health-report.yml`, `scripts/health-report.mjs` |

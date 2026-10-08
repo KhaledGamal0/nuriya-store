@@ -10,15 +10,19 @@ import { formatEgp } from "@/lib/money";
 import { AREA_NOTES, areasForPicker } from "@/lib/shipping";
 import { useStore } from "./StoreProvider";
 import { keepReceipt } from "@/lib/receipt";
-import { fieldError, type FieldErrors } from "@/lib/checkout";
+import { fieldError, formatPhoneInput, normalizePhone, type FieldErrors } from "@/lib/checkout";
+import { prettyPhone } from "@/lib/receipt";
 
-const FIELDS = ["phone", "name", "area", "address"] as const;
+const FIELDS = ["phone", "phone2", "name", "area", "address"] as const;
 type Field = (typeof FIELDS)[number];
 
-function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: ReactNode }) {
+function Field({ id, label, error, optional, children }: { id: string; label: string; error?: string; optional?: boolean; children: ReactNode }) {
   return (
     <div className="f" data-bad={error ? "true" : "false"}>
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>
+        {label}
+        {optional && <span className="f-opt"> (optional)</span>}
+      </label>
       {children}
       {error && (
         <span className="f-err" id={`${id}-err`}>
@@ -76,6 +80,10 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   const picker = areasForPicker(areas);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(submitOrder, null);
   const [areaId, setAreaId] = useState("");
+  // Phone numbers are shown grouped as they are typed (010 1234 5678), so a missing digit is easy to spot.
+  const [phone, setPhone] = useState("");
+  const [phone2, setPhone2] = useState("");
+  const phoneOk = normalizePhone(phone);
   const [errors, setErrors] = useState<FieldErrors>({});
   const formRef = useRef<HTMLFormElement>(null);
   // One key per checkout attempt, made in the browser at the first tap (never at build time, or every
@@ -107,8 +115,8 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   }
 
   // Check a field when the shopper leaves it; clear its error as soon as it becomes valid.
-  function check(field: Field, value: string, onlyClear = false) {
-    const msg = fieldError(field, value);
+  function check(field: Field, value: string, onlyClear = false, main: string = phone) {
+    const msg = fieldError(field, value, main);
     setErrors((prev) => {
       if (onlyClear && !prev[field]) return prev;
       return { ...prev, [field]: onlyClear && msg ? prev[field] : msg };
@@ -156,7 +164,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
           const form = new FormData(e.currentTarget);
           const next: FieldErrors = {};
           for (const f of FIELDS) {
-            const msg = fieldError(f, form.get(f));
+            const msg = fieldError(f, form.get(f), form.get("phone"));
             if (msg) next[f] = msg;
           }
           if (Object.keys(next).length) {
@@ -186,7 +194,65 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
         <fieldset className="fs">
           <legend>Contact</legend>
           <Field id="phone" label="Mobile number" error={errors.phone}>
-            <input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="010 1234 5678" required {...live("phone")} />
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="010 1234 5678"
+              required
+              value={phone}
+              {...live("phone")}
+              aria-describedby={errors.phone ? "phone-err" : "phone-hint"}
+              data-ok={phoneOk ? "true" : undefined}
+              onChange={(e) => {
+                const el = e.currentTarget;
+                // Format only while typing at the end, so editing in the middle never jumps the cursor.
+                const next = el.selectionStart === el.value.length ? formatPhoneInput(el.value) : el.value;
+                setPhone(next);
+                check("phone", next, true);
+                if (phone2) check("phone2", phone2, true, next);
+              }}
+            />
+            {!errors.phone && (
+              <p className="f-hint" id="phone-hint" data-ok={phoneOk ? "true" : undefined}>
+                {phoneOk ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                      <path d="M5 12.5l4.5 4.5L19 7.5" />
+                    </svg>
+                    We&apos;ll confirm your order on <b>{prettyPhone(phoneOk)}</b>
+                  </>
+                ) : (
+                  "We call or WhatsApp this number to confirm your order. 11 digits, starting 010, 011, 012 or 015."
+                )}
+              </p>
+            )}
+          </Field>
+          <Field id="phone2" label="Another mobile number" optional error={errors.phone2}>
+            <input
+              id="phone2"
+              name="phone2"
+              type="tel"
+              inputMode="tel"
+              autoComplete="off"
+              placeholder="010 1234 5678"
+              value={phone2}
+              {...live("phone2")}
+              aria-describedby={errors.phone2 ? "phone2-err" : "phone2-hint"}
+              onChange={(e) => {
+                const el = e.currentTarget;
+                const next = el.selectionStart === el.value.length ? formatPhoneInput(el.value) : el.value;
+                setPhone2(next);
+                check("phone2", next, true);
+              }}
+            />
+            {!errors.phone2 && (
+              <p className="f-hint" id="phone2-hint">
+                In case we can&apos;t reach you on the first one.
+              </p>
+            )}
           </Field>
           <Field id="name" label="Full name" error={errors.name}>
             <input id="name" name="name" autoComplete="name" required {...live("name")} />

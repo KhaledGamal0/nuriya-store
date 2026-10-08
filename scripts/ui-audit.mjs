@@ -437,7 +437,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
 
   await step(vp, "checkout-filled", async () => {
     where = "checkout-filled";
-    await page.getByLabel("Mobile number").fill(PHONES[vp]);
+    await page.getByLabel("Mobile number", { exact: true }).fill(PHONES[vp]);
     await page.getByLabel("Full name").fill("Nour Ahmed");
     await page.getByLabel("Area").selectOption("alexandria");
     await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");

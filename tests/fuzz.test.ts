@@ -152,6 +152,12 @@ test("order e-mail and WhatsApp link: hostile names and addresses cannot inject 
   for (const part of ["*Order NUR-TEST22*", "1 × Quiet Confidence — White, S/M", "*Total: 1,075 EGP*", "Delivery (Cairo): 75 EGP", "010 1234 5678", "12 St #4", "cash on delivery"])
     assert.ok(msg.includes(part), `WhatsApp message is missing "${part}"`);
   assert.ok(!msg.includes("*bold*"), "customer text must not add WhatsApp formatting");
+  const two = decodeURIComponent(whatsappLink({
+    number: "NUR-TEST23", customer_name: "Nour", customer_phone: "01012345678", alt_phone: "01223334444", area_name: "Cairo & Giza", address: "12 Tahrir St",
+    payment_method: "cod", subtotal_piasters: 100000, shipping_piasters: 7500, total_piasters: 107500,
+    items: [{ product_name: "Quiet Confidence", color_name: "White", size: "S/M", qty: 1, line_piasters: 100000 }],
+  }).split("?text=")[1]!);
+  assert.ok(two.includes("010 1234 5678 · 012 2333 4444"), "both numbers in the WhatsApp message");
 });
 
 test("order e-mail shows stock left, flags low and sold-out sizes, and says what to collect in cash", () => {

@@ -27,7 +27,7 @@ try {
   await page.locator("#size-group").getByRole("button", { name: "L/XL" }).click();
   await page.getByRole("button", { name: "Add to bag" }).click();
   await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
-  await page.getByLabel("Mobile number").fill("010 1234 5678");
+  await page.getByLabel("Mobile number", { exact: true }).fill("010 1234 5678");
   await page.getByLabel("Full name").fill("Nour Ahmed");
   await page.getByLabel("Area").selectOption("alexandria");
   await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");

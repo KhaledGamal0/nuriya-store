@@ -342,3 +342,12 @@ test("timed sale: charged only inside its window, doesn't use up the 7-order off
   const [p = noRow()] = await sql!`SELECT price_piasters FROM products WHERE slug = 'quiet-confidence'`;
   assert.equal(p.price_piasters, 120000);
 });
+
+test("the optional second number is saved with the order", { skip }, async () => {
+  const order = { ...(await valid(nextPhone())), altPhone: "01223334444" };
+  const r = await place(order);
+  assert.ok(r.ok);
+  const [o = noRow()] = await sql!`SELECT alt_phone FROM orders WHERE number = ${r.ok ? r.number : ""}`;
+  assert.equal(o.alt_phone, "01223334444");
+  await assert.rejects(sql!`UPDATE orders SET alt_phone = '12345' WHERE number = ${r.ok ? r.number : ""}`, "the database refuses a malformed number");
+});

@@ -53,7 +53,7 @@ async function setBag(page, lines) {
 
 async function fillCheckout(page, phone, { name = "Stress Buyer", area = "cairo", address = "5 Stress Test St, building 2, floor 1" } = {}) {
   await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
-  await page.getByLabel("Mobile number").fill(phone);
+  await page.getByLabel("Mobile number", { exact: true }).fill(phone);
   await page.getByLabel("Full name").fill(name);
   await page.getByLabel("Area").selectOption(area);
   await page.getByLabel("Address").fill(address);
