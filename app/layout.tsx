@@ -48,8 +48,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         </BagProvider>
         </StoreProvider>
         {/* Visitor counts (Vercel Web Analytics): no cookies, no personal data, ~1 KB loaded after everything else. */}
-        <Script id="va-init" strategy="afterInteractive">{`window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}`}</Script>
-        <Script src="/_vercel/insights/script.js" strategy="lazyOnload" />
+        {process.env.VERCEL === "1" && (
+          <>
+            <Script id="va-init" strategy="afterInteractive">{`window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}`}</Script>
+            <Script src="/_vercel/insights/script.js" strategy="lazyOnload" />
+          </>
+        )}
       </body>
     </html>
   );
