@@ -33,6 +33,9 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
       const e = performance.getEntriesByType("largest-contentful-paint");
       return Math.round(e.at(-1)?.startTime ?? -1);
     }).catch(() => -1);
+    await page.waitForTimeout(3000); // the visitor-stats script loads last, after everything else
+    const va = await page.evaluate(() => ({ script: !!document.querySelector('script[src*="_vercel/insights"]'), queued: typeof window.va }));
+    rows.push(`${path} [${net}] visitor stats: script ${va.script ? "on page" : "MISSING"}, va=${va.queued}`);
     const stats = [...files.entries()].map(([u, f]) => `${u.split("/").pop()} ${f.status} ${f.cache} +${f.t - t0}ms`);
     rows.push(`${path} [${net}] html ${html}ms · LCP ${first}ms · all photos shown ${all}ms\n    ${stats.join("\n    ")}`);
     await ctx.close();
