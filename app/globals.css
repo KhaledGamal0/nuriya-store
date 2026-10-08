@@ -230,7 +230,9 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .dlg-sheet:has(.lo) > .dlg-inner { padding: 0; gap: 0; }
 .lo { display: grid; overflow: hidden; border-radius: var(--r) var(--r) 0 0; }
 .lo-ph { position: relative; height: clamp(160px, 26vh, 240px); }
-.lo-ph img { object-fit: cover; object-position: 50% 30%; }
+.lo-ph img { object-fit: cover; object-position: 50% 50%; }
+/* Darker scrim than other sheets: the offer clearly sits above the page, not inside it. */
+.dlg:has(.lo)::backdrop { background: rgba(20, 16, 17, 0.62); }
 .lo-x { position: absolute; top: var(--s1); right: var(--s1); background: var(--paper); border-radius: var(--r); }
 .lo-b { display: grid; gap: var(--s2); padding: var(--s3) var(--g) calc(var(--s3) + env(safe-area-inset-bottom, 0px)); text-align: center; justify-items: center; }
 .lo-k { font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--burg); }

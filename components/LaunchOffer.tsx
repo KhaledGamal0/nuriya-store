@@ -12,7 +12,8 @@ import { useStore } from "./StoreProvider";
 import { useCountdown } from "./useCountdown";
 
 const SEEN = "nuriya-sale-seen";
-const PHOTO = "/images/hero-pair.jpg";
+// A close-up that is not on the first screen, so the popup never looks like part of the page behind it.
+const PHOTO = "/images/craft-sleeve-wide.jpg";
 
 /**
  * Launch-day sale popup. Shown once per visit, a moment after the page has loaded (never delays the page
