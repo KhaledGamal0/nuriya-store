@@ -204,7 +204,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               required
               value={phone}
               {...live("phone")}
-              aria-describedby={errors.phone ? "phone-err" : "phone-hint"}
+              aria-describedby={errors.phone ? "phone-err" : phoneOk ? "phone-hint" : undefined}
               data-ok={phoneOk ? "true" : undefined}
               onChange={(e) => {
                 const el = e.currentTarget;
@@ -215,22 +215,17 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
                 if (phone2) check("phone2", phone2, true, next);
               }}
             />
-            {!errors.phone && (
-              <p className="f-hint" id="phone-hint" data-ok={phoneOk ? "true" : undefined}>
-                {phoneOk ? (
-                  <>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-                      <path d="M5 12.5l4.5 4.5L19 7.5" />
-                    </svg>
-                    We&apos;ll confirm your order on <b>{prettyPhone(phoneOk)}</b>
-                  </>
-                ) : (
-                  "We call or WhatsApp this number to confirm your order. 11 digits, starting 010, 011, 012 or 015."
-                )}
+            {/* Quiet until it helps: a short confirmation once the number is complete; the format is in the placeholder. */}
+            {!errors.phone && phoneOk && (
+              <p className="f-hint" id="phone-hint" data-ok="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+                </svg>
+                We&apos;ll confirm on <b>{prettyPhone(phoneOk)}</b>
               </p>
             )}
           </Field>
-          <Field id="phone2" label="Another mobile number" optional error={errors.phone2}>
+          <Field id="phone2" label="Second number" optional error={errors.phone2}>
             <input
               id="phone2"
               name="phone2"
@@ -240,7 +235,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               placeholder="010 1234 5678"
               value={phone2}
               {...live("phone2")}
-              aria-describedby={errors.phone2 ? "phone2-err" : "phone2-hint"}
+              aria-describedby={errors.phone2 ? "phone2-err" : undefined}
               onChange={(e) => {
                 const el = e.currentTarget;
                 const next = el.selectionStart === el.value.length ? formatPhoneInput(el.value) : el.value;
@@ -248,11 +243,6 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
                 check("phone2", next, true);
               }}
             />
-            {!errors.phone2 && (
-              <p className="f-hint" id="phone2-hint">
-                In case we can&apos;t reach you on the first one.
-              </p>
-            )}
           </Field>
           <Field id="name" label="Full name" error={errors.name}>
             <input id="name" name="name" autoComplete="name" required {...live("name")} />
@@ -284,9 +274,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
                 </optgroup>
               ))}
             </select>
-            {(areaId === "" || areaId === "cairo") && AREA_NOTES.cairo && (
-              <p className="small">Cairo &amp; Giza {AREA_NOTES.cairo.charAt(0).toLowerCase() + AREA_NOTES.cairo.slice(1)}</p>
-            )}
+            {areaId === "cairo" && AREA_NOTES.cairo && <p className="f-hint">{AREA_NOTES.cairo}</p>}
           </Field>
           <Field id="address" label="Address" error={errors.address}>
             <textarea id="address" name="address" autoComplete="street-address" placeholder="Street, building, floor, apartment" required {...live("address")} />

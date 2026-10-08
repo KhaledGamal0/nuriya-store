@@ -35,7 +35,7 @@ const GROUP_LABELS: Record<string, string> = {
 
 /** Which places one checkout option covers, shown under the area picker and on the delivery page. */
 export const AREA_NOTES: Record<string, string> = {
-  cairo: "Includes 6th of October, Sheikh Zayed, Hadayek October, Madinaty, El Shorouk and El Obour.",
+  cairo: "Includes October, Sheikh Zayed, Madinaty, El Shorouk and El Obour.",
 };
 
 /** Checkout picker: one group per region with its fee in the heading (cheapest first), places A to Z inside. */
