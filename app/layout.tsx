@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { IBM_Plex_Sans_Arabic, Instrument_Serif, Poppins } from "next/font/google";
 import { BagProvider } from "@/components/BagProvider";
+import Script from "next/script";
 import { LaunchOffer } from "@/components/LaunchOffer";
 import { StoreProvider } from "@/components/StoreProvider";
 import { getAreas, getCatalog } from "@/lib/store";
@@ -46,6 +47,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <LaunchOffer />
         </BagProvider>
         </StoreProvider>
+        {/* Visitor counts (Vercel Web Analytics): no cookies, no personal data, ~1 KB loaded after everything else. */}
+        <Script id="va-init" strategy="afterInteractive">{`window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}`}</Script>
+        <Script src="/_vercel/insights/script.js" strategy="lazyOnload" />
       </body>
     </html>
   );

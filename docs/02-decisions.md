@@ -55,3 +55,4 @@
 - Oct 8 2026 (Khaled): launch-day sale 900 EGP (25% off 1,200) for both colours, from Oct 8 noon until Sat 10 Oct 00:00 Cairo; then back to 1,000 EGP (7-order offer, sale orders don't count). Khaled asked for a launch popup: allowed for this sale only (exception to the no-promo-popup rule): shown once per visit, after the page loads, never on checkout, accessible.
 - Oct 8 2026 (Khaled): checkout area picker simplified: one "Cairo & Giza" option (75 EGP) covers Cairo, Giza and the new cities; fees unchanged and checked against the Direction list; each option shows its fee.
 - Oct 8 2026 (Khaled): checkout phone is grouped as typed (010 1234 5678) with a live confirmation of the number; optional second mobile number ("Another mobile number"), shown in the order e-mail and the WhatsApp message.
+- Oct 8 2026 (Khaled): visitor stats with Vercel Web Analytics (cookie-free, billed per event from the Pro usage credit, about $0.03 per 1,000 page views).
