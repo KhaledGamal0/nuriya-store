@@ -76,7 +76,7 @@ export function Header() {
             className="ib ib-r"
             onClick={() => {
               bag.openBag();
-              track("Bag opened", `${bag.count} pieces`);
+              track("Bag opened", `${bag.count} pcs · ${(bag.subtotalPiasters / 100).toLocaleString("en-US")} EGP`);
             }}
             aria-haspopup="dialog"
             aria-label={bag.count ? `Open bag, ${bag.count} ${bag.count === 1 ? "item" : "items"}` : "Open bag, empty"}

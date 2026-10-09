@@ -39,6 +39,9 @@ export function ProductPurchase({ color }: { color: ColorId }) {
     }
     bag.add(color, size);
     track("3 · Added to bag", `${catalog.colors[color].name} · ${size}`);
+    // What the whole bag is worth right after adding (current bag + this piece).
+    const unit = catalog.colors[color].sizes.find((x) => x.size === size)?.pricePiasters ?? catalog.pricePiasters;
+    track("Bag value after adding", `${bag.count + 1} pcs · ${((bag.subtotalPiasters + unit) / 100).toLocaleString("en-US")} EGP`);
     setAdded(true);
     window.setTimeout(() => {
       setAdded(false);
