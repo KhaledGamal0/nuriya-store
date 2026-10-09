@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   title: { default: "Nuriya — comfy · everyday pieces", template: "%s · Nuriya" },
   description: "Soft, oversized everyday pieces from Cairo. Not loud. Just unforgettable.",
   openGraph: { siteName: "Nuriya", locale: "en_EG", type: "website" },
+  // Meta (Facebook/Instagram ads) domain verification for nuriya.app — public value, safe in code.
+  other: { "facebook-domain-verification": "mtu8fh7mkjmjr6w2fippk8iq2hrsdo" },
 };
 
 export const viewport: Viewport = {
