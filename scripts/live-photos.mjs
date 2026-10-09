@@ -9,6 +9,7 @@ const rows = [];
 for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"]) {
   for (const net of ["5g", "4g"]) {
     const ctx = await browser.newContext({ ...devices["iPhone 13"] });
+    await ctx.route(/facebook\.com\/tr/, (r) => r.abort()); // never send test visits to the real Meta Pixel
     const page = await ctx.newPage();
     const cdp = await ctx.newCDPSession(page);
     await cdp.send("Network.enable");
@@ -46,6 +47,13 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
 {
   const ctx = await browser.newContext({ ...devices["iPhone 13"] });
   await ctx.route("**/_vercel/insights/**", (r) => r.abort());
+  // Meta Pixel: its script loads for real, but what it would send to Meta is caught here and never sent.
+  const meta = [];
+  await ctx.route(/facebook\.com\/tr/, (r) => {
+    const u = new URL(r.request().url());
+    meta.push(u.searchParams.get("ev") + (u.searchParams.get("cd[value]") ? ` ${u.searchParams.get("cd[value]")} ${u.searchParams.get("cd[currency]")}` : ""));
+    return r.abort();
+  });
   await ctx.addInitScript(() => { try { sessionStorage.setItem("nuriya-sale-seen", "1"); } catch {} });
   const page = await ctx.newPage();
   await page.goto(SITE + "/quiet-confidence/white", { waitUntil: "networkidle" });
@@ -60,6 +68,9 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
   await page.getByLabel("Area").selectOption("alexandria");
   const names = await page.evaluate(() => (window.vaq || []).map((a) => (a[1] && a[1].name) + " " + JSON.stringify((a[1] && a[1].data) || {})));
   rows.push(`events on checkout page: ${names.join(" | ") || "none"}`);
+  await page.waitForTimeout(3000);
+  const pixelId = await page.evaluate(() => typeof window.fbq === "function" && !!document.querySelector('script[src*="connect.facebook.net"]'));
+  rows.push(`Meta Pixel: ${pixelId ? "loaded" : "MISSING"} · events it sent: ${meta.join(" | ") || "none"}`);
   await ctx.close();
 }
 await browser.close();
