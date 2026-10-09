@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -26,8 +27,7 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
       if (sessionStorage.getItem(`counted-${number}`)) return;
       sessionStorage.setItem(`counted-${number}`, "1");
     } catch {}
-    const va = (window as unknown as { va?: (type: "event", e: { name: string; data?: Record<string, string | number> }) => void }).va;
-    va?.("event", { name: "6 · Order placed", data: { total: r.totalPiasters / 100, area: r.area } });
+    track("6 · Order placed", `${r.totalPiasters / 100} EGP · ${r.area}`);
   }, [number]);
 
   const first = receipt?.name.split(" ")[0];
