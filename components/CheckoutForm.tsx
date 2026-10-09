@@ -1,6 +1,7 @@
 "use client";
 
 import { track } from "@/lib/track";
+import { egp, pixel } from "@/lib/pixel";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from "react";
@@ -101,6 +102,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
     if (startedRef.current || bag.lines.length === 0) return;
     startedRef.current = true;
     track("5 · Opened checkout", `${bag.lines.reduce((n, l) => n + l.qty, 0)} pcs · ${(bag.subtotalPiasters / 100).toLocaleString("en-US")} EGP`);
+    pixel("InitiateCheckout", { content_ids: [...new Set(bag.lines.map((l) => l.color))], content_type: "product", num_items: bag.lines.reduce((n, l) => n + l.qty, 0), value: egp(bag.subtotalPiasters), currency: "EGP" });
   }, [bag.lines, bag.subtotalPiasters]);
 
   // Server errors replace local ones after each submit.

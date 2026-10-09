@@ -1,6 +1,7 @@
 "use client";
 
 import { track } from "@/lib/track";
+import { egp, pixel } from "@/lib/pixel";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -28,6 +29,8 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
       sessionStorage.setItem(`counted-${number}`, "1");
     } catch {}
     track("7 · Order placed", `${(r.totalPiasters / 100).toLocaleString("en-US")} EGP · ${r.area}`);
+    // The order number is the event id, so Meta counts each order once.
+    pixel("Purchase", { content_ids: [...new Set(r.lines.map((l) => l.color))], content_type: "product", num_items: r.lines.reduce((n, l) => n + l.qty, 0), value: egp(r.totalPiasters), currency: "EGP" }, number);
   }, [number]);
 
   const first = receipt?.name.split(" ")[0];

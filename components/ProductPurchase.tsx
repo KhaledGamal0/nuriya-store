@@ -1,6 +1,7 @@
 "use client";
 
 import { track } from "@/lib/track";
+import { egp, pixel } from "@/lib/pixel";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { productPath, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
@@ -26,6 +27,8 @@ export function ProductPurchase({ color }: { color: ColorId }) {
   // Which product people look at (counted once per colour per page view).
   useEffect(() => {
     track("2 · Viewed product", catalog.colors[color].name);
+    const price = catalog.colors[color].sizes[0]?.pricePiasters ?? catalog.pricePiasters;
+    pixel("ViewContent", { content_ids: [color], content_name: catalog.colors[color].name, content_type: "product", value: egp(price), currency: "EGP" });
   }, [color, catalog]);
 
   function addToBag() {
@@ -42,6 +45,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
     // What the whole bag is worth right after adding (current bag + this piece).
     const unit = catalog.colors[color].sizes.find((x) => x.size === size)?.pricePiasters ?? catalog.pricePiasters;
     track("Bag · value after adding", `${bag.count + 1} pcs · ${((bag.subtotalPiasters + unit) / 100).toLocaleString("en-US")} EGP`);
+    pixel("AddToCart", { content_ids: [color], content_name: `${catalog.colors[color].name} · ${size}`, content_type: "product", value: egp(unit), currency: "EGP" });
     setAdded(true);
     window.setTimeout(() => {
       setAdded(false);
