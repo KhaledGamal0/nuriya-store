@@ -34,7 +34,7 @@ export function LaunchOffer() {
         sessionStorage.setItem(SEEN, "1");
       } catch {}
       setOpen(true);
-      track("Sale popup", "Shown");
+      track("Offer popup", "Shown");
     };
     const t = window.setTimeout(show, 1200);
     return () => window.clearTimeout(t);
@@ -80,7 +80,7 @@ export function LaunchOffer() {
             className="btn"
             onClick={() => {
               setOpen(false);
-              track("Sale popup", "Tapped Shop the offer");
+              track("Offer popup", "Tapped Shop the offer");
               if (onProduct) return;
               if (path !== "/") return router.push("/#shop");
               // Home: the page can't scroll while the popup is open, so glide to the products once it has closed.
@@ -95,7 +95,7 @@ export function LaunchOffer() {
             className="lo-later"
             onClick={() => {
               setOpen(false);
-              track("Sale popup", "Tapped Maybe later");
+              track("Offer popup", "Tapped Maybe later");
             }}
           >
             Maybe later

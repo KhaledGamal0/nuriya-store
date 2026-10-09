@@ -82,3 +82,9 @@ Every migration pushed to `main` runs `db-deploy.yml`: it applies the change, wa
 
 ## Sales report
 `sales-report.yml` e-mails a formatted sales report every night (~23:50 Cairo) and on demand (Actions → Sales report → Run workflow): today and last 7 days, what sold, prices paid, areas, orders by hour, today's orders, stock. Visitor numbers and the funnel (Add to bag → Checkout started → Place order tapped → Order placed) are in Vercel → Analytics → Events.
+
+## Visitor stats: event guide (Vercel → Analytics → Events)
+Every event has two details: **detail** (what happened) and **city** ("Nasr City · Cairo"). Steps 1–7 are the shopping path in order:
+1 · Visitor (new / returning) → 2 · Viewed product (colour) → 3 · Chose size → 4 · Added to bag → 5 · Opened checkout (pieces · value) → 6 · Tapped Place order (pieces · area) → 7 · Order placed (total · area).
+Extra detail: Page opened, Bag · opened, Bag · value after adding, Checkout · area chosen, Product · photo opened, Product · size helper used, Offer popup, Problem · missing or wrong field, Problem · order refused, Problem · tapped Add without a size.
+Names before Oct 9 2026 evening (Visit, Visitor city, Add to bag, Order placed…) are old test data: set the date range to start after the rename.

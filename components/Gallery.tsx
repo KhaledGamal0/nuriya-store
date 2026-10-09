@@ -61,7 +61,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
             onClick={() => {
               setViewIndex(i);
               setOpen(true);
-              track("Photo viewer", `${label} · photo ${i + 1}`);
+              track("Product · photo opened", `${label} · photo ${i + 1}`);
             }}
             aria-label={`Open photo ${i + 1} of ${total} full screen`}
           >

@@ -27,7 +27,7 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
       if (sessionStorage.getItem(`counted-${number}`)) return;
       sessionStorage.setItem(`counted-${number}`, "1");
     } catch {}
-    track("6 · Order placed", `${r.totalPiasters / 100} EGP · ${r.area}`);
+    track("7 · Order placed", `${(r.totalPiasters / 100).toLocaleString("en-US")} EGP · ${r.area}`);
   }, [number]);
 
   const first = receipt?.name.split(" ")[0];

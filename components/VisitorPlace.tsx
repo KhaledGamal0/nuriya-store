@@ -44,7 +44,7 @@ export function VisitorPlace() {
         n = Number(localStorage.getItem("nuriya-visits") || "0") + 1;
         localStorage.setItem("nuriya-visits", String(n));
       } catch {}
-      track("Visit", n === 1 ? "First visit" : n === 2 ? "2nd visit" : n <= 5 ? "3rd–5th visit" : "6+ visits");
+      track("1 · Visitor", n === 1 ? "New visitor" : n === 2 ? "Returning (2nd visit)" : n <= 5 ? "Returning (3–5 visits)" : "Returning (6+ visits)");
     };
     const fallback = window.setTimeout(() => finish("Unknown"), 6000);
     fetch("/api/place")
@@ -60,7 +60,7 @@ export function VisitorPlace() {
   }, []);
 
   useEffect(() => {
-    track("Page viewed", pageName(path));
+    track("Page opened", pageName(path));
   }, [path]);
 
   return null;

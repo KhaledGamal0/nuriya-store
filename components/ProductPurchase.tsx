@@ -25,12 +25,12 @@ export function ProductPurchase({ color }: { color: ColorId }) {
 
   // Which product people look at (counted once per colour per page view).
   useEffect(() => {
-    track("1 · Product viewed", catalog.colors[color].name);
+    track("2 · Viewed product", catalog.colors[color].name);
   }, [color, catalog]);
 
   function addToBag() {
     if (!size || !isAvailable(size)) {
-      track("Add tapped before choosing a size", catalog.colors[color].name);
+      track("Problem · tapped Add without a size", catalog.colors[color].name);
       setNeedSize(true);
       const group = document.getElementById("size-group");
       group?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -38,10 +38,10 @@ export function ProductPurchase({ color }: { color: ColorId }) {
       return;
     }
     bag.add(color, size);
-    track("3 · Added to bag", `${catalog.colors[color].name} · ${size}`);
+    track("4 · Added to bag", `${catalog.colors[color].name} · ${size}`);
     // What the whole bag is worth right after adding (current bag + this piece).
     const unit = catalog.colors[color].sizes.find((x) => x.size === size)?.pricePiasters ?? catalog.pricePiasters;
-    track("Bag value after adding", `${bag.count + 1} pcs · ${((bag.subtotalPiasters + unit) / 100).toLocaleString("en-US")} EGP`);
+    track("Bag · value after adding", `${bag.count + 1} pcs · ${((bag.subtotalPiasters + unit) / 100).toLocaleString("en-US")} EGP`);
     setAdded(true);
     window.setTimeout(() => {
       setAdded(false);
@@ -92,7 +92,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
               disabled={!available}
               aria-label={available ? s : `${s}, sold out`}
               onClick={() => {
-                track("2 · Size chosen", `${catalog.colors[color].name} · ${s}`);
+                track("3 · Chose size", `${catalog.colors[color].name} · ${s}`);
                 setSize(s);
                 setNeedSize(false);
               }}
@@ -149,7 +149,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
           disabled={!isAvailable(fit.size)}
           onClick={() => {
             setSize(fit.size);
-            track("Size helper used", `${Math.floor(kg / 5) * 5}–${Math.floor(kg / 5) * 5 + 4} kg → ${fit.size}`);
+            track("Product · size helper used", `${Math.floor(kg / 5) * 5}–${Math.floor(kg / 5) * 5 + 4} kg → ${fit.size}`);
             setNeedSize(false);
             setGuideOpen(false);
             bag.toast(`Size ${fit.size} selected`);

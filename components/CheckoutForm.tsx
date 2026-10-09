@@ -100,7 +100,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   useEffect(() => {
     if (startedRef.current || bag.lines.length === 0) return;
     startedRef.current = true;
-    track("4 · Checkout started", `${bag.lines.reduce((n, l) => n + l.qty, 0)} pcs · ${bag.subtotalPiasters / 100} EGP`);
+    track("5 · Opened checkout", `${bag.lines.reduce((n, l) => n + l.qty, 0)} pcs · ${(bag.subtotalPiasters / 100).toLocaleString("en-US")} EGP`);
   }, [bag.lines, bag.subtotalPiasters]);
 
   // Server errors replace local ones after each submit.
@@ -114,7 +114,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
     sendingRef.current = false; // the server answered with a problem: allow another try
     if (state?.errors) {
       const first = Object.keys(state.errors)[0];
-      if (first || state.notice) track("Order refused", first ?? "server notice");
+      if (first || state.notice) track("Problem · order refused", first === "cart" ? "sold out or price changed" : first ?? "too many tries / connection");
       setErrors(state.errors);
       focusFirst(state.errors);
     }
@@ -181,10 +181,10 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
           if (Object.keys(next).length) {
             setErrors(next);
             focusFirst(next);
-            track("Checkout problem", Object.keys(next)[0]!);
+            track("Problem · missing or wrong field", Object.keys(next)[0]!);
             return;
           }
-          track("5 · Place order tapped", `${bag.lines.reduce((n, l) => n + l.qty, 0)} pcs · ${areaId || "no area"}`);
+          track("6 · Tapped Place order", `${bag.lines.reduce((n, l) => n + l.qty, 0)} pcs · ${areas.find((x) => x.id === areaId)?.nameEn ?? "no area yet"}`);
           keyRef.current ??= crypto.randomUUID();
           form.set("key", keyRef.current);
           sendingRef.current = true;
@@ -274,7 +274,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               onChange={(e) => {
                 setAreaId(e.target.value);
                 const chosen = areas.find((a) => a.id === e.target.value);
-                if (chosen) track("Area chosen", chosen.nameEn);
+                if (chosen) track("Checkout · area chosen", chosen.nameEn);
                 check("area", e.target.value, true);
               }}
             >
