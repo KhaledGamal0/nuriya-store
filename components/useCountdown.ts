@@ -17,5 +17,8 @@ export function useCountdown(endsAt: string | undefined, active = true): { ms: n
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return { ms, text: `${h}h ${pad(m)}m ${pad(s % 60)}s` };
+  const days = Math.floor(h / 24);
+  // Over a day left: "6d 08h 12m 03s" instead of "152h 12m 03s".
+  const text = days > 0 ? `${days}d ${pad(h % 24)}h ${pad(m)}m ${pad(s % 60)}s` : `${h}h ${pad(m)}m ${pad(s % 60)}s`;
+  return { ms, text };
 }
