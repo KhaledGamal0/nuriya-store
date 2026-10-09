@@ -5,13 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { pixel } from "@/lib/pixel";
 
-/**
- * Meta Pixel: the tiny queue (fbInit, in the layout, runs before the page starts) collects events;
- * Meta's own script arrives after the page has loaded; PageView is sent on every page change.
- */
-export const fbInit = (id: string) =>
-  `!function(f,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}(window);fbq('init','${id}');fbq('track','PageView');`;
-
+/** Meta Pixel: Meta's script after the page has loaded, and PageView on every in-site page change. */
 export function MetaPixel() {
   const path = usePathname();
   const first = useRef(true);

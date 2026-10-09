@@ -4,8 +4,8 @@ import { IBM_Plex_Sans_Arabic, Instrument_Serif, Poppins } from "next/font/googl
 import { BagProvider } from "@/components/BagProvider";
 import Script from "next/script";
 import { VisitorPlace } from "@/components/VisitorPlace";
-import { MetaPixel, fbInit } from "@/components/MetaPixel";
-import { META_PIXEL_ID } from "@/lib/pixel";
+import { MetaPixel } from "@/components/MetaPixel";
+import { META_PIXEL_ID, fbInit } from "@/lib/pixel";
 import { LaunchOffer } from "@/components/LaunchOffer";
 import { StoreProvider } from "@/components/StoreProvider";
 import { getAreas, getCatalog } from "@/lib/store";

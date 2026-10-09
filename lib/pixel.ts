@@ -18,3 +18,8 @@ export function pixel(event: string, params: Record<string, unknown> = {}, event
 }
 
 export const egp = (piasters: number) => Math.round(piasters) / 100;
+
+/** Start-up snippet (inline, runs before the page starts): a tiny queue + init + first PageView. */
+export const fbInit = (id: string) =>
+  `!function(f,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}(window);fbq('init','${id}');fbq('track','PageView');`;
+
