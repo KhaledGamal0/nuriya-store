@@ -4,6 +4,8 @@ import { IBM_Plex_Sans_Arabic, Instrument_Serif, Poppins } from "next/font/googl
 import { BagProvider } from "@/components/BagProvider";
 import Script from "next/script";
 import { VisitorPlace } from "@/components/VisitorPlace";
+import { MetaPixel } from "@/components/MetaPixel";
+import { META_PIXEL_ID, fbInit } from "@/lib/pixel";
 import { LaunchOffer } from "@/components/LaunchOffer";
 import { StoreProvider } from "@/components/StoreProvider";
 import { getAreas, getCatalog } from "@/lib/store";
@@ -23,6 +25,8 @@ export const metadata: Metadata = {
   title: { default: "Nuriya — comfy · everyday pieces", template: "%s · Nuriya" },
   description: "Soft, oversized everyday pieces from Cairo. Not loud. Just unforgettable.",
   openGraph: { siteName: "Nuriya", locale: "en_EG", type: "website" },
+  // Meta (Facebook/Instagram ads) domain verification for nuriya.app — public value, safe in code.
+  other: { "facebook-domain-verification": "mtu8fh7mkjmjr6w2fippk8iq2hrsdo" },
 };
 
 export const viewport: Viewport = {
@@ -54,6 +58,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <Script id="va-init" strategy="afterInteractive">{`window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}`}</Script>
             <Script src="/_vercel/insights/script.js" strategy="lazyOnload" />
             <VisitorPlace />
+            {/* Meta Pixel for the ads: a tiny queue first, Meta's script only after the page has loaded. */}
+            <Script id="fb-init" strategy="beforeInteractive">{fbInit(META_PIXEL_ID)}</Script>
+            <MetaPixel />
           </>
         )}
       </body>
