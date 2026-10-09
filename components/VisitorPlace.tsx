@@ -61,7 +61,54 @@ export function VisitorPlace() {
 
   useEffect(() => {
     track("Page opened", pageName(path));
+    const page = pageName(path);
+    const t0 = Date.now();
+    // How far down the page people scroll (25 / 50 / 75 / 100 %), each step once per visit.
+    let deepest = 0;
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      if (max <= 0) return;
+      const pct = Math.floor(((scrollY / max) * 100) / 25) * 25;
+      if (pct > deepest && pct >= 25) {
+        deepest = pct;
+        track("Page · scrolled", `${page} · ${pct}%`);
+      }
+    };
+    // How long people stay on each page, sent when they leave it.
+    const sent = { done: false };
+    const leave = () => {
+      if (sent.done) return;
+      sent.done = true;
+      const s = (Date.now() - t0) / 1000;
+      const bucket = s < 10 ? "under 10 s" : s < 30 ? "10–30 s" : s < 60 ? "30–60 s" : s < 180 ? "1–3 min" : "3+ min";
+      track("Page · time spent", `${page} · ${bucket}`);
+    };
+    const onHide = () => document.visibilityState === "hidden" && leave();
+    addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      removeEventListener("scroll", onScroll);
+      document.removeEventListener("visibilitychange", onHide);
+      leave();
+    };
   }, [path]);
+
+  // Taps on links: Instagram anywhere, and menu / footer links (which way people move around the site).
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.("a");
+      if (!a) return;
+      const href = a.getAttribute("href") || "";
+      const text = (a.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40) || href;
+      const from = pageName(location.pathname);
+      if (/instagram\.com/.test(href)) track("Link · Instagram tapped", from);
+      else if (/linkedin\.com|github\.io/.test(href)) track("Link · site credit tapped", text);
+      else if (a.closest("header, dialog")) track("Menu · link tapped", text);
+      else if (a.closest("footer")) track("Footer · link tapped", text);
+    };
+    document.addEventListener("click", onClick, { capture: true });
+    return () => document.removeEventListener("click", onClick, { capture: true });
+  }, []);
 
   return null;
 }

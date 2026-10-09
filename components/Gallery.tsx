@@ -21,6 +21,10 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
   const strip = useRef<HTMLDivElement>(null);
   const viewer = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  // Which photos people swipe to (each photo once per visit).
+  useEffect(() => {
+    if (active > 0) track("Product · photo swiped", `${label} · photo ${active + 1}`);
+  }, [active, label]);
   const [open, setOpen] = useState(false);
   const [viewIndex, setViewIndex] = useState(0);
   const total = images.length;

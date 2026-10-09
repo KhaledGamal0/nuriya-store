@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { isColor, isSize, type ColorId, type SizeId } from "@/lib/catalog";
 import { useStore } from "./StoreProvider";
@@ -39,7 +40,8 @@ function load(): BagLine[] {
 }
 
 export function BagProvider({ children }: { children: ReactNode }) {
-  const { unitPrice } = useStore();
+  const { unitPrice, catalog } = useStore();
+  const itemName = (l: { color: ColorId; size: SizeId }) => `${catalog.colors[l.color]?.name ?? l.color} · ${l.size}`;
   const [lines, setLines] = useState<BagLine[]>([]);
   const [ready, setReady] = useState(false);
   const [bagOpen, setBagOpen] = useState(false);
@@ -87,16 +89,23 @@ export function BagProvider({ children }: { children: ReactNode }) {
       count: lines.reduce((n, l) => n + l.qty, 0),
       subtotalPiasters: lines.reduce((n, l) => n + l.qty * unitPrice(l.color, l.size), 0),
       add,
-      setQty: (index, qty) =>
-        setLines((prev) => prev.map((l, j) => (j === index ? { ...l, qty: Math.max(1, Math.min(MAX_QTY_PER_LINE, qty)) } : l))),
-      remove: (index) => setLines((prev) => prev.filter((_, j) => j !== index)),
+      setQty: (index, qty) => {
+        const l = lines[index];
+        if (l) track("Bag · quantity changed", `${itemName(l)} · ${l.qty} → ${Math.max(1, Math.min(MAX_QTY_PER_LINE, qty))}`);
+        setLines((prev) => prev.map((x, j) => (j === index ? { ...x, qty: Math.max(1, Math.min(MAX_QTY_PER_LINE, qty)) } : x)));
+      },
+      remove: (index) => {
+        const l = lines[index];
+        if (l) track("Bag · item removed", `${itemName(l)} · ${l.qty} pcs`);
+        setLines((prev) => prev.filter((_, j) => j !== index));
+      },
       clear,
       bagOpen,
       openBag: () => setBagOpen(true),
       closeBag: () => setBagOpen(false),
       toast,
     }),
-    [lines, add, clear, bagOpen, toast, unitPrice],
+    [lines, add, clear, bagOpen, toast, unitPrice, catalog],
   );
 
   return (
