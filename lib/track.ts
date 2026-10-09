@@ -38,8 +38,27 @@ export function knownPlace(): string | null {
   return place;
 }
 
+/**
+ * Each action counts once per visit (same event + same detail), so reloading a page or opening the same
+ * product again doesn't inflate the numbers: a count means "visits that did this". Problems are the
+ * exception: every time someone gets stuck is worth knowing.
+ */
+function firstTimeThisVisit(name: string, detail: string): boolean {
+  if (name.startsWith("Problem")) return true;
+  try {
+    const key = "nuriya-ev";
+    const seen: string[] = JSON.parse(sessionStorage.getItem(key) || "[]");
+    const id = `${name}|${detail}`;
+    if (seen.includes(id)) return false;
+    seen.push(id);
+    sessionStorage.setItem(key, JSON.stringify(seen.slice(-200)));
+  } catch {}
+  return true;
+}
+
 export function track(name: string, detail: string | number = "-"): void {
   if (typeof window === "undefined") return;
+  if (!firstTimeThisVisit(name, String(detail))) return;
   const city = knownPlace();
   if (city) send({ name, data: { detail: String(detail), city } });
   else waiting.push({ name, detail: String(detail) }); // sent as soon as the city is known (within a few seconds)
