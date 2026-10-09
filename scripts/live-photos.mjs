@@ -50,8 +50,14 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
   // Meta Pixel: its script loads for real, but what it would send to Meta is caught here and never sent.
   const meta = [];
   await ctx.route(/facebook\.com\/tr/, (r) => {
-    const u = new URL(r.request().url());
-    meta.push(u.searchParams.get("ev") + (u.searchParams.get("cd[value]") ? ` ${u.searchParams.get("cd[value]")} ${u.searchParams.get("cd[currency]")}` : ""));
+    // Events go either in the address (GET) or in the body (POST); read both.
+    const q = new URL(r.request().url()).searchParams;
+    const body = r.request().postData() ?? "";
+    let b = new URLSearchParams();
+    try { b = new URLSearchParams(body); } catch {}
+    const get = (k) => q.get(k) ?? b.get(k) ?? (body.match(new RegExp(`name="${k.replace(/[[\]]/g, "\\$&")}"\\r?\\n\\r?\\n([^\\r\\n]*)`)) || [])[1];
+    const ev = get("ev");
+    if (ev) meta.push(ev + (get("cd[value]") ? ` ${get("cd[value]")} ${get("cd[currency]")}` : ""));
     return r.abort();
   });
   await ctx.addInitScript(() => { try { sessionStorage.setItem("nuriya-sale-seen", "1"); } catch {} });
