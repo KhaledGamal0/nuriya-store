@@ -44,7 +44,8 @@ export function knownPlace(): string | null {
  * exception: every time someone gets stuck is worth knowing.
  */
 function firstTimeThisVisit(name: string, detail: string): boolean {
-  if (name.startsWith("Problem")) return true;
+  // Problems count every time; orders are already counted once per order number on the thank-you page.
+  if (name.startsWith("Problem") || name.startsWith("7 ·")) return true;
   try {
     const key = "nuriya-ev";
     const seen: string[] = JSON.parse(sessionStorage.getItem(key) || "[]");
