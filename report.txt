@@ -1,0 +1,24 @@
+Nuriya early warning · 
+
+OK         Website · Shop opens: yes, 17 ms
+OK         Website · Database answers the site: yes
+OK         Website · Security certificate (https): 86 days left (Vercel renews it by itself)
+OK         Vercel · Live version: working, published 0 days ago
+OK         Vercel · Domain nuriya.app: expiry not available from Vercel (check Vercel → Domains)
+OK         Vercel · Pro plan payment: Keep the card on Vercel valid (Vercel → Settings → Billing)
+OK         Database (Neon) · Running time this month: 3.6 of 100 free hours (4%)
+OK         Database (Neon) · Stored data: 61.6 MB of 1024 MB free (6%)
+OK         Database (Neon) · Plan: Free (upgrade to Launch once real orders come in: 7-day undo window, no running-time limit)
+OK         Shop · Orders in the last 7 days: 2
+OK         Shop · Orders waiting for confirmation: 2 (call or WhatsApp each customer)
+OK         Shop · Orders whose e-mail did not go out: 0
+OK         Shop · Stock White S/M: 16 left
+OK         Shop · Stock White L/XL: 15 left
+OK         Shop · Stock Burgundy S/M: 17 left
+OK         Shop · Stock Burgundy L/XL: 14 left
+OK         E-mail (Resend) · Order e-mails this month: 2 of 3000 free (0%)
+OK         E-mail (Resend) · Order e-mails today: 1 of 100 free per day
+OK         GitHub · Days since the last code change: 0 (automatic jobs pause at 60)
+OK         GitHub · Last database backup: 9 hours ago (kept 30 days)
+OK         GitHub · Uptime checks (7 days, every 15 min): 25 of 27 passed
+OK         GitHub · Open alerts: none
