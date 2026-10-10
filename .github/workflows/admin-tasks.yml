@@ -1,7 +1,8 @@
 name: Admin tasks
 
 # Shop tasks you can run from your phone (GitHub → Actions → Admin tasks → Run workflow) until the admin
-# dashboard exists. Every task: takes an encrypted backup first, changes the live database in ONE
+# dashboard exists. confirm-orders: marks every order waiting for confirmation (placed until now) as CONFIRMED,
+# after Khaled confirmed them with the customers on WhatsApp. Every task: takes an encrypted backup first, changes the live database in ONE
 # transaction (all or nothing), then refreshes the live site so customers see the change at once.
 on:
   workflow_dispatch:
@@ -9,7 +10,7 @@ on:
       task:
         description: "What to do"
         type: choice
-        options: ["set-stock", "reset-test-orders", "refresh-site"]
+        options: ["set-stock", "confirm-orders", "reset-test-orders", "refresh-site"]
         default: "set-stock"
       cream_sm:
         description: "set-stock: Cream S/M pieces available to sell now"
@@ -94,6 +95,22 @@ jobs:
           DO \$\$ BEGIN IF (SELECT count(*) FROM variants WHERE track_inventory) < 4 THEN RAISE EXCEPTION 'not every size was updated'; END IF; END \$\$;
           COMMIT;
           SQL
+          elif [ "$TASK" = "confirm-orders" ]; then
+            cat > task.sql <<'SQL'
+          BEGIN;
+          -- Orders confirmed with the customer on WhatsApp: CONFIRMATION_NEEDED → CONFIRMED, with a history line each.
+          WITH done AS (
+            UPDATE orders SET status = 'CONFIRMED', updated_at = now()
+            WHERE status = 'CONFIRMATION_NEEDED' AND created_at <= now()
+            RETURNING id, number)
+          , ev AS (
+            INSERT INTO order_events (order_id, type, data, actor)
+            SELECT id, 'status_changed', '{"from":"CONFIRMATION_NEEDED","to":"CONFIRMED","how":"confirmed with the customer on WhatsApp"}', 'khaled'
+            FROM done RETURNING order_id)
+          INSERT INTO audit_log (actor, action, entity, entity_id, before, after)
+          SELECT 'khaled', 'confirm_order', 'order', number, '{"status":"CONFIRMATION_NEEDED"}', '{"status":"CONFIRMED"}' FROM done;
+          COMMIT;
+          SQL
           else
             cat > task.sql <<'SQL'
           BEGIN;
@@ -113,6 +130,7 @@ jobs:
               echo "::notice::$sku — available $avail, reserved for open orders $reserved"
             done
           docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT 'orders in database: ' || count(*) FROM orders" | sed 's/^/::notice::/'
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT status || ': ' || count(*) || ' (' || string_agg(number, ', ' ORDER BY created_at) || ')' FROM orders GROUP BY status" | sed 's/^/::notice::/'
       - name: Refresh the live site
         run: |
           TOKEN=$(openssl rand -hex 32)
