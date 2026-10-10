@@ -162,7 +162,9 @@ export function ProductPurchase({ color }: { color: ColorId }) {
         >
           Select {fit.size}
         </button>
-        <ModelFit />
+        <p className="model-fit">
+          For reference: our model is {PRODUCT.model.heightCm} cm · {PRODUCT.model.weightKg} kg and wears {PRODUCT.model.wears}.
+        </p>
       </Dialog>
     </>
   );
