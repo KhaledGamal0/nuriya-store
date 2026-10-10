@@ -58,3 +58,5 @@
 - Oct 8 2026 (Khaled): visitor stats with Vercel Web Analytics (cookie-free, billed per event from the Pro usage credit, about $0.03 per 1,000 page views).
 - Oct 8 2026 (Khaled): size chart corrected: S/M shoulder 56 / chest 112 / length 64; L/XL 60 / 120 / 67 (chest all around; old 56/60 were half-width).
 - Oct 9 2026 (Khaled): launch sale (900 EGP) extended to Friday 16 Oct 2026, 11:59 pm Cairo.
+
+- **Oct 11 2026 (Khaled):** product pages show "Model is 160 cm · 50 kg and wears S/M" under the size buttons and in Find my size (same model, both colours; real 161 cm / 51 kg, rounded by Khaled). Holding a photo on phones no longer opens the save/preview menu. UGC gift: 1 White L/XL taken out of stock (admin task take-out-stock).
