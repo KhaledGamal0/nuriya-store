@@ -10,19 +10,19 @@ on:
       task:
         description: "What to do"
         type: choice
-        options: ["set-stock", "confirm-orders", "reset-test-orders", "refresh-site"]
+        options: ["set-stock", "take-out-stock", "confirm-orders", "reset-test-orders", "refresh-site"]
         default: "set-stock"
       cream_sm:
-        description: "set-stock: Cream S/M pieces available to sell now"
+        description: "set-stock: Cream S/M pieces available now · take-out-stock: Cream S/M pieces to remove (gift, damaged)"
         default: ""
       cream_lxl:
-        description: "set-stock: Cream L/XL pieces available to sell now"
+        description: "set-stock: Cream L/XL pieces available now · take-out-stock: Cream L/XL pieces to remove (gift, damaged)"
         default: ""
       burgundy_sm:
-        description: "set-stock: Burgundy S/M pieces available to sell now"
+        description: "set-stock: Burgundy S/M pieces available now · take-out-stock: Burgundy S/M pieces to remove (gift, damaged)"
         default: ""
       burgundy_lxl:
-        description: "set-stock: Burgundy L/XL pieces available to sell now"
+        description: "set-stock: Burgundy L/XL pieces available now · take-out-stock: Burgundy L/XL pieces to remove (gift, damaged)"
         default: ""
       confirm:
         description: 'reset-test-orders: type DELETE ALL ORDERS to confirm'
@@ -57,6 +57,10 @@ jobs:
           if [ "$TASK" = "set-stock" ]; then
             for v in "$CREAM_SM" "$CREAM_LXL" "$BURGUNDY_SM" "$BURGUNDY_LXL"; do
               [[ "$v" =~ ^[0-9]{1,5}$ ]] || { echo "::error::Each stock count must be a whole number 0–99999 (got '$v')."; exit 1; }
+            done
+          elif [ "$TASK" = "take-out-stock" ]; then
+            for v in "${CREAM_SM:-0}" "${CREAM_LXL:-0}" "${BURGUNDY_SM:-0}" "${BURGUNDY_LXL:-0}"; do
+              [[ "$v" =~ ^[0-9]{1,3}$ ]] || { echo "::error::Pieces to take out must be a whole number 0–999 (got '$v')."; exit 1; }
             done
           elif [ "$TASK" = "reset-test-orders" ]; then
             [ "$CONFIRM" = "DELETE ALL ORDERS" ] || { echo "::error::To delete all orders, type DELETE ALL ORDERS in the confirm box."; exit 1; }
@@ -93,6 +97,20 @@ jobs:
           UPDATE variants SET track_inventory = true, stock_on_hand = stock_reserved + ${BURGUNDY_SM} WHERE sku = 'NUR-QC-BRG-SM';
           UPDATE variants SET track_inventory = true, stock_on_hand = stock_reserved + ${BURGUNDY_LXL} WHERE sku = 'NUR-QC-BRG-LXL';
           DO \$\$ BEGIN IF (SELECT count(*) FROM variants WHERE track_inventory) < 4 THEN RAISE EXCEPTION 'not every size was updated'; END IF; END \$\$;
+          COMMIT;
+          SQL
+          elif [ "$TASK" = "take-out-stock" ]; then
+            cat > task.sql <<SQL
+          BEGIN;
+          -- Pieces leaving without an order (gift, UGC, damaged): subtract only what was asked, never below 0 (stops instead).
+          UPDATE variants SET stock_on_hand = stock_on_hand - ${CREAM_SM:-0}    WHERE sku = 'NUR-QC-CRM-SM';
+          UPDATE variants SET stock_on_hand = stock_on_hand - ${CREAM_LXL:-0}   WHERE sku = 'NUR-QC-CRM-LXL';
+          UPDATE variants SET stock_on_hand = stock_on_hand - ${BURGUNDY_SM:-0} WHERE sku = 'NUR-QC-BRG-SM';
+          UPDATE variants SET stock_on_hand = stock_on_hand - ${BURGUNDY_LXL:-0} WHERE sku = 'NUR-QC-BRG-LXL';
+          DO \$\$ BEGIN IF EXISTS (SELECT 1 FROM variants WHERE stock_on_hand - stock_reserved < 0) THEN RAISE EXCEPTION 'that would make stock negative'; END IF; END \$\$;
+          INSERT INTO audit_log (actor, action, entity, entity_id, after)
+          VALUES ('khaled', 'take_out_stock', 'variants', 'NUR-QC',
+                  json_build_object('white_sm', ${CREAM_SM:-0}, 'white_lxl', ${CREAM_LXL:-0}, 'burgundy_sm', ${BURGUNDY_SM:-0}, 'burgundy_lxl', ${BURGUNDY_LXL:-0})::jsonb);
           COMMIT;
           SQL
           elif [ "$TASK" = "confirm-orders" ]; then

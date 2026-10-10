@@ -128,6 +128,11 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
   .hero .btn-light { background: var(--ink); color: var(--paper); box-shadow: none; }
 }
 @media (min-width: 900px) and (hover: hover) { .hero .btn-light:hover { background: #7a2b3c; color: var(--paper); } }
+/* Phones: holding a photo while scrolling must not open the save/preview menu or lift the photo
+   (iOS Safari, Android Chrome, in-app browsers). Pinch-zoom and taps are unchanged; mouse devices are untouched. */
+@media (hover: none) {
+  main img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+}
 @keyframes rise { from { transform: translateY(14px); opacity: 0.001; } }
 @keyframes glide { from { transform: translateY(14px); } }
 
