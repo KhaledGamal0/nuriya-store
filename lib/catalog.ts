@@ -40,6 +40,8 @@ export const PRODUCT = {
     "“do what you love, love what you do” stitched on the left sleeve, near the cuff.",
     "Pointed contrast collar, quarter-zip with silver teeth and a round ring pull, dropped shoulders, ribbed cuffs, curved hem.",
   ],
+  /** The model in the photos, both colours (Khaled, Oct 11 2026). Shown next to the size buttons. */
+  model: { heightCm: 160, weightKg: 50, wears: "S/M" as SizeId },
   // TODO(khaled): fabric composition, weight and care instructions.
   fabric: null as string | null,
   sizeChart: [

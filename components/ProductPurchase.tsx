@@ -4,7 +4,7 @@ import { track } from "@/lib/track";
 import { egp, pixel } from "@/lib/pixel";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { productPath, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
+import { PRODUCT, productPath, sizeForWeight, type ColorId, type SizeId } from "@/lib/catalog";
 import { useStore } from "./StoreProvider";
 import { useBag } from "./BagProvider";
 import { Dialog, CloseButton } from "./Dialog";
@@ -106,6 +106,9 @@ export function ProductPurchase({ color }: { color: ColorId }) {
             </button>
           ))}
         </div>
+        <p className="model-fit">
+          Model is {PRODUCT.model.heightCm} cm · {PRODUCT.model.weightKg} kg and wears {PRODUCT.model.wears}
+        </p>
         {needSize && (
           <p className="sz-err" role="alert">
             Choose a size first.
@@ -161,6 +164,9 @@ export function ProductPurchase({ color }: { color: ColorId }) {
         >
           Select {fit.size}
         </button>
+        <p className="model-fit">
+          For reference: our model is {PRODUCT.model.heightCm} cm · {PRODUCT.model.weightKg} kg and wears {PRODUCT.model.wears}.
+        </p>
       </Dialog>
     </>
   );
