@@ -41,6 +41,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable} ${arabic.variable}`}>
       <body>
+        {/* Photo heights use the screen height measured ONCE (updated only when the phone turns), so the top
+            photo never resizes or "zooms" while the browser bars slide in and out during scrolling. */}
+        <Script id="svh" strategy="beforeInteractive">{`(function(){var w=0;function s(){if(innerWidth===w)return;w=innerWidth;document.documentElement.style.setProperty('--svh',innerHeight/100+'px')}s();addEventListener('resize',s)})()`}</Script>
         <a className="skip" href="#main">
           Skip to content
         </a>
