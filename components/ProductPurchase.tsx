@@ -106,9 +106,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
             </button>
           ))}
         </div>
-        <p className="model-fit">
-          Model is {PRODUCT.model.heightCm} cm · {PRODUCT.model.weightKg} kg and wears {PRODUCT.model.wears}
-        </p>
+        <ModelFit />
         {needSize && (
           <p className="sz-err" role="alert">
             Choose a size first.
@@ -164,10 +162,23 @@ export function ProductPurchase({ color }: { color: ColorId }) {
         >
           Select {fit.size}
         </button>
-        <p className="model-fit">
-          For reference: our model is {PRODUCT.model.heightCm} cm · {PRODUCT.model.weightKg} kg and wears {PRODUCT.model.wears}.
-        </p>
+        <ModelFit />
       </Dialog>
     </>
+  );
+}
+
+/** The model in the photos: three short facts in one tidy row. */
+function ModelFit() {
+  const m = PRODUCT.model;
+  return (
+    <div className="model" aria-label="Our model">
+      <p className="model-t">Our model</p>
+      <dl>
+        <div><dt>Height</dt><dd>{m.heightCm} cm</dd></div>
+        <div><dt>Weight</dt><dd>{m.weightKg} kg</dd></div>
+        <div><dt>Wears</dt><dd>{m.wears}</dd></div>
+      </dl>
+    </div>
   );
 }
