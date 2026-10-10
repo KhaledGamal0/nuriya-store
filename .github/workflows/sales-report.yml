@@ -1,12 +1,22 @@
 name: Sales report
 
-# E-mails ORDER_ALERT_EMAIL a formatted sales report: today and the last 7 days (orders, pieces, money,
-# what sold, prices paid, areas, orders by hour, today's orders, stock). Every night at about 23:50 Cairo,
-# and any time on demand (Actions → Sales report → Run workflow).
+# E-mails ORDER_ALERT_EMAIL a formatted sales report (Cairo time; cron is UTC, Cairo = UTC+3 in summer, +2 in winter):
+#   daily   every morning ~9:00   yesterday vs the day before, orders to confirm, low stock, stock
+#   weekly  Sunday ~9:10          last 7 days vs the 7 before, best seller, areas, day by day
+#   monthly the 1st ~9:20         last month vs the month before
+# Also on demand: Actions → Sales report → Run workflow (choose the report).
 on:
   schedule:
-    - cron: "50 20 * * *"
+    - cron: "0 6 * * *"  # daily
+    - cron: "10 6 * * 0" # weekly (Sunday)
+    - cron: "20 6 1 * *" # monthly (the 1st)
   workflow_dispatch:
+    inputs:
+      report:
+        description: "Which report"
+        type: choice
+        options: [daily, weekly, monthly]
+        default: daily
 
 permissions:
   contents: write
@@ -19,6 +29,7 @@ jobs:
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       ORDER_ALERT_EMAIL: ${{ secrets.ORDER_ALERT_EMAIL }}
+      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.report || (github.event.schedule == '10 6 * * 0' && 'weekly' || (github.event.schedule == '20 6 1 * *' && 'monthly' || 'daily')) }}
       SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
     steps:
       - uses: actions/checkout@v5
@@ -28,7 +39,7 @@ jobs:
       - name: Database address (masked)
         run: node scripts/neon.mjs env production
       - name: Sales numbers (no customer phones)
-        run: docker run --rm --network host -e DATABASE_URL -v "$PWD/scripts:/s:ro" postgres:17 psql "$DATABASE_URL" -tA -v ON_ERROR_STOP=1 -f /s/sales.sql > sales.json
+        run: docker run --rm --network host -e DATABASE_URL -e MODE -v "$PWD/scripts:/s:ro" postgres:17 psql "$DATABASE_URL" -tA -v ON_ERROR_STOP=1 -v mode="$MODE" -f /s/sales.sql > sales.json
       - name: One-time e-mail pass (the site sends the report with its own Resend key)
         continue-on-error: true
         run: |

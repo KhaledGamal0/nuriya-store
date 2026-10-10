@@ -81,7 +81,12 @@ Every migration pushed to `main` runs `db-deploy.yml`: it applies the change, wa
 - After upgrading Neon to Launch, set the repository variable `NEON_PLAN=launch` (the free limits then no longer apply).
 
 ## Sales report
-`sales-report.yml` e-mails a formatted sales report every night (~23:50 Cairo) and on demand (Actions → Sales report → Run workflow): today and last 7 days, what sold, prices paid, areas, orders by hour, today's orders, stock. Visitor numbers and the funnel (Add to bag → Checkout started → Place order tapped → Order placed) are in Vercel → Analytics → Events.
+`sales-report.yml` + `scripts/sales.sql` + `scripts/sales-report.mjs` (Oct 10 2026, Khaled: best-practice schedule). Cairo times; cron is UTC so in winter (UTC+2) each arrives an hour earlier.
+- **Daily ~9:00:** yesterday vs the day before · orders waiting for confirmation (by number) · low stock (≤3) · what sold · areas · hours · stock · since opening.
+- **Weekly, Sunday ~9:10:** last 7 full days vs the 7 before · best seller · day by day.
+- **Monthly, the 1st ~9:20:** last calendar month vs the month before.
+- On demand: Actions → Sales report → Run workflow → choose daily / weekly / monthly. Cancelled/expired orders are left out; no names or phones.
+Visitor numbers and the funnel are in Vercel → Analytics → Events.
 
 **How report e-mails are sent (Oct 10 2026):** the Resend key lives only in Vercel. The sales and health jobs write a one-time pass to `refresh_tokens` (10 minutes, used once) and POST the finished report to `/api/report-mail`, which sends it with the site's key to `ORDER_ALERT_EMAIL` only. If `RESEND_API_KEY` + `ORDER_ALERT_EMAIL` are ever added as GitHub secrets, the jobs send directly instead. A job turns red when its e-mail is not sent.
 
