@@ -37,6 +37,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: no-preference) { html[data-scroll-behavior="smooth"] { scroll-behavior: smooth; } }
+/* No bounce (iPhone) or stretch (Android) at the top or bottom of the page: the top photo never looks like it zooms or moves. */
+html, body { overscroll-behavior-y: none; }
 /* No sideways jump when a panel locks the page on desktop (no effect on phones). */
 html { scrollbar-gutter: stable; }
 body {
