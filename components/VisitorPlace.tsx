@@ -102,7 +102,7 @@ export function VisitorPlace() {
       const text = (a.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40) || href;
       const from = pageName(location.pathname);
       if (/instagram\.com/.test(href)) track("Link · Instagram tapped", from);
-      else if (/linkedin\.com|github\.io/.test(href)) track("Link · site credit tapped", text);
+      else if (/linkedin\.com|github\.io/.test(href)) track("Link · site credit tapped", `${/linkedin\.com/.test(href) ? "LinkedIn" : "Portfolio (Khaled Gamal)"} · from ${from}`);
       else if (a.closest("header, dialog")) track("Menu · link tapped", text);
       else if (a.closest("footer")) track("Footer · link tapped", text);
     };
