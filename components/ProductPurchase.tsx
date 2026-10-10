@@ -168,17 +168,12 @@ export function ProductPurchase({ color }: { color: ColorId }) {
   );
 }
 
-/** The model in the photos: three short facts in one tidy row. */
+/** The model in the photos, one short line. */
 function ModelFit() {
   const m = PRODUCT.model;
   return (
-    <div className="model" aria-label="Our model">
-      <p className="model-t">Our model</p>
-      <dl>
-        <div><dt>Height</dt><dd>{m.heightCm} cm</dd></div>
-        <div><dt>Weight</dt><dd>{m.weightKg} kg</dd></div>
-        <div><dt>Wears</dt><dd>{m.wears}</dd></div>
-      </dl>
-    </div>
+    <p className="model-fit">
+      Model is {m.heightCm} cm · {m.weightKg} kg · wears {m.wears}
+    </p>
   );
 }
