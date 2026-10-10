@@ -112,7 +112,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .logo-link { padding: 8px; border-radius: 4px; }
 
 /* Home */
-.hero { position: relative; height: min(86svh, 860px); min-height: 520px; overflow: hidden; background: var(--stone); }
+.hero { position: relative; height: min(calc(var(--svh, 1svh) * 86), 860px); min-height: 520px; overflow: hidden; background: var(--stone); }
 .hero-ph { position: absolute; inset: 0; }
 /* Phone: the photo fills the screen; framed on the embroidery and both colours. */
 .hero-img { object-fit: cover; object-position: 50% 28%; }
@@ -122,7 +122,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .hero .btn { animation: glide 0.9s 0.1s var(--ease) both; }
 /* Desktop: editorial split — the whole photo on the right, words on the left. */
 @media (min-width: 900px) {
-  .hero { height: min(88svh, 900px); background: var(--cream); }
+  .hero { height: min(calc(var(--svh, 1svh) * 88), 900px); background: var(--cream); }
   .hero-ph { left: 50%; }
   .hero-img { object-position: 50% 30%; }
   .hero::after { display: none; }
@@ -157,7 +157,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .pc-t b { font-weight: 500; }
 .pc-t span { color: var(--ink-2); }
 
-.ed { position: relative; aspect-ratio: 4 / 5; max-height: 88svh; width: 100%; overflow: hidden; }
+.ed { position: relative; aspect-ratio: 4 / 5; max-height: calc(var(--svh, 1svh) * 88); width: 100%; overflow: hidden; }
 @media (min-width: 900px) { .ed { aspect-ratio: 16 / 9; } }
 .ed img { object-fit: cover; object-position: center 55%; }
 .ed p { position: absolute; left: var(--g); bottom: var(--s4); color: var(--paper); font-family: var(--display); font-size: clamp(32px, 4.5vw, 56px); line-height: 1; text-shadow: 0 1px 16px rgba(0, 0, 0, 0.3); }

@@ -64,7 +64,15 @@ export function Header() {
             <Link className="hdr-link line-link" href="/quiet-confidence/burgundy" aria-current={current("/quiet-confidence/burgundy")}>Burgundy</Link>
             <Link className="hdr-link line-link" href="/size-guide" aria-current={current("/size-guide")}>Size guide</Link>
           </div>
-          <Link href="/" className="logo-link" aria-label="Nuriya, home">
+          <Link
+            href="/"
+            className="logo-link"
+            aria-label="Nuriya, home"
+            onClick={() => {
+              // Already on the home page: go back to the very top (other pages open home at the top by themselves).
+              if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
             <Logo className="logo" />
           </Link>
           <div className="hdr-side hdr-side-r">
