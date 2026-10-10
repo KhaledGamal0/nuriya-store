@@ -1,0 +1,56 @@
+[
+  {
+    "vp": "mobile",
+    "where": "/",
+    "kind": "lighthouse",
+    "detail": "LCP 2.60s (budget 2.0s)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/white",
+    "kind": "lighthouse",
+    "detail": "performance 92 (budget 95)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/white",
+    "kind": "lighthouse",
+    "detail": "LCP 3.22s (budget 2.0s)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/burgundy",
+    "kind": "lighthouse",
+    "detail": "performance 92 (budget 95)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/burgundy",
+    "kind": "lighthouse",
+    "detail": "LCP 3.33s (budget 2.0s)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/checkout",
+    "kind": "lighthouse",
+    "detail": "LCP 2.16s (budget 2.0s)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/checkout",
+    "kind": "lighthouse",
+    "detail": "JavaScript 181 KB transferred (budget 180)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/returns",
+    "kind": "lighthouse",
+    "detail": "performance 93 (budget 95)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/returns",
+    "kind": "lighthouse",
+    "detail": "LCP 2.96s (budget 2.0s)"
+  }
+]

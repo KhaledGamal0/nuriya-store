@@ -1,0 +1,7 @@
+▲ Next.js 16.4.0
+- Local:         http://localhost:3001
+- Network:       http://10.1.0.153:3001
+✓ Ready in 125ms
+✓ Running next.config.ts took 35ms
+checkout.unavailable Failed query: select "id", "slug", "name_en", "name_ar", "type_en", "summary_en", "details_en", "fabric_en", "care_en", "price_piasters", "compare_at_piasters", "offer_orders_limit", "offer_started_at", "sale_price_piasters", "sale_starts_at", "sale_ends_at", "status", "updated_at" from "products" where ("products"."slug" = $1 and "products"."status" = $2)
+params: quiet-confidence,live
