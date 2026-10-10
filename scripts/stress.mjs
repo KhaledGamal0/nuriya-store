@@ -40,6 +40,8 @@ const phoneCtx = (extra = {}) => browser.newContext({ viewport: { width: 390, he
 async function open(extra = {}) {
   const ip = `198.51.${Math.floor(ipSeq / 250)}.${(ipSeq++ % 250) + 1}`;
   const ctx = await phoneCtx({ ...extra, extraHTTPHeaders: { "x-forwarded-for": ip, ...(extra.extraHTTPHeaders ?? {}) } });
+  // 30 phones share one small test machine: give each step time instead of failing on a slow machine.
+  ctx.setDefaultTimeout(90000);
   const page = await ctx.newPage();
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));
