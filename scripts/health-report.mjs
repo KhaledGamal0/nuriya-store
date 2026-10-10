@@ -1,3 +1,4 @@
+import { sendReport } from "./report-mail.mjs";
 // Health report for Khaled: checks every service the shop depends on and warns BEFORE a limit is reached.
 //   - every day: e-mails only if something needs attention (early warning)
 //   - every Sunday (or WEEKLY=1): always e-mails the full weekly status
@@ -196,17 +197,6 @@ writeFileSync("report-summary.txt", problems.map((p) => `- ${p.section} · ${p.l
 
 const send = WEEKLY || problems.length > 0;
 if (send) {
-  const to = process.env.ORDER_ALERT_EMAIL;
-  if (!process.env.RESEND_API_KEY || !to) {
-    console.log("::warning::RESEND_API_KEY or ORDER_ALERT_EMAIL secret missing: report not e-mailed");
-  } else {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({ from: process.env.ORDER_EMAIL_FROM || "Nuriya health <onboarding@resend.dev>", to: [to], subject, html, text }),
-    });
-    console.log(r.ok ? "::notice::Report e-mailed." : `::warning::E-mail failed: ${r.status}`);
-    if (!r.ok) process.exitCode = 1;
-  }
+  if (!(await sendReport({ kind: "health", subject, html, text }))) process.exitCode = 1;
 }
 if (process.env.GITHUB_ENV) writeFileSync(process.env.GITHUB_ENV, `PROBLEMS=${problems.length}\nBAD=${bad ? 1 : 0}\n`, { flag: "a" });
