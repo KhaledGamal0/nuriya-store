@@ -1,3 +1,4 @@
+import { sendReport } from "./report-mail.mjs";
 // Sales report for Khaled: today and the last 7 days, from the orders database (Cairo time).
 // Reads sales.json written by the workflow's SQL step. E-mails ORDER_ALERT_EMAIL. No customer phones.
 import { readFileSync, writeFileSync } from "node:fs";
@@ -49,12 +50,4 @@ const text = [subject, "", `TODAY: ${T.orders} orders · ${T.pieces} pcs · ${eg
 console.log(text);
 writeFileSync("report.txt", text + "\n");
 
-const to = process.env.ORDER_ALERT_EMAIL;
-if (process.env.RESEND_API_KEY && to) {
-  const r = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify({ from: process.env.ORDER_EMAIL_FROM || "Nuriya sales <onboarding@resend.dev>", to: [to], subject, html, text }),
-  });
-  console.log(r.ok ? "::notice::Sales report e-mailed." : `::warning::E-mail failed: ${r.status}`);
-} else console.log("::warning::RESEND_API_KEY / ORDER_ALERT_EMAIL missing: not e-mailed");
+if (!(await sendReport({ kind: "sales", subject, html, text }))) process.exitCode = 1;

@@ -83,6 +83,8 @@ Every migration pushed to `main` runs `db-deploy.yml`: it applies the change, wa
 ## Sales report
 `sales-report.yml` e-mails a formatted sales report every night (~23:50 Cairo) and on demand (Actions → Sales report → Run workflow): today and last 7 days, what sold, prices paid, areas, orders by hour, today's orders, stock. Visitor numbers and the funnel (Add to bag → Checkout started → Place order tapped → Order placed) are in Vercel → Analytics → Events.
 
+**How report e-mails are sent (Oct 10 2026):** the Resend key lives only in Vercel. The sales and health jobs write a one-time pass to `refresh_tokens` (10 minutes, used once) and POST the finished report to `/api/report-mail`, which sends it with the site's key to `ORDER_ALERT_EMAIL` only. If `RESEND_API_KEY` + `ORDER_ALERT_EMAIL` are ever added as GitHub secrets, the jobs send directly instead. A job turns red when its e-mail is not sent.
+
 ## Visitor stats: event guide (Vercel → Analytics → Events)
 Each event counts **once per visit** for the same detail (reloads and repeat opens don't inflate it; "Problem · …" events count every time). Every event has two details: **detail** (what happened) and **city** ("Nasr City · Cairo"). Steps 1–7 are the shopping path in order:
 1 · Visitor (new / returning) → 2 · Viewed product (colour) → 3 · Chose size → 4 · Added to bag → 5 · Opened checkout (pieces · value) → 6 · Tapped Place order (pieces · area) → 7 · Order placed (total · area).

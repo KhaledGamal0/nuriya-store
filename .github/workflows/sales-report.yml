@@ -19,6 +19,7 @@ jobs:
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       ORDER_ALERT_EMAIL: ${{ secrets.ORDER_ALERT_EMAIL }}
+      SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -28,6 +29,13 @@ jobs:
         run: node scripts/neon.mjs env production
       - name: Sales numbers (no customer phones)
         run: docker run --rm --network host -e DATABASE_URL -v "$PWD/scripts:/s:ro" postgres:17 psql "$DATABASE_URL" -tA -v ON_ERROR_STOP=1 -f /s/sales.sql > sales.json
+      - name: One-time e-mail pass (the site sends the report with its own Resend key)
+        continue-on-error: true
+        run: |
+          TOKEN=$(openssl rand -hex 32)
+          echo "::add-mask::$TOKEN"
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -q -c "INSERT INTO refresh_tokens (token) VALUES ('$TOKEN')"
+          echo "REPORT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
       - name: Write and e-mail the report
         run: node scripts/sales-report.mjs
       - name: Keep the latest report on the sales-report branch (never deployed)

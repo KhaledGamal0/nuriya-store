@@ -60,6 +60,13 @@ jobs:
                  SELECT c.name_en AS color, v.size, v.track_inventory AS tracked, (v.stock_on_hand - v.stock_reserved) AS available
                  FROM variants v JOIN colorways c ON c.id = v.colorway_id
                  WHERE v.is_active AND c.is_active ORDER BY c.position, v.size DESC) s))" > db.json
+      - name: One-time e-mail pass (the site sends the report with its own Resend key)
+        continue-on-error: true
+        run: |
+          TOKEN=$(openssl rand -hex 32)
+          echo "::add-mask::$TOKEN"
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -q -c "INSERT INTO refresh_tokens (token) VALUES ('$TOKEN')"
+          echo "REPORT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
       - name: Check everything and e-mail
         run: node scripts/health-report.mjs
       - name: Alert on the phone if something needs action
