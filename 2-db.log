@@ -1,0 +1,49 @@
+
+> nuriya-store@0.1.0 db:migrate
+> node --experimental-strip-types scripts/db-migrate.ts
+
+(node:2922) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/scripts/db-migrate.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+applied 0001_init.sql
+applied 0002_orders.sql
+applied 0003_refresh_tokens.sql
+applied 0004_hd_photos.sql
+applied 0005_white_colour_name.sql
+applied 0006_remove_four_photos.sql
+applied 0007_offer_price.sql
+applied 0008_offer_limit_and_stock.sql
+applied 0009_launch_sale.sql
+applied 0010_merge_cairo_areas.sql
+applied 0011_alt_phone.sql
+applied 0012_size_chart_chest.sql
+applied 0013_extend_launch_sale.sql
+migrations up to date
+
+> nuriya-store@0.1.0 db:seed
+> node --experimental-strip-types scripts/db-seed.ts
+
+(node:2947) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/scripts/db-seed.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+seed complete { variants: 4, media: 6, areas: 28 }
+
+> nuriya-store@0.1.0 db:migrate
+> node --experimental-strip-types scripts/db-migrate.ts
+
+(node:2972) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/scripts/db-migrate.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+migrations up to date
+
+> nuriya-store@0.1.0 db:seed
+> node --experimental-strip-types scripts/db-seed.ts
+
+(node:2996) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/scripts/db-seed.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+seed complete { variants: 4, media: 6, areas: 28 }

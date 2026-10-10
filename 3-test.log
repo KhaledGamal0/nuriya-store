@@ -1,0 +1,382 @@
+
+> nuriya-store@0.1.0 test
+> node --test --experimental-strip-types --test-concurrency=1 tests/*.test.ts
+
+TAP version 13
+# (node:3029) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/tests/checkout.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: valid order is priced on the server
+ok 1 - valid order is priced on the server
+  ---
+  duration_ms: 2.051192
+  type: 'test'
+  ...
+# Subtest: a price sent by the browser is ignored
+ok 2 - a price sent by the browser is ignored
+  ---
+  duration_ms: 0.217107
+  type: 'test'
+  ...
+# Subtest: unknown color, size or area is rejected
+ok 3 - unknown color, size or area is rejected
+  ---
+  duration_ms: 0.212469
+  type: 'test'
+  ...
+# Subtest: quantities are merged and capped
+ok 4 - quantities are merged and capped
+  ---
+  duration_ms: 0.845477
+  type: 'test'
+  ...
+# Subtest: Egyptian mobile numbers
+ok 5 - Egyptian mobile numbers
+  ---
+  duration_ms: 0.157956
+  type: 'test'
+  ...
+# Subtest: errors name every bad field
+ok 6 - errors name every bad field
+  ---
+  duration_ms: 0.254729
+  type: 'test'
+  ...
+# Subtest: shipping table matches the Direction price list
+ok 7 - shipping table matches the Direction price list
+  ---
+  duration_ms: 0.349696
+  type: 'test'
+  ...
+# Subtest: money and size helpers
+ok 8 - money and size helpers
+  ---
+  duration_ms: 15.557727
+  type: 'test'
+  ...
+# Subtest: a sold-out size cannot be ordered
+ok 9 - a sold-out size cannot be ordered
+  ---
+  duration_ms: 0.737204
+  type: 'test'
+  ...
+# Subtest: the price comes from the store data, not a constant
+ok 10 - the price comes from the store data, not a constant
+  ---
+  duration_ms: 0.720003
+  type: 'test'
+  ...
+# Subtest: an area that is not active is rejected
+ok 11 - an area that is not active is rejected
+  ---
+  duration_ms: 0.355017
+  type: 'test'
+  ...
+# Subtest: phone input is grouped as typed, Arabic digits and +20 included
+ok 12 - phone input is grouped as typed, Arabic digits and +20 included
+  ---
+  duration_ms: 0.697851
+  type: 'test'
+  ...
+# Subtest: second number is optional, must be valid, and different from the main one
+ok 13 - second number is optional, must be valid, and different from the main one
+  ---
+  duration_ms: 0.374984
+  type: 'test'
+  ...
+# Subtest: size chart matches Khaled's corrected guide (chest all around)
+ok 14 - size chart matches Khaled's corrected guide (chest all around)
+  ---
+  duration_ms: 0.393448
+  type: 'test'
+  ...
+# (node:3036) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/tests/db.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: seed created the catalog and all delivery areas
+ok 15 - seed created the catalog and all delivery areas
+  ---
+  duration_ms: 26.070269
+  type: 'test'
+  ...
+# Subtest: storefront reads price, photos and fees from the database
+ok 16 - storefront reads price, photos and fees from the database
+  ---
+  duration_ms: 455.557479
+  type: 'test'
+  ...
+# Subtest: a price change in the database is what checkout charges
+ok 17 - a price change in the database is what checkout charges
+  ---
+  duration_ms: 13.432187
+  type: 'test'
+  ...
+# Subtest: a size with no stock shows sold out and cannot be ordered
+ok 18 - a size with no stock shows sold out and cannot be ordered
+  ---
+  duration_ms: 7.672469
+  type: 'test'
+  ...
+# Subtest: a deactivated delivery area disappears from checkout
+ok 19 - a deactivated delivery area disappears from checkout
+  ---
+  duration_ms: 2.975178
+  type: 'test'
+  ...
+# Subtest: the database itself refuses bad data
+ok 20 - the database itself refuses bad data
+  ---
+  duration_ms: 8.589153
+  type: 'test'
+  ...
+# Subtest: seeding twice changes nothing
+ok 21 - seeding twice changes nothing
+  ---
+  duration_ms: 160.981889
+  type: 'test'
+  ...
+# (node:3065) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/tests/fuzz.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: phone: every format an Egyptian customer might type is accepted, junk is not
+ok 22 - phone: every format an Egyptian customer might type is accepted, junk is not
+  ---
+  duration_ms: 1.605986
+  type: 'test'
+  ...
+# Subtest: text fields: control characters, NUL, invisible overrides and huge input are cleaned
+ok 23 - text fields: control characters, NUL, invisible overrides and huge input are cleaned
+  ---
+  duration_ms: 0.654329
+  type: 'test'
+  ...
+# Subtest: cart: tampered quantities, prices, unknown items, prototype pollution and huge carts are handled
+ok 24 - cart: tampered quantities, prices, unknown items, prototype pollution and huge carts are handled
+  ---
+  duration_ms: 1.385702
+  type: 'test'
+  ...
+# Subtest: 5,000 random checkouts: never crashes, and every accepted order adds up exactly
+ok 25 - 5,000 random checkouts: never crashes, and every accepted order adds up exactly
+  ---
+  duration_ms: 91.76768
+  type: 'test'
+  ...
+# Subtest: order e-mail and WhatsApp link: hostile names and addresses cannot inject HTML or break the link
+ok 26 - order e-mail and WhatsApp link: hostile names and addresses cannot inject HTML or break the link
+  ---
+  duration_ms: 18.28028
+  type: 'test'
+  ...
+# Subtest: order e-mail shows stock left, flags low and sold-out sizes, and says what to collect in cash
+ok 27 - order e-mail shows stock left, flags low and sold-out sizes, and says what to collect in cash
+  ---
+  duration_ms: 0.589988
+  type: 'test'
+  ...
+# (node:3072) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/tests/images.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: every photo in public/images has preview colours (run: python3 scripts/make-blur.py)
+ok 28 - every photo in public/images has preview colours (run: python3 scripts/make-blur.py)
+  ---
+  duration_ms: 1.127648
+  type: 'test'
+  ...
+# Subtest: every gallery photo exists and has a preview
+ok 29 - every gallery photo exists and has a preview
+  ---
+  duration_ms: 0.388119
+  type: 'test'
+  ...
+# Subtest: every photo is prepared in every size the site asks for (run: python3 scripts/make-images.py)
+ok 30 - every photo is prepared in every size the site asks for (run: python3 scripts/make-images.py)
+  ---
+  duration_ms: 2.803635
+  type: 'test'
+  ...
+# (node:3079) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/tests/load.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# \# 200 orders saved in 958 ms (209 orders/s)
+# Subtest: 200 shoppers ordering at once (40 at a time): every order saved once, complete and correct
+ok 31 - 200 shoppers ordering at once (40 at a time): every order saved once, complete and correct
+  ---
+  duration_ms: 1470.062734
+  type: 'test'
+  ...
+# Subtest: 60 buyers race for 25 pieces: exactly the stock is sold, never more
+ok 32 - 60 buyers race for 25 pieces: exactly the stock is sold, never more
+  ---
+  duration_ms: 206.197515
+  type: 'test'
+  ...
+# Subtest: one phone hammering checkout 15 times at once gets exactly 3 orders
+ok 33 - one phone hammering checkout 15 times at once gets exactly 3 orders
+  ---
+  duration_ms: 40.974578
+  type: 'test'
+  ...
+# Subtest: one device firing 10 more orders than allowed, all at once, gets exactly the limit through
+ok 34 - one device firing 10 more orders than allowed, all at once, gets exactly the limit through
+  ---
+  duration_ms: 146.40336
+  type: 'test'
+  ...
+# Subtest: 20 retries of the same checkout at once (bad network) create one order
+ok 35 - 20 retries of the same checkout at once (bad network) create one order
+  ---
+  duration_ms: 106.304303
+  type: 'test'
+  ...
+# (node:3098) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/nuriya-store/nuriya-store/tests/orders.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /home/runner/work/nuriya-store/nuriya-store/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a COD order is saved with items, customer and history, priced from the database
+ok 36 - a COD order is saved with items, customer and history, priced from the database
+  ---
+  duration_ms: 700.9168
+  type: 'test'
+  ...
+# Subtest: a price sent by the browser never reaches the database
+ok 37 - a price sent by the browser never reaches the database
+  ---
+  duration_ms: 22.624391
+  type: 'test'
+  ...
+# Subtest: the same checkout sent twice creates one order
+ok 38 - the same checkout sent twice creates one order
+  ---
+  duration_ms: 20.432943
+  type: 'test'
+  ...
+# Subtest: two taps at the same moment create one order
+ok 39 - two taps at the same moment create one order
+  ---
+  duration_ms: 29.173499
+  type: 'test'
+  ...
+# Subtest: a key reused with another phone is refused
+ok 40 - a key reused with another phone is refused
+  ---
+  duration_ms: 26.837068
+  type: 'test'
+  ...
+# Subtest: two buyers cannot both get the last piece
+ok 41 - two buyers cannot both get the last piece
+  ---
+  duration_ms: 35.985985
+  type: 'test'
+  ...
+# Subtest: a refused order leaves no trace: no order, no reservation
+ok 42 - a refused order leaves no trace: no order, no reservation
+  ---
+  duration_ms: 19.430492
+  type: 'test'
+  ...
+# Subtest: a price change between viewing and ordering is refused, never charged silently
+ok 43 - a price change between viewing and ordering is refused, never charged silently
+  ---
+  duration_ms: 15.293721
+  type: 'test'
+  ...
+# Subtest: a delivery fee change or a closed area during checkout is refused
+ok 44 - a delivery fee change or a closed area during checkout is refused
+  ---
+  duration_ms: 20.333239
+  type: 'test'
+  ...
+# Subtest: cash on delivery is refused where the courier doesn't allow it
+ok 45 - cash on delivery is refused where the courier doesn't allow it
+  ---
+  duration_ms: 13.910686
+  type: 'test'
+  ...
+# Subtest: card orders are refused until Paymob is connected
+ok 46 - card orders are refused until Paymob is connected
+  ---
+  duration_ms: 7.949555
+  type: 'test'
+  ...
+# Subtest: a blocked phone cannot order
+ok 47 - a blocked phone cannot order
+  ---
+  duration_ms: 10.687114
+  type: 'test'
+  ...
+# Subtest: one phone can place at most 3 orders a day, even all at once
+ok 48 - one phone can place at most 3 orders a day, even all at once
+  ---
+  duration_ms: 30.989592
+  type: 'test'
+  ...
+# Subtest: too many checkout attempts from one device are slowed down
+ok 49 - too many checkout attempts from one device are slowed down
+  ---
+  duration_ms: 386.929309
+  type: 'test'
+  ...
+# Subtest: a malformed key is refused
+ok 50 - a malformed key is refused
+  ---
+  duration_ms: 8.469024
+  type: 'test'
+  ...
+# Subtest: order lookup needs the right number AND phone, and says the same thing otherwise
+ok 51 - order lookup needs the right number AND phone, and says the same thing otherwise
+  ---
+  duration_ms: 18.040559
+  type: 'test'
+  ...
+# order.email.failed NUR-SXW858 500
+# Subtest: order e-mail: sent once, retried after a failure, and never blocks or loses the order
+ok 52 - order e-mail: sent once, retried after a failure, and never blocks or loses the order
+  ---
+  duration_ms: 68.249046
+  type: 'test'
+  ...
+# Subtest: the database refuses an order whose total doesn't add up or a reservation above stock
+ok 53 - the database refuses an order whose total doesn't add up or a reservation above stock
+  ---
+  duration_ms: 10.654037
+  type: 'test'
+  ...
+# Subtest: launch offer ends by itself after the set number of orders; the next order pays the old price
+ok 54 - launch offer ends by itself after the set number of orders; the next order pays the old price
+  ---
+  duration_ms: 58.559685
+  type: 'test'
+  ...
+# Subtest: offer count is exact when many orders arrive at once
+ok 55 - offer count is exact when many orders arrive at once
+  ---
+  duration_ms: 52.730439
+  type: 'test'
+  ...
+# Subtest: timed sale: charged only inside its window, doesn't use up the 7-order offer, price returns after
+ok 56 - timed sale: charged only inside its window, doesn't use up the 7-order offer, price returns after
+  ---
+  duration_ms: 42.781809
+  type: 'test'
+  ...
+# Subtest: the optional second number is saved with the order
+ok 57 - the optional second number is saved with the order
+  ---
+  duration_ms: 18.448575
+  type: 'test'
+  ...
+1..57
+# tests 57
+# suites 0
+# pass 57
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5219.520328

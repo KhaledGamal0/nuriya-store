@@ -1,0 +1,6 @@
+Generating route types...
+✓ Types generated successfully
+
+> nuriya-store@0.1.0 typecheck
+> tsc --noEmit
+
