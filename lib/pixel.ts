@@ -39,7 +39,8 @@ export function pixelCustomer(phone: string, fullName: string): void {
     const data: Record<string, string> = { country: "eg" };
     if (/^01\d{9}$/.test(d)) data.ph = `2${d}`;
     if (parts[0]) data.fn = parts[0];
-    if (parts.length > 1) data.ln = parts[parts.length - 1];
+    const last = parts.length > 1 ? parts[parts.length - 1] : undefined;
+    if (last) data.ln = last;
     fbq("init", META_PIXEL_ID, data);
   } catch {}
 }
