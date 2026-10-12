@@ -37,9 +37,10 @@ export type ServerPurchase = {
   url: string;
 };
 
-export async function sendServerPurchase(p: ServerPurchase): Promise<void> {
+/** testCode: only for the on-demand test (Events Manager → Test events); real orders never pass one. */
+export async function sendServerPurchase(p: ServerPurchase, testCode?: string): Promise<{ sent: boolean; status: number; meta?: unknown }> {
   const token = process.env.META_CAPI_TOKEN;
-  if (!token) return;
+  if (!token) return { sent: false, status: 0 };
   const version = process.env.META_GRAPH_VERSION || "v24.0";
   const ph = metaPhone(p.phone);
   const { fn, ln } = metaName(p.name);
@@ -73,7 +74,7 @@ export async function sendServerPurchase(p: ServerPurchase): Promise<void> {
         },
       },
     ],
-    ...(process.env.META_TEST_EVENT_CODE && { test_event_code: process.env.META_TEST_EVENT_CODE }),
+    ...(testCode && { test_event_code: testCode }),
   };
   const res = await fetch(`https://graph.facebook.com/${version}/${META_PIXEL_ID}/events?access_token=${encodeURIComponent(token)}`, {
     method: "POST",
@@ -84,4 +85,6 @@ export async function sendServerPurchase(p: ServerPurchase): Promise<void> {
   // Never log the token or customer details: only the order number and Meta's status.
   if (res.ok) console.info("meta.capi.sent", { order: p.orderNumber });
   else console.error("meta.capi.failed", { order: p.orderNumber, status: res.status });
+  const meta = await res.json().catch(() => undefined);
+  return { sent: res.ok, status: res.status, meta };
 }
