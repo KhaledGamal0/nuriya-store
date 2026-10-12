@@ -60,3 +60,5 @@
 - Oct 9 2026 (Khaled): launch sale (900 EGP) extended to Friday 16 Oct 2026, 11:59 pm Cairo.
 
 - **Oct 11 2026 (Khaled):** product pages show "Model is 160 cm · 50 kg and wears S/M" under the size buttons and in Find my size (same model, both colours; real 161 cm / 51 kg, rounded by Khaled). Holding a photo on phones no longer opens the save/preview menu. UGC gift: 1 White L/XL taken out of stock (admin task take-out-stock).
+
+- **Oct 12 2026 (Khaled: "do everything to make the ad reach more people"):** Meta Advanced Matching on Purchase (phone + name, hashed by the Pixel), `contents` on AddToCart/InitiateCheckout/Purchase, and Conversions API Purchase from the server (same event_id = order number, hashed phone/name, IP, user agent, _fbp/_fbc), sent after the order is saved. Privacy note added on Delivery and returns ("Your details").
