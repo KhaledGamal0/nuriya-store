@@ -1,0 +1,38 @@
+name: Meta test
+
+# Sends ONE test Purchase from the live site to Meta (Conversions API) with a Test Events code,
+# to prove the META_CAPI_TOKEN in Vercel works. It appears only in Events Manager → Nuriya Pixel → Test events.
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "Test code from Events Manager → Test events (e.g. TEST12345)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      SITE: ${{ vars.SITE_URL || 'https://nuriya.app' }}
+      CODE: ${{ inputs.code }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        run: node scripts/neon.mjs env production
+      - name: Send the test Purchase through the live site
+        run: |
+          [[ "$CODE" =~ ^TEST[A-Za-z0-9_]{1,20}$ ]] || { echo "::error::Test code must look like TEST12345"; exit 1; }
+          TOKEN=$(openssl rand -hex 32)
+          echo "::add-mask::$TOKEN"
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -q -c "INSERT INTO refresh_tokens (token) VALUES ('$TOKEN')"
+          code=$(curl -s -o out.json -w "%{http_code}" -X POST -H "Authorization: Bearer $TOKEN" -H "content-type: application/json" -d "{\"code\":\"$CODE\"}" "$SITE/api/meta-test")
+          echo "::notice::Site answered $code: $(head -c 400 out.json)"
+          [ "$code" = "200" ]
