@@ -9,7 +9,7 @@ const rows = [];
 for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"]) {
   for (const net of ["5g", "4g"]) {
     const ctx = await browser.newContext({ ...devices["iPhone 13"] });
-    await ctx.route(/facebook\.com\/tr/, (r) => r.abort()); // never send test visits to the real Meta Pixel
+    await ctx.route(/facebook\.com\/tr|\/api\/meta-event/, (r) => r.abort()); // never send test visits to the real Meta Pixel
     const page = await ctx.newPage();
     const cdp = await ctx.newCDPSession(page);
     await cdp.send("Network.enable");
@@ -49,6 +49,12 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
   await ctx.route("**/_vercel/insights/**", (r) => r.abort());
   // Meta Pixel: its script loads for real, but what it would send to Meta is caught here and never sent.
   const meta = [];
+  // Server copies (Conversions API) are caught too: we only check they would be sent, never send them.
+  const server = [];
+  await ctx.route(/\/api\/meta-event/, (r) => {
+    try { server.push(JSON.parse(r.request().postData() || "{}").name); } catch {}
+    return r.abort();
+  });
   await ctx.route(/facebook\.com\/tr/, (r) => {
     // Events go either in the address (GET) or in the body (POST); read both.
     const q = new URL(r.request().url()).searchParams;
@@ -77,6 +83,7 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
   await page.waitForTimeout(3000);
   const pixelId = await page.evaluate(() => typeof window.fbq === "function" && !!document.querySelector('script[src*="connect.facebook.net"]'));
   rows.push(`Meta Pixel: ${pixelId ? "loaded" : "MISSING"} · events it sent: ${meta.join(" | ") || "none"}`);
+  rows.push(`Meta server copies: ${server.join(" | ") || "none"}`);
   await ctx.close();
 }
 await browser.close();

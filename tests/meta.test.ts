@@ -47,3 +47,18 @@ test("Conversions API: Purchase uses the order number as event_id and never send
   assert.match(e.user_data.ph[0], /^[0-9a-f]{64}$/);
   assert.ok(!body.includes("1012345678") && !body.toLowerCase().includes("sara"));
 });
+
+import { parseClientEvent } from "../lib/meta-capi.ts";
+
+test("Browser notes: only our three events, our products and sane numbers are accepted", () => {
+  const ok = parseClientEvent({ name: "AddToCart", eventId: "atc-abc123def456", path: "/quiet-confidence/white",
+    custom: { content_ids: ["cream", "evil"], value: 900, contents: [{ id: "cream", quantity: 1, item_price: 900 }], content_name: "White · S/M", extra: "x" } });
+  assert.ok(ok);
+  assert.deepEqual(ok!.custom.content_ids, ["cream"]);
+  assert.equal(ok!.custom.value, 900);
+  assert.equal((ok!.custom as Record<string, unknown>).extra, undefined);
+  assert.equal(parseClientEvent({ name: "Purchase", eventId: "atc-abc123def456", path: "/" }), null); // purchases only from the server's order
+  assert.equal(parseClientEvent({ name: "AddToCart", eventId: "<script>", path: "/" }), null);
+  assert.equal(parseClientEvent({ name: "AddToCart", eventId: "atc-abc123def456", path: "https://evil.com" }), null);
+  assert.equal(parseClientEvent({ name: "AddToCart", eventId: "atc-abc123def456", path: "/", custom: { value: 1e9 } })!.custom.value, undefined);
+});

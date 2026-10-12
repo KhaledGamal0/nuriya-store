@@ -5,7 +5,7 @@ import { BagProvider } from "@/components/BagProvider";
 import Script from "next/script";
 import { VisitorPlace } from "@/components/VisitorPlace";
 import { MetaPixel } from "@/components/MetaPixel";
-import { META_PIXEL_ID, fbInit } from "@/lib/pixel";
+import { META_PIXEL_ID, fbCookies, fbInit } from "@/lib/pixel";
 import { LaunchOffer } from "@/components/LaunchOffer";
 import { StoreProvider } from "@/components/StoreProvider";
 import { getAreas, getCatalog } from "@/lib/store";
@@ -62,6 +62,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <Script src="/_vercel/insights/script.js" strategy="lazyOnload" />
             <VisitorPlace />
             {/* Meta Pixel for the ads: a tiny queue first, Meta's script only after the page has loaded. */}
+            <Script id="fb-cookies" strategy="beforeInteractive">{fbCookies}</Script>
             <Script id="fb-init" strategy="beforeInteractive">{fbInit(META_PIXEL_ID)}</Script>
             <MetaPixel />
           </>
