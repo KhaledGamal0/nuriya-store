@@ -1,7 +1,9 @@
 "use server";
 
 import { after } from "next/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { sendServerPurchase } from "@/lib/meta-capi";
+import { siteUrl } from "@/lib/site";
 import { MESSAGES, validateCheckout, type FieldErrors } from "@/lib/checkout";
 import { getAreas, getCatalog } from "@/lib/store";
 import { getSql, hasDatabase } from "@/lib/db";
@@ -86,6 +88,25 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
   if (saved.soldOutNow || saved.offerEnded) refreshStorefront();
   // E-mail the shop after the response is sent, so the customer never waits for it (and retry older misses).
   after(() => sendPendingOrderEmails(getSql()).catch((e) => console.error("order.email.batch_failed", e)));
+
+  // Meta ads: send this Purchase from the server too (after the answer is sent; never blocks or breaks ordering).
+  if (!saved.existing) {
+    const jar = await cookies();
+    const o = result.order;
+    const purchase = {
+      orderNumber: saved.number,
+      totalPiasters: o.totalPiasters,
+      lines: o.lines.map((l) => ({ color: l.color, qty: l.qty, linePiasters: l.linePiasters })),
+      phone: o.phone,
+      name: o.name,
+      ip,
+      userAgent: h.get("user-agent"),
+      fbp: jar.get("_fbp")?.value,
+      fbc: jar.get("_fbc")?.value,
+      url: `${siteUrl()}/checkout`,
+    };
+    after(() => sendServerPurchase(purchase).catch((e) => console.error("meta.capi.error", e instanceof Error ? e.name : "error")));
+  }
 
   // Card payments (Paymob) are deferred until Nuriya has business documents (Khaled, Oct 7 2026); card stays hidden and refused.
   // Returned, not redirect(): a server-action redirect left the page's transition pending, so the next

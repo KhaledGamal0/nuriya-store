@@ -60,6 +60,14 @@ export default async function ReturnsPage() {
         </ul>
       </section>
 
+      <section className="page-sec" aria-labelledby="data-title">
+        <h2 id="data-title">Your details</h2>
+        <p style={{ color: "var(--ink-2)" }}>
+          We use your name, phone and address only to deliver your order. To measure our Instagram and Facebook ads, we share a
+          scrambled (hashed) version of your phone number and name with Meta. We never sell your details.
+        </p>
+      </section>
+
       <section className="page-sec" aria-labelledby="help-title">
         <h2 id="help-title">Questions?</h2>
         <p style={{ color: "var(--ink-2)" }}>Message us on Instagram and we will help with sizing, orders and delivery.</p>
