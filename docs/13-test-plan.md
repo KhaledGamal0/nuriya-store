@@ -89,3 +89,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Phone grouped as typed (Arabic digits, +20, max 11 digits); second number optional, valid and different; saved; in WhatsApp message | `checkout.test.ts`, `orders.test.ts`, `fuzz.test.ts` | unit + database |
 
 | Meta Conversions API Purchase: no token = nothing sent; event_id = order number; phone/name only hashed | tests/meta.test.ts |
+| Meta browser notes: only ViewContent/AddToCart/InitiateCheckout, known products, sane numbers; Purchase only from the server order | tests/meta.test.ts |
