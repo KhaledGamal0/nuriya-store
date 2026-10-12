@@ -21,6 +21,17 @@ const PAGES: [RegExp, string][] = [
   [/^\/size-guide/, "Size guide"],
   [/^\/returns/, "Delivery & returns"],
 ];
+/** "14:00 – 15:00 · 2 pm" in Cairo time. */
+function cairoHour(): string {
+  try {
+    const h = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Cairo", hour: "2-digit", hourCycle: "h23" }).format(new Date()));
+    const two = (x: number) => String(x % 24).padStart(2, "0");
+    const ampm = h === 0 ? "12 am" : h < 12 ? `${h} am` : h === 12 ? "12 pm" : `${h - 12} pm`;
+    return `${two(h)}:00 – ${two(h + 1)}:00 · ${ampm}`;
+  } catch {
+    return "unknown";
+  }
+}
 const pageName = (p: string) => PAGES.find(([re]) => re.test(p))?.[1] ?? "Other page";
 
 /**
@@ -45,6 +56,9 @@ export function VisitorPlace() {
         localStorage.setItem("nuriya-visits", String(n));
       } catch {}
       track("1 · Visitor", n === 1 ? "New visitor" : n === 2 ? "Returning (2nd visit)" : n <= 5 ? "Returning (3–5 visits)" : "Returning (6+ visits)");
+      // The hour of the visit, Cairo time ("14:00 – 15:00 · 2 pm"), once per visit: Vercel → Events → this event
+      // lists how many visits came in each hour.
+      track("Visit · hour (Cairo)", cairoHour());
     };
     const fallback = window.setTimeout(() => finish("Unknown"), 6000);
     fetch("/api/place")
