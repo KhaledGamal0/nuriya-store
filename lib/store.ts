@@ -2,7 +2,7 @@
 // From the database when DATABASE_URL is set; otherwise the built-in data (until Neon is connected).
 import { cache } from "react";
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { getDb, hasDatabase } from "./db/index.ts";
+import { getDb, getSql, hasDatabase } from "./db/index.ts";
 import { colorways, media, products, shippingAreas, shippingZones, sizeChart, variants } from "./db/schema.ts";
 import {
   COLORS,
@@ -45,6 +45,18 @@ async function loadCatalog(): Promise<CatalogData> {
   const compareAt = saleOn ? (product.compareAtPiasters ?? product.pricePiasters) : (product.compareAtPiasters ?? null);
   const sale = saleOn ? { endsAt: new Date(saleEnd).toISOString(), after: { pricePiasters: product.pricePiasters, compareAtPiasters: product.compareAtPiasters ?? null } } : null;
 
+  // Launch offer counted in pieces: how many are still left at the offer price (same count as lib/orders.ts).
+  let offerPiecesLeft: number | null = null;
+  if (product.offerPiecesLimit != null && product.compareAtPiasters != null) {
+    const [{ n } = { n: 0 }] = await getSql()<{ n: number }[]>`
+      SELECT coalesce(sum(i.qty), 0)::int AS n
+      FROM order_items i JOIN orders o ON o.id = i.order_id, products p
+      WHERE p.id = ${product.id} AND o.created_at >= ${product.offerStartedAt ?? new Date(0)}
+        AND o.status NOT IN ('CANCELLED', 'EXPIRED')
+        AND NOT (p.sale_starts_at IS NOT NULL AND o.created_at >= p.sale_starts_at AND o.created_at < p.sale_ends_at)`;
+    offerPiecesLeft = Math.max(0, product.offerPiecesLimit - n);
+  }
+
   const colors = {} as Record<ColorId, ColorwayData>;
   const order: ColorId[] = [];
   for (const cw of cws) {
@@ -82,6 +94,7 @@ async function loadCatalog(): Promise<CatalogData> {
     pricePiasters: price,
     compareAtPiasters: compareAt,
     sale,
+    offerPiecesLeft,
     sizeChart: sizeRows.length ? sizeRows : fallback.sizeChart,
     colorOrder: order.length ? order : COLORS,
     colors,

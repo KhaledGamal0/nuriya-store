@@ -109,6 +109,12 @@ export type CatalogData = {
   compareAtPiasters: number | null;
   /** A timed sale running right now (prices above are already the sale prices), or null. */
   sale: SaleInfo | null;
+  /**
+   * Launch offer counted in pieces: how many pieces are still left at the offer price (pricePiasters) for
+   * everyone; after that each piece costs compareAtPiasters. null = no piece limit. Display only: the
+   * server recounts inside the order transaction.
+   */
+  offerPiecesLeft?: number | null;
   sizeChart: readonly SizeChartRow[];
   colorOrder: readonly ColorId[];
   colors: Record<ColorId, ColorwayData>;
@@ -130,6 +136,7 @@ export function staticCatalog(): CatalogData {
     pricePiasters: PRODUCT.pricePiasters,
     compareAtPiasters: PRODUCT.compareAtPiasters,
     sale: null,
+    offerPiecesLeft: null,
     sizeChart: PRODUCT.sizeChart,
     colorOrder: COLORS,
     colors: { cream: colorway("cream"), burgundy: colorway("burgundy") },
@@ -153,4 +160,32 @@ export const percentOff = (now: number, was: number | null) => (was && was > now
 export function priceFor(catalog: CatalogData, color: ColorId, size: SizeId): number | null {
   const option = catalog.colors[color]?.sizes.find((s) => s.size === size);
   return option && option.available ? option.pricePiasters : null;
+}
+
+export type PricedPiece = { color: ColorId; size: SizeId; qty: number; unitPiasters: number };
+
+/**
+ * Prices a bag, splitting a line when the launch offer runs out inside it: the first pieces (in bag order) take
+ * the offer price while offer pieces are left, the rest pay the full price. Example with 2 left and 3 in the bag:
+ * 2 × 1,000 + 1 × 1,200. During a timed sale there is no split (sale pieces don't use up the offer).
+ * Returns null if any line can't be sold. The same rule runs again in the database at checkout (lib/orders.ts).
+ */
+export function priceBag(catalog: CatalogData, lines: readonly { color: ColorId; size: SizeId; qty: number }[]): PricedPiece[] | null {
+  const full = catalog.compareAtPiasters;
+  const limited = !catalog.sale && full != null && catalog.offerPiecesLeft != null;
+  let left = limited ? Math.max(0, catalog.offerPiecesLeft!) : Infinity;
+  const out: PricedPiece[] = [];
+  for (const l of lines) {
+    const unit = priceFor(catalog, l.color, l.size);
+    if (unit === null) return null;
+    if (!limited || unit !== catalog.pricePiasters) {
+      out.push({ ...l, unitPiasters: unit });
+      continue;
+    }
+    const atOffer = Math.min(left, l.qty);
+    if (atOffer > 0) out.push({ color: l.color, size: l.size, qty: atOffer, unitPiasters: unit });
+    if (l.qty - atOffer > 0) out.push({ color: l.color, size: l.size, qty: l.qty - atOffer, unitPiasters: full! });
+    left -= atOffer;
+  }
+  return out;
 }

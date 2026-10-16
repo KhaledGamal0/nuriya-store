@@ -1,6 +1,6 @@
 // Server-side checkout rules. The browser only sends WHAT the customer wants (color, size, quantity);
 // every price, fee and total is computed here from the catalog and the shipping table.
-import { isColor, isSize, priceFor, staticCatalog, type CatalogData, type ColorId, type SizeId } from "./catalog.ts";
+import { isColor, isSize, priceBag, staticCatalog, type CatalogData, type ColorId, type SizeId } from "./catalog.ts";
 import { AREAS, type Area } from "./shipping.ts";
 
 /** What checkout needs to know about the store right now (from the database in production). */
@@ -164,12 +164,10 @@ export function validateCheckout(input: CheckoutInput, ctx: CheckoutContext = ST
 
   if (!phone || !area || !payment || !cart || Object.keys(errors).length > 0) return { ok: false, errors };
 
-  const lines: PricedLine[] = [];
-  for (const line of cart) {
-    const unit = priceFor(ctx.catalog, line.color, line.size);
-    if (unit === null) return { ok: false, errors: { cart: MESSAGES.soldOut } };
-    lines.push({ ...line, unitPiasters: unit, linePiasters: unit * line.qty });
-  }
+  // Offer pieces may run out inside the bag: such a line is split (e.g. 2 × 1,000 + 1 × 1,200).
+  const priced = priceBag(ctx.catalog, cart);
+  if (!priced) return { ok: false, errors: { cart: MESSAGES.soldOut } };
+  const lines: PricedLine[] = priced.map((l) => ({ color: l.color, size: l.size, qty: l.qty, unitPiasters: l.unitPiasters, linePiasters: l.unitPiasters * l.qty }));
   const subtotalPiasters = lines.reduce((sum, l) => sum + l.linePiasters, 0);
   const shippingPiasters = area.feePiasters;
 

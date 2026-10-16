@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useStore } from "./StoreProvider";
 import { formatEgp } from "@/lib/money";
 import { MAX_QTY_PER_LINE } from "@/lib/checkout";
-import type { BagLine } from "./BagProvider";
+import { useBag, type BagLine } from "./BagProvider";
 import { preview } from "@/lib/blur";
 
 type Props = {
@@ -14,7 +14,8 @@ type Props = {
 };
 
 export function BagLineItem({ line, onQty, onRemove }: Props) {
-  const { catalog, unitPrice } = useStore();
+  const { catalog } = useStore();
+  const { totalPiasters, parts } = useBag().priceOf(line);
   const color = catalog.colors[line.color];
   const image = color.images[0]!;
   const editable = Boolean(onQty && onRemove);
@@ -43,7 +44,11 @@ export function BagLineItem({ line, onQty, onRemove }: Props) {
         )}
       </div>
       <div className="ln-r">
-        <span className="price">{formatEgp(line.qty * unitPrice(line.color, line.size))}</span>
+        <span className="price">{formatEgp(totalPiasters)}</span>
+        {parts.length > 1 && (
+          // The offer ran out inside this line: show how the price is made up.
+          <small className="ln-split">{parts.map((p) => `${p.qty} × ${formatEgp(p.unitPiasters)}`).join(" + ")}</small>
+        )}
         {editable && (
           <button type="button" className="rm" onClick={onRemove}>
             Remove

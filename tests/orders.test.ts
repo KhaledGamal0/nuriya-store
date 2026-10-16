@@ -18,7 +18,7 @@ async function cleanup() {
   await sql!`DELETE FROM customers WHERE phone LIKE '0109%'`;
   await sql!`DELETE FROM rate_limits`;
   await sql!`UPDATE variants SET track_inventory = false, stock_on_hand = 0, stock_reserved = 0, is_active = true`;
-  await sql!`UPDATE products SET price_piasters = 120000, compare_at_piasters = NULL, offer_orders_limit = NULL, offer_started_at = NULL, sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL WHERE slug = 'quiet-confidence'`;
+  await sql!`UPDATE products SET price_piasters = 120000, compare_at_piasters = NULL, offer_orders_limit = NULL, offer_pieces_limit = NULL, offer_started_at = NULL, sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL WHERE slug = 'quiet-confidence'`;
   await sql!`UPDATE shipping_areas SET is_active = true`;
   await sql!`UPDATE shipping_zones SET is_active = true, cod_allowed = true`;
 }
@@ -292,16 +292,16 @@ test("the database refuses an order whose total doesn't add up or a reservation 
   await assert.rejects(sql!`UPDATE variants SET track_inventory = true, stock_on_hand = 1, stock_reserved = 2 WHERE sku = 'NUR-QC-CRM-SM'`);
 });
 
-test("launch offer ends by itself after the set number of orders; the next order pays the old price", { skip }, async () => {
-  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_orders_limit = 2, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
+test("launch offer ends by itself after the set number of pieces; the next order pays the old price", { skip }, async () => {
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 2, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
   await sql!`UPDATE variants SET track_inventory = true, stock_on_hand = 10, stock_reserved = 0 WHERE sku = 'NUR-QC-CRM-SM'`;
   const first = await place(await valid(nextPhone()));
-  assert.ok(first.ok && !first.offerEnded, "order 1 of 2 keeps the offer");
+  assert.ok(first.ok && !first.offerEnded, "piece 1 of 2 keeps the offer");
   const stale = await valid(nextPhone()); // priced at 1,000 while the offer is still on
   const second = await place(await valid(nextPhone()));
-  assert.ok(second.ok && second.offerEnded, "order 2 of 2 ends the offer");
-  const [p = noRow()] = await sql!`SELECT price_piasters, compare_at_piasters, offer_orders_limit FROM products WHERE slug = 'quiet-confidence'`;
-  assert.deepEqual({ ...p }, { price_piasters: 120000, compare_at_piasters: null, offer_orders_limit: null });
+  assert.ok(second.ok && second.offerEnded, "piece 2 of 2 ends the offer");
+  const [p = noRow()] = await sql!`SELECT price_piasters, compare_at_piasters, offer_pieces_limit FROM products WHERE slug = 'quiet-confidence'`;
+  assert.deepEqual({ ...p }, { price_piasters: 120000, compare_at_piasters: null, offer_pieces_limit: null });
   assert.deepEqual(await place(stale), { ok: false, reason: "price_changed" }, "a bag priced at the offer is refused after it ended");
   const third = await place(await valid(nextPhone()));
   assert.ok(third.ok, "new orders go through at the old price");
@@ -312,7 +312,7 @@ test("launch offer ends by itself after the set number of orders; the next order
 });
 
 test("offer count is exact when many orders arrive at once", { skip }, async () => {
-  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_orders_limit = 3, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 3, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
   const orders = await Promise.all(Array.from({ length: 6 }, () => valid(nextPhone())));
   const results = await Promise.all(orders.map((o) => place(o)));
   const ok = results.filter((r) => r.ok);
@@ -321,8 +321,36 @@ test("offer count is exact when many orders arrive at once", { skip }, async () 
   assert.ok(results.filter((r) => !r.ok).every((r) => !r.ok && r.reason === "price_changed"));
 });
 
+test("offer runs out inside one bag: 2 pieces at the offer + 1 at the full price, then the full price for everyone", { skip }, async () => {
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 2, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
+  const order = await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 2 }, { color: "burgundy", size: "L/XL", qty: 1 }]);
+  assert.deepEqual(order.lines.map((l) => [l.color, l.qty, l.unitPiasters]), [["cream", 2, 100000], ["burgundy", 1, 120000]]);
+  const split = await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 3 }]);
+  assert.deepEqual(split.lines.map((l) => [l.qty, l.unitPiasters]), [[2, 100000], [1, 120000]], "one line split: 2 × 1,000 + 1 × 1,200");
+  assert.equal(split.subtotalPiasters, 320000);
+  const r = await place(split);
+  assert.ok(r.ok && r.offerEnded, "the bag that takes the last offer piece ends the offer");
+  const items = await sql!`SELECT i.unit_piasters AS unit, i.qty FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.number = ${r.ok ? r.number : ""} ORDER BY i.id`;
+  assert.deepEqual(items.map((x) => [x.qty, x.unit]), [[2, 100000], [1, 120000]]);
+  const [o = noRow()] = await sql!`SELECT subtotal_piasters FROM orders WHERE number = ${r.ok ? r.number : ""}`;
+  assert.equal(o.subtotal_piasters, 320000);
+  assert.deepEqual(await place(order), { ok: false, reason: "price_changed" }, "a bag priced with offer pieces is refused once they are gone");
+  const next = await valid(nextPhone());
+  assert.equal(next.lines[0]!.unitPiasters, 120000, "everyone pays the full price now");
+});
+
+test("two buyers at the same second can't both get the last offer piece", { skip }, async () => {
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 3, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
+  const bags = await Promise.all(Array.from({ length: 4 }, () => valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 2 }])));
+  const results = await Promise.all(bags.map((b) => place(b)));
+  const ok = results.filter((r) => r.ok);
+  assert.equal(ok.length, 1, "only one 2-piece bag fits in the 3 offer pieces; the others must re-price");
+  const [{ n } = noRow()] = await sql!`SELECT coalesce(sum(i.qty), 0)::int AS n FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.customer_phone LIKE '0109%' AND i.unit_piasters = 100000`;
+  assert.ok(n <= 3, "never more than 3 pieces sold at the offer price");
+});
+
 test("timed sale: charged only inside its window, doesn't use up the 7-order offer, price returns after", { skip }, async () => {
-  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_orders_limit = 1, offer_started_at = now() - interval '1 hour',
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 1, offer_started_at = now() - interval '1 hour',
              sale_price_piasters = 90000, sale_starts_at = now() - interval '1 minute', sale_ends_at = now() + interval '1 hour' WHERE slug = 'quiet-confidence'`;
   const { getCatalog } = await import("../lib/store.ts");
   const during = await getCatalog();

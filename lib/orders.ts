@@ -34,7 +34,7 @@ export type RefusalReason =
   | "bad_key";
 
 export type PlaceResult =
-  | { ok: true; number: string; payment: "cod" | "card"; existing: boolean; soldOutNow: boolean; offerEnded?: boolean }
+  | { ok: true; number: string; payment: "cod" | "card"; existing: boolean; soldOutNow: boolean; offerEnded?: boolean; offerPiecesSold?: number }
   | { ok: false; reason: RefusalReason };
 
 class Refusal extends Error {
@@ -131,8 +131,8 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
 
         // Lock the product row: orders queue here for a moment, so the offer count below is exact and an order
         // placed after the offer ended is priced at the new price (price_changed → the customer refreshes).
-        const [offer = noRow("product")] = await tx<{ id: number; limit: number | null; started: Date | null; was: number | null; sale_on: boolean }[]>`
-          SELECT id, offer_orders_limit AS limit, offer_started_at AS started, compare_at_piasters AS was,
+        const [offer = noRow("product")] = await tx<{ id: number; limit: number | null; started: Date | null; was: number | null; sale_on: boolean; price: number }[]>`
+          SELECT id, offer_pieces_limit AS limit, offer_started_at AS started, compare_at_piasters AS was, price_piasters AS price,
                  coalesce(sale_price_piasters IS NOT NULL AND now() >= sale_starts_at AND now() < sale_ends_at, false) AS sale_on
           FROM products WHERE slug = ${PRODUCT_SLUG} FOR UPDATE`;
 
@@ -151,12 +151,37 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
           ORDER BY v.id
           FOR UPDATE OF v`;
 
+        // Launch offer counted in pieces (Khaled, Oct 16 2026): the first `limit` pieces sold after the sale, by all
+        // customers together, pay the offer price; every piece after that pays the full price (`was`), even inside
+        // the same bag (the bag's lines arrive already split, e.g. 2 × 1,000 + 1 × 1,200). Counted here, under the
+        // product lock above, so two buyers at the same second can never both get the last offer piece.
+        const offerOn = offer.limit !== null && offer.was !== null && !offer.sale_on;
+        let offerLeft = 0;
+        if (offerOn) {
+          const [{ n } = noRow("offer pieces")] = await tx<{ n: number }[]>`
+            SELECT coalesce(sum(i.qty), 0)::int AS n
+            FROM order_items i JOIN orders o ON o.id = i.order_id, products p
+            WHERE p.id = ${offer.id} AND o.created_at >= ${offer.started ?? new Date(0)}
+              AND o.status NOT IN ('CANCELLED', 'EXPIRED')
+              AND NOT (p.sale_starts_at IS NOT NULL AND o.created_at >= p.sale_starts_at AND o.created_at < p.sale_ends_at)`;
+          offerLeft = Math.max(0, offer.limit! - n);
+        }
+        let offerPiecesHere = 0;
+
         let soldOutNow = false;
         const items = [];
         for (const line of order.lines) {
           const v = variants.find((x) => x.color === line.color && x.size === line.size);
           if (!v || !v.sellable) throw new Refusal("sold_out");
-          if (v.unit !== line.unitPiasters) throw new Refusal("price_changed");
+          let expected = v.unit;
+          if (offerOn && v.unit === offer.price) {
+            if (offerLeft >= line.qty) {
+              offerLeft -= line.qty;
+              offerPiecesHere += line.qty;
+            } else if (offerLeft === 0) expected = offer.was!;
+            else throw new Refusal("price_changed"); // only part of this line is still at the offer: re-price the bag
+          }
+          if (expected !== line.unitPiasters) throw new Refusal("price_changed");
           // Pieces come straight out of stock (Khaled, Oct 7 2026). The WHERE makes overselling impossible.
           const [left] = await tx<{ tracked: boolean; left: number }[]>`
             UPDATE variants SET stock_on_hand = CASE WHEN track_inventory THEN stock_on_hand - ${line.qty} ELSE stock_on_hand END
@@ -167,7 +192,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
           items.push({ v, line });
         }
 
-        const subtotal = items.reduce((s, { v, line }) => s + v.unit * line.qty, 0);
+        const subtotal = items.reduce((s, { line }) => s + line.unitPiasters * line.qty, 0);
         const total = subtotal + area.fee;
         if (total !== order.totalPiasters) throw new Refusal("price_changed");
 
@@ -184,34 +209,26 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
         for (const { v, line } of items) {
           await tx`
             INSERT INTO order_items (order_id, variant_id, product_name, color_name, size, unit_piasters, qty, line_piasters)
-            VALUES (${saved.id}, ${v.id}, ${v.product_name}, ${v.color_name}, ${v.size}, ${v.unit}, ${line.qty}, ${v.unit * line.qty})`;
+            VALUES (${saved.id}, ${v.id}, ${v.product_name}, ${v.color_name}, ${v.size}, ${line.unitPiasters}, ${line.qty}, ${line.unitPiasters * line.qty})`;
         }
         await tx`
           INSERT INTO order_events (order_id, type, data)
           VALUES (${saved.id}, 'created', ${JSON.stringify({ source: "web", payment: order.payment, totalPiasters: total, status })}::jsonb)`;
 
-        // Launch offer: after the set number of orders the price goes back to the old price, for everyone after this one.
+        // Launch offer: once its last piece is sold, the full price applies to everyone from the next order on.
         let offerEnded = false;
-        // Orders placed during a timed sale don't use up the offer (Khaled, Oct 8 2026).
-        if (offer.limit !== null && offer.was !== null && !offer.sale_on) {
-          const [{ n } = noRow("offer count")] = await tx<{ n: number }[]>`
-            SELECT count(*)::int AS n FROM orders o, products p
-            WHERE p.id = ${offer.id} AND o.created_at >= ${offer.started ?? new Date(0)}
-              AND o.status NOT IN ('CANCELLED', 'EXPIRED')
-              AND NOT (p.sale_starts_at IS NOT NULL AND o.created_at >= p.sale_starts_at AND o.created_at < p.sale_ends_at)`;
-          if (n >= offer.limit) {
-            await tx`
-              UPDATE products SET price_piasters = compare_at_piasters, compare_at_piasters = NULL,
-                                  offer_orders_limit = NULL, updated_at = now()
-              WHERE id = ${offer.id}`;
-            await tx`
-              INSERT INTO order_events (order_id, type, data)
-              VALUES (${saved.id}, 'offer_ended', ${JSON.stringify({ afterOrders: n, newPricePiasters: offer.was })}::jsonb)`;
-            offerEnded = true;
-          }
+        if (offerOn && offerLeft === 0) {
+          await tx`
+            UPDATE products SET price_piasters = compare_at_piasters, compare_at_piasters = NULL,
+                                offer_pieces_limit = NULL, offer_orders_limit = NULL, updated_at = now()
+            WHERE id = ${offer.id}`;
+          await tx`
+            INSERT INTO order_events (order_id, type, data)
+            VALUES (${saved.id}, 'offer_ended', ${JSON.stringify({ lastOfferPieces: offerPiecesHere, newPricePiasters: offer.was })}::jsonb)`;
+          offerEnded = true;
         }
 
-        return { ok: true as const, number, payment: order.payment, existing: false, soldOutNow, offerEnded };
+        return { ok: true as const, number, payment: order.payment, existing: false, soldOutNow, offerEnded, offerPiecesSold: offerPiecesHere };
       });
     } catch (err) {
       if (err instanceof Refusal) return { ok: false, reason: err.reason };

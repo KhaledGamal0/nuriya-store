@@ -356,6 +356,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .ln-m b { font-weight: 500; }
 .ln-m span { color: var(--ink-2); font-size: 13px; }
 .ln-r { display: grid; justify-items: end; align-content: space-between; }
+.ln-split { display: block; font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
 .qty { display: inline-flex; align-items: center; margin-top: var(--s1); font-size: 13px; border: 1px solid var(--line); border-radius: var(--r); width: fit-content; }
 .qty button { width: 44px; height: 44px; }
 .qty button:disabled { opacity: 0.35; cursor: not-allowed; }

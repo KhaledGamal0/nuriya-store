@@ -141,3 +141,14 @@ test("size chart matches Khaled's corrected guide (chest all around)", async () 
   const rows = staticCatalog().sizeChart.map((r) => [r.size, r.shoulderCm, r.chestCm, r.lengthCm]);
   assert.deepEqual(rows, [["S/M", 56, 112, 64], ["L/XL", 60, 120, 67]]);
 });
+
+test("offer pieces: the bag is priced 1,000 until the offer pieces run out, then 1,200 (line split)", async () => {
+  const { priceBag, staticCatalog } = await import("../lib/catalog.ts");
+  const c = { ...staticCatalog(), pricePiasters: 100_000, compareAtPiasters: 120_000, offerPiecesLeft: 3 };
+  const bag = priceBag(c, [{ color: "cream", size: "S/M", qty: 2 }, { color: "burgundy", size: "L/XL", qty: 2 }]);
+  assert.deepEqual(bag?.map((l) => [l.color, l.qty, l.unitPiasters]), [["cream", 2, 100_000], ["burgundy", 1, 100_000], ["burgundy", 1, 120_000]]);
+  assert.deepEqual(priceBag({ ...c, offerPiecesLeft: 0 }, [{ color: "cream", size: "S/M", qty: 1 }])?.[0]?.unitPiasters, 120_000);
+  assert.equal(priceBag({ ...c, offerPiecesLeft: null }, [{ color: "cream", size: "S/M", qty: 9 }])?.length, 1, "no piece limit: no split");
+  const sale = { ...c, pricePiasters: 90_000, sale: { endsAt: "2099-01-01T00:00:00Z", after: { pricePiasters: 100_000, compareAtPiasters: 120_000 } } };
+  assert.equal(priceBag(sale, [{ color: "cream", size: "S/M", qty: 9 }])?.length, 1, "during a timed sale: no split");
+});

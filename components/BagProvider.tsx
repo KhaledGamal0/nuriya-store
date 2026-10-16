@@ -2,7 +2,7 @@
 
 import { track } from "@/lib/track";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { isColor, isSize, type ColorId, type SizeId } from "@/lib/catalog";
+import { isColor, isSize, priceBag, type ColorId, type SizeId } from "@/lib/catalog";
 import { useStore } from "./StoreProvider";
 import { MAX_LINES, MAX_QTY_PER_LINE } from "@/lib/checkout";
 
@@ -13,6 +13,8 @@ type BagContext = {
   count: number;
   /** Display only. The server recomputes every amount at checkout. */
   subtotalPiasters: number;
+  /** One bag line's price, split when the offer runs out inside it (parts: 2 × 1,000 + 1 × 1,200). */
+  priceOf: (line: BagLine) => { totalPiasters: number; parts: { qty: number; unitPiasters: number }[] };
   add: (color: ColorId, size: SizeId) => void;
   setQty: (index: number, qty: number) => void;
   remove: (index: number) => void;
@@ -83,11 +85,20 @@ export function BagProvider({ children }: { children: ReactNode }) {
   // bag change, so the thank-you page's ClearBag effect re-ran forever and starved navigation.
   const clear = useCallback(() => setLines((prev) => (prev.length ? [] : prev)), []);
 
-  const value = useMemo<BagContext>(
-    () => ({
+  const value = useMemo<BagContext>(() => {
+    // Launch offer counted in pieces: the bag shows exactly what checkout will charge.
+    const priced = priceBag(catalog, lines);
+    const priceOf = (line: BagLine) => {
+      const parts = priced
+        ? priced.filter((p) => p.color === line.color && p.size === line.size).map((p) => ({ qty: p.qty, unitPiasters: p.unitPiasters }))
+        : [{ qty: line.qty, unitPiasters: unitPrice(line.color, line.size) }];
+      return { totalPiasters: parts.reduce((n, p) => n + p.qty * p.unitPiasters, 0), parts };
+    };
+    return {
       lines,
       count: lines.reduce((n, l) => n + l.qty, 0),
-      subtotalPiasters: lines.reduce((n, l) => n + l.qty * unitPrice(l.color, l.size), 0),
+      subtotalPiasters: lines.reduce((n, l) => n + priceOf(l).totalPiasters, 0),
+      priceOf,
       add,
       setQty: (index, qty) => {
         const l = lines[index];
@@ -104,9 +115,8 @@ export function BagProvider({ children }: { children: ReactNode }) {
       openBag: () => setBagOpen(true),
       closeBag: () => setBagOpen(false),
       toast,
-    }),
-    [lines, add, clear, bagOpen, toast, unitPrice, catalog],
-  );
+    };
+  }, [lines, add, clear, bagOpen, toast, unitPrice, catalog]);
 
   return (
     <Ctx.Provider value={value}>
