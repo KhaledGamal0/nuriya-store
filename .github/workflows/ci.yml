@@ -51,7 +51,7 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: rm -rf .next && DATABASE_URL= npm run build 2>&1 | tee ci-logs/6-build-no-db.log; exit ${PIPESTATUS[0]}
       - name: Publish logs to the ci-logs branch
-        if: always() && github.event_name == 'push'
+        if: always()
         run: |
           cp package-lock.json ci-logs/ 2>/dev/null || true
           cd ci-logs
