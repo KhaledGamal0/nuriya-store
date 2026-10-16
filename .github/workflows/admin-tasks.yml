@@ -10,7 +10,7 @@ on:
       task:
         description: "What to do"
         type: choice
-        options: ["set-stock", "take-out-stock", "confirm-orders", "reset-test-orders", "refresh-site"]
+        options: ["set-stock", "take-out-stock", "confirm-orders", "start-offer", "start-sale", "end-offers", "reset-test-orders", "refresh-site"]
         default: "set-stock"
       cream_sm:
         description: "set-stock: Cream S/M pieces available now · take-out-stock: Cream S/M pieces to remove (gift, damaged)"
@@ -26,6 +26,18 @@ on:
         default: ""
       confirm:
         description: 'reset-test-orders: type DELETE ALL ORDERS to confirm'
+        default: ""
+      price:
+        description: "start-offer: offer price in EGP (e.g. 1000) · start-sale: sale price in EGP (e.g. 900)"
+        default: ""
+      was:
+        description: "start-offer: old price shown crossed out, EGP (e.g. 1200); blank = none"
+        default: ""
+      pieces:
+        description: "start-offer: how many pieces at the offer price, all customers together (e.g. 7); blank = no limit"
+        default: ""
+      ends:
+        description: "start-sale: last day of the sale, YYYY-MM-DD (ends 11:59 pm Cairo that day)"
         default: ""
 
 permissions:
@@ -50,6 +62,10 @@ jobs:
       BURGUNDY_SM: ${{ inputs.burgundy_sm }}
       BURGUNDY_LXL: ${{ inputs.burgundy_lxl }}
       CONFIRM: ${{ inputs.confirm }}
+      PRICE: ${{ inputs.price }}
+      WAS: ${{ inputs.was }}
+      PIECES: ${{ inputs.pieces }}
+      ENDS: ${{ inputs.ends }}
     steps:
       - name: Check the request before touching anything
         run: |
@@ -62,6 +78,14 @@ jobs:
             for v in "${CREAM_SM:-0}" "${CREAM_LXL:-0}" "${BURGUNDY_SM:-0}" "${BURGUNDY_LXL:-0}"; do
               [[ "$v" =~ ^[0-9]{1,3}$ ]] || { echo "::error::Pieces to take out must be a whole number 0–999 (got '$v')."; exit 1; }
             done
+          elif [ "$TASK" = "start-offer" ]; then
+            [[ "$PRICE" =~ ^[0-9]{2,5}$ ]] || { echo "::error::Offer price must be a whole number of EGP, e.g. 1000."; exit 1; }
+            [ -z "$WAS" ] || { [[ "$WAS" =~ ^[0-9]{2,5}$ ]] && [ "$WAS" -gt "$PRICE" ]; } || { echo "::error::Old price must be a whole number of EGP, higher than the offer price (or blank)."; exit 1; }
+            [ -z "$PIECES" ] || [[ "$PIECES" =~ ^[1-9][0-9]{0,3}$ ]] || { echo "::error::Pieces must be a whole number 1–9999 (or blank for no limit)."; exit 1; }
+            [ -z "$PIECES" ] || [ -n "$WAS" ] || { echo "::error::A piece limit needs the old price (the price after the offer pieces run out)."; exit 1; }
+          elif [ "$TASK" = "start-sale" ]; then
+            [[ "$PRICE" =~ ^[0-9]{2,5}$ ]] || { echo "::error::Sale price must be a whole number of EGP, e.g. 900."; exit 1; }
+            [[ "$ENDS" =~ ^20[0-9]{2}-[01][0-9]-[0-3][0-9]$ ]] || { echo "::error::Sale end must be a date like 2026-10-30."; exit 1; }
           elif [ "$TASK" = "reset-test-orders" ]; then
             [ "$CONFIRM" = "DELETE ALL ORDERS" ] || { echo "::error::To delete all orders, type DELETE ALL ORDERS in the confirm box."; exit 1; }
           fi
@@ -113,6 +137,48 @@ jobs:
                   json_build_object('white_sm', ${CREAM_SM:-0}, 'white_lxl', ${CREAM_LXL:-0}, 'burgundy_sm', ${BURGUNDY_SM:-0}, 'burgundy_lxl', ${BURGUNDY_LXL:-0})::jsonb);
           COMMIT;
           SQL
+          elif [ "$TASK" = "start-offer" ]; then
+            # New regular offer from now: price, optional crossed-out old price, optional piece limit (all customers).
+            # Ends any timed sale. When the pieces run out the old price applies by itself (lib/orders.ts).
+            WAS_SQL=${WAS:+$((WAS * 100))}; PIECES_SQL=${PIECES:-NULL}
+            cat > task.sql <<SQL
+          BEGIN;
+          INSERT INTO audit_log (actor, action, entity, entity_id, before)
+          SELECT 'khaled', 'start_offer', 'product', slug, to_jsonb(p) - 'details_en' - 'details_ar' FROM products p WHERE slug = 'quiet-confidence';
+          UPDATE products SET price_piasters = $((PRICE * 100)), compare_at_piasters = ${WAS_SQL:-NULL},
+                 offer_pieces_limit = ${PIECES_SQL}, offer_orders_limit = NULL, offer_started_at = now(),
+                 sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL, updated_at = now()
+          WHERE slug = 'quiet-confidence';
+          COMMIT;
+          SQL
+          elif [ "$TASK" = "start-sale" ]; then
+            # Timed sale on top of the current price/offer: starts now, ends at 11:59 pm Cairo on the given day,
+            # then the current price/offer comes back by itself. Sale pieces don't use up a piece-limited offer.
+            cat > task.sql <<SQL
+          BEGIN;
+          INSERT INTO audit_log (actor, action, entity, entity_id, before)
+          SELECT 'khaled', 'start_sale', 'product', slug, to_jsonb(p) - 'details_en' - 'details_ar' FROM products p WHERE slug = 'quiet-confidence';
+          UPDATE products SET sale_price_piasters = $((PRICE * 100)), sale_starts_at = now(),
+                 sale_ends_at = ('${ENDS} 23:59:00')::timestamp AT TIME ZONE 'Africa/Cairo', updated_at = now()
+          WHERE slug = 'quiet-confidence';
+          DO \$\$ BEGIN
+            IF (SELECT sale_ends_at <= now() FROM products WHERE slug = 'quiet-confidence') THEN RAISE EXCEPTION 'the sale end date is in the past'; END IF;
+            IF (SELECT sale_price_piasters >= price_piasters FROM products WHERE slug = 'quiet-confidence') THEN RAISE EXCEPTION 'the sale price must be lower than the current price'; END IF;
+          END \$\$;
+          COMMIT;
+          SQL
+          elif [ "$TASK" = "end-offers" ]; then
+            # Back to the normal price now: the crossed-out price (if any) becomes the price; no offer, no sale.
+            cat > task.sql <<'SQL'
+          BEGIN;
+          INSERT INTO audit_log (actor, action, entity, entity_id, before)
+          SELECT 'khaled', 'end_offers', 'product', slug, to_jsonb(p) - 'details_en' - 'details_ar' FROM products p WHERE slug = 'quiet-confidence';
+          UPDATE products SET price_piasters = coalesce(compare_at_piasters, price_piasters), compare_at_piasters = NULL,
+                 offer_pieces_limit = NULL, offer_orders_limit = NULL,
+                 sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL, updated_at = now()
+          WHERE slug = 'quiet-confidence';
+          COMMIT;
+          SQL
           elif [ "$TASK" = "confirm-orders" ]; then
             cat > task.sql <<'SQL'
           BEGIN;
@@ -148,6 +214,7 @@ jobs:
               echo "::notice::$sku — available $avail, reserved for open orders $reserved"
             done
           docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT 'orders in database: ' || count(*) FROM orders" | sed 's/^/::notice::/'
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT 'price now: ' || price_piasters/100 || ' EGP' || coalesce(' · crossed out: ' || compare_at_piasters/100, '') || coalesce(' · offer pieces: ' || offer_pieces_limit, '') || coalesce(' · sale: ' || sale_price_piasters/100 || ' until ' || to_char(sale_ends_at AT TIME ZONE 'Africa/Cairo', 'Dy DD Mon HH24:MI') || ' Cairo', '') FROM products WHERE slug = 'quiet-confidence'" | sed 's/^/::notice::/'
           docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT status || ': ' || count(*) || ' (' || string_agg(number, ', ' ORDER BY created_at) || ')' FROM orders GROUP BY status" | sed 's/^/::notice::/'
       - name: Refresh the live site
         run: |

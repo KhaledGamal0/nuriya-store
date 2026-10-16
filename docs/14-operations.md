@@ -96,3 +96,12 @@ Each event counts **once per visit** for the same detail (reloads and repeat ope
 Visit · hour (Cairo): once per visit, the Cairo hour it started ("14:00 – 15:00 · 2 pm") — Events → this event lists visits per hour; pick "Last 24 hours" for today, or 7 days to see the best hours for ads.
 Extra detail: Page opened, Page · scrolled (25/50/75/100%), Page · time spent, Menu · link tapped, Footer · link tapped, Link · Instagram tapped, Link · site credit tapped, Bag · item removed, Bag · quantity changed, Product · photo swiped, Bag · opened, Bag · value after adding, Checkout · area chosen, Product · photo opened, Product · size helper used, Offer popup, Problem · missing or wrong field, Problem · order refused, Problem · tapped Add without a size.
 Names before Oct 9 2026 evening (Visit, Visitor city, Add to bag, Order placed…) are old test data: set the date range to start after the rename.
+
+## Prices and offers (GitHub → Actions → Admin tasks → Run workflow)
+Every task takes an encrypted backup first, changes the database in one transaction, writes an audit line and refreshes the site.
+| Task | Fill in | What happens |
+|---|---|---|
+| **start-offer** | `price` (e.g. 1000), `was` crossed-out price (e.g. 1200, optional), `pieces` (e.g. 7, optional) | From now: the price is `price`, `was` shown crossed out. With `pieces`: the first N pieces sold (all customers, both colours) are at `price`, then `was` for everyone, even inside the same bag (line split). |
+| **start-sale** | `price` (e.g. 900), `ends` (e.g. 2026-10-30) | Timed sale on top of the current price/offer, from now until 11:59 pm Cairo on `ends`; then the current price/offer is back by itself. Sale pieces don't use up offer pieces. |
+| **end-offers** | nothing | Back to the normal price now (the crossed-out price becomes the price); no offer, no sale. |
+Rules (lib/catalog.ts priceBag + lib/orders.ts): prices are always recomputed in the database at checkout under the product lock; a bag priced before a change is refused with "price changed, refresh"; cancelled orders don't use up offer pieces.
