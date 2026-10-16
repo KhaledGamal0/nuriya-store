@@ -1,0 +1,50 @@
+/quiet-confidence/burgundy [5g] visitor stats: script on page, va=function
+/quiet-confidence/burgundy [5g] html 459ms · LCP -1ms · all photos shown 684ms
+    burgundy-hd-flatlay-828.webp 200 MISS +571ms
+    cream-hd-model-192.webp 200 MISS +581ms
+    burgundy-hd-full-828.webp 200 MISS +581ms
+    burgundy-hd-collar-828.webp 200 MISS +634ms
+    script.js 200 HIT +797ms
+/quiet-confidence/burgundy [4g] visitor stats: script on page, va=function
+/quiet-confidence/burgundy [4g] html 251ms · LCP -1ms · all photos shown 823ms
+    burgundy-hd-collar-828.webp 200 HIT +389ms
+    burgundy-hd-flatlay-828.webp 200 HIT +411ms
+    burgundy-hd-full-828.webp 200 HIT +413ms
+    cream-hd-model-192.webp 200 HIT +414ms
+    script.js 200 HIT +977ms
+/quiet-confidence/white [5g] visitor stats: script on page, va=function
+/quiet-confidence/white [5g] html 285ms · LCP -1ms · all photos shown 658ms
+    burgundy-hd-collar-192.webp 200 MISS +402ms
+    cream-hd-chest-828.webp 200 MISS +416ms
+    cream-hd-sleeve-828.webp 200 MISS +424ms
+    cream-hd-model-828.webp 200 MISS +623ms
+    script.js 200 HIT +679ms
+/quiet-confidence/white [4g] visitor stats: script on page, va=function
+/quiet-confidence/white [4g] html 243ms · LCP -1ms · all photos shown 719ms
+    cream-hd-model-828.webp 200 HIT +381ms
+    cream-hd-chest-828.webp 200 HIT +403ms
+    cream-hd-sleeve-828.webp 200 HIT +405ms
+    burgundy-hd-collar-192.webp 200 HIT +408ms
+    script.js 200 HIT +911ms
+/ [5g] visitor stats: script on page, va=function
+/ [5g] html 261ms · LCP -1ms · all photos shown 423ms
+    burgundy-hd-collar-828.webp 200 HIT +303ms
+    cream-hd-model-828.webp 200 HIT +303ms
+    hero-pair-828.webp 200 MISS +337ms
+    burgundy-hd-flatlay-828.webp 200 HIT +339ms
+    cream-hd-chest-828.webp 200 HIT +339ms
+    craft-sleeve-tall-828.webp 200 MISS +344ms
+    script.js 200 HIT +594ms
+/ [4g] visitor stats: script on page, va=function
+/ [4g] html 233ms · LCP -1ms · all photos shown 859ms
+    hero-pair-828.webp 200 HIT +372ms
+    cream-hd-model-828.webp 200 HIT +396ms
+    burgundy-hd-collar-828.webp 200 HIT +398ms
+    craft-sleeve-tall-828.webp 200 HIT +400ms
+    cream-hd-chest-828.webp 200 HIT +487ms
+    burgundy-hd-flatlay-828.webp 200 HIT +488ms
+    script.js 200 HIT +1044ms
+events on product page: 2 · Viewed product {"detail":"White","city":"Des Moines · US"} | Page opened {"detail":"White product","city":"Des Moines · US"} | 1 · Visitor {"detail":"New visitor","city":"Des Moines · US"} | Visit · hour (Cairo) {"detail":"16:00 – 17:00 · 4 pm","city":"Des Moines · US"} | 3 · Chose size {"detail":"White · S/M","city":"Des Moines · US"} | Page · scrolled {"detail":"White product · 25%","city":"Des Moines · US"} | 4 · Added to bag {"detail":"White · S/M","city":"Des Moines · US"} | Bag · value after adding {"detail":"1 pcs · 900 EGP","city":"Des Moines · US"}
+events on checkout page: Page opened {"detail":"Checkout","city":"Des Moines · US"} | 5 · Opened checkout {"detail":"1 pcs · 900 EGP","city":"Des Moines · US"} | Checkout · area chosen {"detail":"Alexandria","city":"Des Moines · US"}
+Meta Pixel: loaded · events it sent: PageView | ViewContent 900 EGP | SubscribedButtonClick | SubscribedButtonClick | AddToCart 900 EGP | PageView | InitiateCheckout 900 EGP
+Meta server copies: ViewContent | AddToCart | InitiateCheckout
