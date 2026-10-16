@@ -51,7 +51,7 @@ async function loadCatalog(): Promise<CatalogData> {
     const [{ n } = { n: 0 }] = await getSql()<{ n: number }[]>`
       SELECT coalesce(sum(i.qty), 0)::int AS n
       FROM order_items i JOIN orders o ON o.id = i.order_id, products p
-      WHERE p.id = ${product.id} AND o.created_at >= ${product.offerStartedAt ?? new Date(0)}
+      WHERE p.id = ${product.id} AND o.created_at >= ${new Date(product.offerStartedAt ?? 0).toISOString()}::timestamptz
         AND o.status NOT IN ('CANCELLED', 'EXPIRED')
         AND NOT (p.sale_starts_at IS NOT NULL AND o.created_at >= p.sale_starts_at AND o.created_at < p.sale_ends_at)`;
     offerPiecesLeft = Math.max(0, product.offerPiecesLimit - n);
