@@ -90,3 +90,23 @@ test("Returning buyer id: only a 64-hex hash is passed on, never anything else",
   assert.match(u.external_id[0], /^[0-9a-f]{64}$/);
   assert.ok(!body.toLowerCase().includes("alexandria"), "area is hashed too");
 });
+
+test("InitiateCheckout: customer details accepted only on InitiateCheckout, only a valid phone, and sent hashed", async () => {
+  const base = { eventId: "ic-abc123def456", path: "/checkout", custom: { value: 1000 } };
+  const ic = parseClientEvent({ ...base, name: "InitiateCheckout", user: { phone: "01012345678", name: "Sara Ahmed", area: "Alexandria" } });
+  assert.deepEqual(ic?.user, { phone: "01012345678", name: "Sara Ahmed", area: "Alexandria" });
+  assert.equal(parseClientEvent({ ...base, name: "AddToCart", eventId: "atc-abc123def456", user: { phone: "01012345678", name: "Sara" } })?.user, undefined, "not on other events");
+  assert.equal(parseClientEvent({ ...base, name: "InitiateCheckout", user: { phone: "123", name: "Sara" } })?.user, undefined, "bad phone dropped");
+  process.env.META_CAPI_TOKEN = "t";
+  let body = "";
+  const real = globalThis.fetch;
+  globalThis.fetch = (async (_u: unknown, init?: RequestInit) => { body = String(init?.body); return new Response("{}"); }) as typeof fetch;
+  try {
+    const { sendServerEvents } = await import("../lib/meta-capi.ts");
+    await sendServerEvents([{ name: "InitiateCheckout", eventId: ic!.eventId, url: "https://nuriya.app/checkout", custom: ic!.custom, visitor: { ip: null, userAgent: null, ...ic!.user } }]);
+  } finally { globalThis.fetch = real; delete process.env.META_CAPI_TOKEN; }
+  const e = JSON.parse(body).data[0];
+  assert.equal(e.event_id, "ic-abc123def456", "same event id as the browser event");
+  for (const k of ["ph", "fn", "ln", "st", "ct", "country", "external_id"]) assert.match(e.user_data[k][0], /^[0-9a-f]{64}$/, k);
+  assert.ok(!/1012345678|sara|ahmed|alexandria/i.test(body), "nothing in clear");
+});

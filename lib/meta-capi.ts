@@ -156,7 +156,7 @@ const COLORS = new Set(["cream", "burgundy"]);
  * Checks a note posted by the browser and keeps only safe, expected fields (anything else is dropped).
  * Returns null for anything that doesn't look like one of our own events.
  */
-export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eventId: string; path: string; custom: Record<string, unknown>; externalId?: string } | null {
+export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eventId: string; path: string; custom: Record<string, unknown>; externalId?: string; user?: { phone: string; name: string; area?: string } } | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const name = r.name;
@@ -181,11 +181,18 @@ export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eve
     : [];
   const contentName = typeof c.content_name === "string" ? c.content_name.slice(0, 60) : undefined;
   const xid = typeof r.xid === "string" && /^[0-9a-f]{64}$/.test(r.xid) ? r.xid : undefined;
+  // InitiateCheckout only: what she typed at checkout (hashed by sendServerEvents before it leaves the server).
+  const u = name === "InitiateCheckout" && r.user && typeof r.user === "object" ? (r.user as Record<string, unknown>) : null;
+  const user =
+    u && typeof u.phone === "string" && /^01\d{9}$/.test(u.phone) && typeof u.name === "string" && u.name.trim().length >= 2 && u.name.length <= 80
+      ? { phone: u.phone, name: u.name.trim(), ...(typeof u.area === "string" && u.area.length <= 40 && { area: u.area }) }
+      : undefined;
   return {
     name: name as ServerEvent["name"],
     eventId,
     path,
     ...(xid && { externalId: xid }),
+    ...(user && { user }),
     custom: {
       ...(ids.length && { content_ids: ids }),
       ...(contents.length && { contents }),

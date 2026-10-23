@@ -52,7 +52,7 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
   // Server copies (Conversions API) are caught too: we only check they would be sent, never send them.
   const server = [];
   await ctx.route(/\/api\/meta-event/, (r) => {
-    try { server.push(JSON.parse(r.request().postData() || "{}").name); } catch {}
+    try { const n = JSON.parse(r.request().postData() || "{}"); server.push(n.name + (n.user ? " (with customer details)" : "")); } catch {}
     return r.abort();
   });
   await ctx.route(/facebook\.com\/tr/, (r) => {
@@ -78,6 +78,10 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
   await page.goto(SITE + "/checkout", { waitUntil: "networkidle" });
   await page.waitForTimeout(800);
   await page.getByLabel("Area").selectOption("alexandria");
+  // Typing phone + name sends InitiateCheckout with Advanced Matching (test number; caught below, never sent to Meta).
+  await page.getByLabel("Mobile number", { exact: true }).fill("01000000000");
+  await page.getByLabel("Full name").fill("Live Check");
+  await page.getByLabel("Full name").blur();
   const names = await page.evaluate(() => (window.vaq || []).map((a) => (a[1] && a[1].name) + " " + JSON.stringify((a[1] && a[1].data) || {})));
   rows.push(`events on checkout page: ${names.join(" | ") || "none"}`);
   await page.waitForTimeout(3000);

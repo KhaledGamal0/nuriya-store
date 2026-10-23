@@ -91,3 +91,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Meta Conversions API Purchase: no token = nothing sent; event_id = order number; phone/name only hashed | tests/meta.test.ts |
 | Meta browser notes: only ViewContent/AddToCart/InitiateCheckout, known products, sane numbers; Purchase only from the server order | tests/meta.test.ts |
 | Offer in pieces: split line, offer ends on the last piece, stale bag refused, two buyers at once never exceed the limit | tests/orders.test.ts, tests/checkout.test.ts |
+| Meta InitiateCheckout customer details: only on IC, valid phone only, hashed, same event_id | tests/meta.test.ts |

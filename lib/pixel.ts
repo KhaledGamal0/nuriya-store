@@ -54,6 +54,27 @@ export function pixelReturning(): void {
   } catch {}
 }
 
+/** What she typed at checkout, for Advanced Matching (the Pixel scrambles it on the phone before sending). */
+export type CheckoutCustomer = { phone: string; name: string; area?: string };
+
+/** Meta's matching fields: ph (20XXXXXXXXXX), fn, ln, st/ct (from the delivery area), country. Plain; the Pixel hashes. */
+function matchData(c: CheckoutCustomer): Record<string, string> {
+  const d = c.phone.replace(/\D/g, "");
+  const parts = c.name.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const data: Record<string, string> = { country: "eg" };
+  if (/^01\d{9}$/.test(d)) data.ph = `2${d}`;
+  if (parts[0]) data.fn = parts[0];
+  const last = parts.length > 1 ? parts[parts.length - 1] : undefined;
+  if (last) data.ln = last;
+  if (c.area) {
+    const a = c.area.toLowerCase();
+    const st = a.startsWith("cairo") ? "cairo" : a.replace("countryside", "").replace(/[^a-z]/g, "");
+    if (st) data.st = st;
+    if (st && !a.includes("countryside")) data.ct = st;
+  }
+  return data;
+}
+
 const PREFIX: Record<string, string> = { ViewContent: "vc", AddToCart: "atc", InitiateCheckout: "ic" };
 
 /**
@@ -61,14 +82,18 @@ const PREFIX: Record<string, string> = { ViewContent: "vc", AddToCart: "atc", In
  * The server copy is a tiny background note (sendBeacon) that never delays the page. Only on the live
  * site (where the Pixel exists); local and test runs send nothing.
  */
-export function pixelBoth(event: "ViewContent" | "AddToCart" | "InitiateCheckout", params: Record<string, unknown>): void {
+export function pixelBoth(event: "ViewContent" | "AddToCart" | "InitiateCheckout", params: Record<string, unknown>, customer?: CheckoutCustomer): void {
   if (typeof window === "undefined") return;
   try {
-    if (!(window as unknown as { fbq?: Fbq }).fbq) return;
+    const fbq = (window as unknown as { fbq?: Fbq }).fbq;
+    if (!fbq) return;
     const eventId = newEventId(PREFIX[event] ?? "ev");
+    // InitiateCheckout with what she typed (Khaled, Oct 23 2026): Advanced Matching first, then the event.
+    if (customer) fbq("init", META_PIXEL_ID, matchData(customer));
     pixel(event, params, eventId);
     const xid = returningId();
-    const note = JSON.stringify({ name: event, eventId, path: location.pathname, custom: params, ...(xid && { xid }) });
+    const user = customer ? { phone: customer.phone.replace(/\D/g, ""), name: customer.name.trim(), ...(customer.area && { area: customer.area }) } : undefined;
+    const note = JSON.stringify({ name: event, eventId, path: location.pathname, custom: params, ...(xid && { xid }), ...(user && { user }) });
     const blob = new Blob([note], { type: "application/json" });
     if (!navigator.sendBeacon?.("/api/meta-event", blob)) {
       void fetch("/api/meta-event", { method: "POST", body: note, headers: { "content-type": "application/json" }, keepalive: true }).catch(() => {});
@@ -93,13 +118,7 @@ export async function pixelCustomer(phone: string, fullName: string, area?: stri
   try {
     const fbq = (window as unknown as { fbq?: Fbq }).fbq;
     if (!fbq) return;
-    const d = phone.replace(/\D/g, "");
-    const parts = fullName.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const data: Record<string, string> = { country: "eg" };
-    if (/^01\d{9}$/.test(d)) data.ph = `2${d}`;
-    if (parts[0]) data.fn = parts[0];
-    const last = parts.length > 1 ? parts[parts.length - 1] : undefined;
-    if (last) data.ln = last;
+    const data = matchData({ phone, name: fullName, area });
     // external_id: the same scrambled phone the server sends, so browser and server events join up.
     if (data.ph && crypto?.subtle) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data.ph));
@@ -107,13 +126,6 @@ export async function pixelCustomer(phone: string, fullName: string, area?: stri
       try {
         localStorage.setItem(XID_KEY, data.external_id); // so her next visits are matched too (scrambled id only)
       } catch {}
-    }
-    // Her delivery area as Meta's state/city (lowercase letters; the Pixel scrambles it before sending).
-    if (area) {
-      const a = area.toLowerCase();
-      const st = a.startsWith("cairo") ? "cairo" : a.replace("countryside", "").replace(/[^a-z]/g, "");
-      if (st) data.st = st;
-      if (st && !a.includes("countryside")) data.ct = st;
     }
     fbq("init", META_PIXEL_ID, data);
   } catch {}
