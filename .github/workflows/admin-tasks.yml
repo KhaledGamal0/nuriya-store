@@ -1,7 +1,8 @@
 name: Admin tasks
 
 # Shop tasks you can run from your phone (GitHub → Actions → Admin tasks → Run workflow) until the admin
-# dashboard exists. confirm-orders: marks every order waiting for confirmation (placed until now) as CONFIRMED,
+# dashboard exists. mark-delivered: every open order placed until now (waiting, confirmed, packed, with courier)
+# becomes DELIVERED and, for cash on delivery, PAID (cash collected). confirm-orders: marks every order waiting for confirmation (placed until now) as CONFIRMED,
 # after Khaled confirmed them with the customers on WhatsApp. Every task: takes an encrypted backup first, changes the live database in ONE
 # transaction (all or nothing), then refreshes the live site so customers see the change at once.
 on:
@@ -10,7 +11,7 @@ on:
       task:
         description: "What to do"
         type: choice
-        options: ["set-stock", "take-out-stock", "confirm-orders", "start-offer", "start-sale", "end-offers", "reset-test-orders", "refresh-site"]
+        options: ["set-stock", "take-out-stock", "confirm-orders", "mark-delivered", "start-offer", "start-sale", "end-offers", "reset-test-orders", "refresh-site"]
         default: "set-stock"
       cream_sm:
         description: "set-stock: Cream S/M pieces available now · take-out-stock: Cream S/M pieces to remove (gift, damaged)"
@@ -177,6 +178,23 @@ jobs:
                  offer_pieces_limit = NULL, offer_orders_limit = NULL,
                  sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL, updated_at = now()
           WHERE slug = 'quiet-confidence';
+          COMMIT;
+          SQL
+          elif [ "$TASK" = "mark-delivered" ]; then
+            cat > task.sql <<'SQL'
+          BEGIN;
+          -- Delivered and (cash on delivery) paid: every open order placed until now. History line + audit each.
+          WITH done AS (
+            UPDATE orders SET status = 'DELIVERED',
+                   payment_status = CASE WHEN payment_method = 'cod' THEN 'PAID' ELSE payment_status END, updated_at = now()
+            WHERE status IN ('CONFIRMATION_NEEDED', 'CONFIRMED', 'PACKED', 'WITH_COURIER') AND created_at <= now()
+            RETURNING id, number)
+          , ev AS (
+            INSERT INTO order_events (order_id, type, data, actor)
+            SELECT id, 'status_changed', '{"to":"DELIVERED","how":"confirmed on WhatsApp and delivered (Khaled)"}', 'khaled'
+            FROM done RETURNING order_id)
+          INSERT INTO audit_log (actor, action, entity, entity_id, after)
+          SELECT 'khaled', 'mark_delivered', 'order', number, '{"status":"DELIVERED"}' FROM done;
           COMMIT;
           SQL
           elif [ "$TASK" = "confirm-orders" ]; then
