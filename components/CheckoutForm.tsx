@@ -102,8 +102,38 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
     if (startedRef.current || bag.lines.length === 0) return;
     startedRef.current = true;
     track("5 · Opened checkout", `${bag.lines.reduce((n, l) => n + l.qty, 0)} pcs · ${(bag.subtotalPiasters / 100).toLocaleString("en-US")} EGP`);
-    pixelBoth("InitiateCheckout", { content_ids: [...new Set(bag.lines.map((l) => l.color))], contents: bag.lines.map((l) => ({ id: l.color, quantity: l.qty })), content_type: "product", num_items: bag.lines.reduce((n, l) => n + l.qty, 0), value: egp(bag.subtotalPiasters), currency: "EGP" });
   }, [bag.lines, bag.subtotalPiasters]);
+
+  // Meta InitiateCheckout, once per checkout visit (Khaled, Oct 23 2026): sent as soon as she has typed a valid
+  // phone and her name, WITH them (Advanced Matching: ph, fn, ln, area, country); if she leaves checkout before
+  // that, it is sent without them. Tracking only: nothing here changes the form or the order.
+  const icSentRef = useRef(false);
+  const latest = useRef({ lines: bag.lines, subtotal: bag.subtotalPiasters, phone, areaId });
+  latest.current = { lines: bag.lines, subtotal: bag.subtotalPiasters, phone, areaId };
+  const sendInitiateCheckout = (final: boolean) => {
+    const l = latest.current;
+    if (icSentRef.current || l.lines.length === 0) return;
+    const name = (formRef.current?.elements.namedItem("name") as HTMLInputElement | null)?.value?.trim() ?? "";
+    const phoneNow = normalizePhone(l.phone);
+    const ready = Boolean(phoneNow) && name.length >= 3;
+    if (!ready && !final) return;
+    icSentRef.current = true;
+    const area = areas.find((a) => a.id === l.areaId)?.nameEn;
+    pixelBoth(
+      "InitiateCheckout",
+      { content_ids: [...new Set(l.lines.map((x) => x.color))], contents: l.lines.map((x) => ({ id: x.color, quantity: x.qty })), content_type: "product", num_items: l.lines.reduce((n, x) => n + x.qty, 0), value: egp(l.subtotal), currency: "EGP" },
+      ready ? { phone: phoneNow!, name, ...(area && { area }) } : undefined,
+    );
+  };
+  useEffect(() => {
+    const leave = () => sendInitiateCheckout(true);
+    window.addEventListener("pagehide", leave);
+    return () => {
+      window.removeEventListener("pagehide", leave);
+      leave(); // left checkout inside the site
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Server errors replace local ones after each submit.
   useEffect(() => {
@@ -169,6 +199,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
       <form
         ref={formRef}
         noValidate
+        onBlur={() => sendInitiateCheckout(false)}
         onSubmit={(e) => {
           // Submitted by hand (not the form's action prop) so React does not clear the fields:
           // if the server says no, the shopper keeps everything they typed.
@@ -186,6 +217,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
             track("Problem · missing or wrong field", Object.keys(next)[0]!);
             return;
           }
+          sendInitiateCheckout(true); // before Purchase, with her details
           track("6 · Tapped Place order", `${bag.lines.reduce((n, l) => n + l.qty, 0)} pcs · ${areas.find((x) => x.id === areaId)?.nameEn ?? "no area yet"}`);
           keyRef.current ??= crypto.randomUUID();
           form.set("key", keyRef.current);

@@ -33,6 +33,9 @@ export async function POST(request: Request): Promise<Response> {
     fbp: jar.get("_fbp")?.value,
     fbc: jar.get("_fbc")?.value,
     externalId: e.externalId,
+    phone: e.user?.phone,
+    name: e.user?.name,
+    area: e.user?.area,
   };
   const url = `https://${host}${e.path}`;
   after(() =>
