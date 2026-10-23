@@ -33,6 +33,27 @@ function newEventId(prefix: string): string {
   }
 }
 
+/** A returning buyer's id (SHA-256 of her phone, saved on this phone at her last order). Never the phone itself. */
+const XID_KEY = "nuriya-xid";
+function returningId(): string | undefined {
+  try {
+    const v = localStorage.getItem(XID_KEY);
+    return v && /^[0-9a-f]{64}$/.test(v) ? v : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** On every page load: if she bought here before, tell the Pixel who she is (scrambled id only). */
+export function pixelReturning(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const fbq = (window as unknown as { fbq?: Fbq }).fbq;
+    const xid = returningId();
+    if (fbq && xid) fbq("init", META_PIXEL_ID, { external_id: xid });
+  } catch {}
+}
+
 const PREFIX: Record<string, string> = { ViewContent: "vc", AddToCart: "atc", InitiateCheckout: "ic" };
 
 /**
@@ -46,7 +67,8 @@ export function pixelBoth(event: "ViewContent" | "AddToCart" | "InitiateCheckout
     if (!(window as unknown as { fbq?: Fbq }).fbq) return;
     const eventId = newEventId(PREFIX[event] ?? "ev");
     pixel(event, params, eventId);
-    const note = JSON.stringify({ name: event, eventId, path: location.pathname, custom: params });
+    const xid = returningId();
+    const note = JSON.stringify({ name: event, eventId, path: location.pathname, custom: params, ...(xid && { xid }) });
     const blob = new Blob([note], { type: "application/json" });
     if (!navigator.sendBeacon?.("/api/meta-event", blob)) {
       void fetch("/api/meta-event", { method: "POST", body: note, headers: { "content-type": "application/json" }, keepalive: true }).catch(() => {});
@@ -66,7 +88,7 @@ export const fbCookies = `(function(){try{var d=document,n=Date.now(),m=/(?:^|; 
  * Instagram/Facebook account. The Pixel hashes these on the phone before sending; we never send them raw.
  * Called on the thank-you page, just before Purchase.
  */
-export async function pixelCustomer(phone: string, fullName: string): Promise<void> {
+export async function pixelCustomer(phone: string, fullName: string, area?: string): Promise<void> {
   if (typeof window === "undefined") return;
   try {
     const fbq = (window as unknown as { fbq?: Fbq }).fbq;
@@ -82,6 +104,16 @@ export async function pixelCustomer(phone: string, fullName: string): Promise<vo
     if (data.ph && crypto?.subtle) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data.ph));
       data.external_id = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+      try {
+        localStorage.setItem(XID_KEY, data.external_id); // so her next visits are matched too (scrambled id only)
+      } catch {}
+    }
+    // Her delivery area as Meta's state/city (lowercase letters; the Pixel scrambles it before sending).
+    if (area) {
+      const a = area.toLowerCase();
+      const st = a.startsWith("cairo") ? "cairo" : a.replace("countryside", "").replace(/[^a-z]/g, "");
+      if (st) data.st = st;
+      if (st && !a.includes("countryside")) data.ct = st;
     }
     fbq("init", META_PIXEL_ID, data);
   } catch {}

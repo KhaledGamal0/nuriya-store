@@ -31,7 +31,7 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
     track("7 · Order placed", `${(r.totalPiasters / 100).toLocaleString("en-US")} EGP · ${r.area}`);
     // The order number is the event id, so Meta counts each order once.
     // Who bought (scrambled on the phone), then the Purchase itself.
-    void pixelCustomer(r.phone, r.name).finally(() => pixel(
+    void pixelCustomer(r.phone, r.name, r.area).finally(() => pixel(
       "Purchase",
       {
         content_ids: [...new Set(r.lines.map((l) => l.color))],

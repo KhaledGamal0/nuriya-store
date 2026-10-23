@@ -19,6 +19,18 @@ export function metaPhone(local: string): string | null {
   return /^01\d{9}$/.test(d) ? `2${d}` : null;
 }
 
+/**
+ * Delivery area → Meta's state (governorate) and city, lowercase letters only, as Meta normalises them.
+ * "Cairo & Giza" → cairo / cairo · "Alexandria" → alexandria / alexandria · "Giza countryside" → giza (state only).
+ */
+export function metaPlace(area: string): { st?: string; ct?: string } {
+  const a = area.toLowerCase();
+  if (a.startsWith("cairo")) return { st: "cairo", ct: "cairo" };
+  if (a.includes("countryside")) return { st: a.replace("countryside", "").replace(/[^a-z]/g, "") || undefined };
+  const st = a.replace(/[^a-z]/g, "");
+  return st ? { st, ct: st } : {};
+}
+
 /** "Sara Ahmed Ali" → first "sara", last "ali" (Arabic names kept as written). */
 export function metaName(full: string): { fn?: string; ln?: string } {
   const parts = full.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -34,6 +46,9 @@ export type Visitor = {
   /** Only known on a real order. */
   phone?: string;
   name?: string;
+  area?: string;
+  /** A returning buyer's id: the SHA-256 of her phone (already hashed in her browser at her last order). */
+  externalId?: string;
 };
 
 export type ServerEvent = {
@@ -49,9 +64,14 @@ export type SendResult = { sent: boolean; status: number; meta?: unknown };
 function userData(v: Visitor): Record<string, unknown> {
   const ph = v.phone ? metaPhone(v.phone) : null;
   const { fn, ln } = v.name ? metaName(v.name) : {};
+  const { st, ct } = v.area ? metaPlace(v.area) : {};
+  const xid = ph ? sha(ph) : v.externalId && /^[0-9a-f]{64}$/.test(v.externalId) ? v.externalId : null;
   return {
     country: [sha("eg")],
-    ...(ph && { ph: [sha(ph)], external_id: [sha(ph)] }),
+    ...(ph && { ph: [sha(ph)] }),
+    ...(xid && { external_id: [xid] }),
+    ...(st && { st: [sha(st)] }),
+    ...(ct && { ct: [sha(ct)] }),
     ...(fn && { fn: [sha(fn)] }),
     ...(ln && { ln: [sha(ln)] }),
     ...(v.ip && { client_ip_address: v.ip }),
@@ -99,6 +119,7 @@ export type ServerPurchase = {
   lines: { color: string; qty: number; linePiasters: number }[];
   phone: string;
   name: string;
+  area?: string;
   ip: string | null;
   userAgent: string | null;
   fbp?: string;
@@ -111,7 +132,7 @@ export function purchaseEvent(p: ServerPurchase): ServerEvent {
     name: "Purchase",
     eventId: p.orderNumber,
     url: p.url,
-    visitor: { ip: p.ip, userAgent: p.userAgent, fbp: p.fbp, fbc: p.fbc, phone: p.phone, name: p.name },
+    visitor: { ip: p.ip, userAgent: p.userAgent, fbp: p.fbp, fbc: p.fbc, phone: p.phone, name: p.name, area: p.area },
     custom: {
       value: p.totalPiasters / 100,
       content_ids: [...new Set(p.lines.map((l) => l.color))],
@@ -135,7 +156,7 @@ const COLORS = new Set(["cream", "burgundy"]);
  * Checks a note posted by the browser and keeps only safe, expected fields (anything else is dropped).
  * Returns null for anything that doesn't look like one of our own events.
  */
-export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eventId: string; path: string; custom: Record<string, unknown> } | null {
+export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eventId: string; path: string; custom: Record<string, unknown>; externalId?: string } | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const name = r.name;
@@ -159,10 +180,12 @@ export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eve
         }))
     : [];
   const contentName = typeof c.content_name === "string" ? c.content_name.slice(0, 60) : undefined;
+  const xid = typeof r.xid === "string" && /^[0-9a-f]{64}$/.test(r.xid) ? r.xid : undefined;
   return {
     name: name as ServerEvent["name"],
     eventId,
     path,
+    ...(xid && { externalId: xid }),
     custom: {
       ...(ids.length && { content_ids: ids }),
       ...(contents.length && { contents }),
