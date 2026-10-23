@@ -100,6 +100,7 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
       lines: o.lines.map((l) => ({ color: l.color, qty: l.qty, linePiasters: l.linePiasters })),
       phone: o.phone,
       name: o.name,
+      area: o.area.nameEn,
       ip,
       userAgent: h.get("user-agent"),
       fbp: jar.get("_fbp")?.value,

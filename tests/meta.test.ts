@@ -62,3 +62,31 @@ test("Browser notes: only our three events, our products and sane numbers are ac
   assert.equal(parseClientEvent({ name: "AddToCart", eventId: "atc-abc123def456", path: "https://evil.com" }), null);
   assert.equal(parseClientEvent({ name: "AddToCart", eventId: "atc-abc123def456", path: "/", custom: { value: 1e9 } })!.custom.value, undefined);
 });
+
+import { metaPlace } from "../lib/meta-capi.ts";
+
+test("Meta place: delivery area becomes state/city in Meta's format", () => {
+  assert.deepEqual(metaPlace("Cairo & Giza"), { st: "cairo", ct: "cairo" });
+  assert.deepEqual(metaPlace("Alexandria"), { st: "alexandria", ct: "alexandria" });
+  assert.deepEqual(metaPlace("Giza countryside"), { st: "giza" });
+  assert.deepEqual(metaPlace("Port Said"), { st: "portsaid", ct: "portsaid" });
+});
+
+test("Returning buyer id: only a 64-hex hash is passed on, never anything else", async () => {
+  const xid = "a".repeat(64);
+  const ok = parseClientEvent({ name: "ViewContent", eventId: "vc-abc123def456", path: "/", xid });
+  assert.equal(ok?.externalId, xid);
+  assert.equal(parseClientEvent({ name: "ViewContent", eventId: "vc-abc123def456", path: "/", xid: "01012345678" })?.externalId, undefined);
+  process.env.META_CAPI_TOKEN = "t";
+  let body = "";
+  const real = globalThis.fetch;
+  globalThis.fetch = (async (_u: unknown, init?: RequestInit) => { body = String(init?.body); return new Response("{}"); }) as typeof fetch;
+  try {
+    const { sendServerPurchase } = await import("../lib/meta-capi.ts");
+    await sendServerPurchase({ orderNumber: "NUR-T2", totalPiasters: 97_500, lines: [{ color: "cream", qty: 1, linePiasters: 90_000 }], phone: "01012345678", name: "Sara Ali", area: "Alexandria", ip: null, userAgent: null, url: "https://nuriya.app/checkout" });
+  } finally { globalThis.fetch = real; delete process.env.META_CAPI_TOKEN; }
+  const u = JSON.parse(body).data[0].user_data;
+  assert.match(u.st[0], /^[0-9a-f]{64}$/);
+  assert.match(u.external_id[0], /^[0-9a-f]{64}$/);
+  assert.ok(!body.toLowerCase().includes("alexandria"), "area is hashed too");
+});
