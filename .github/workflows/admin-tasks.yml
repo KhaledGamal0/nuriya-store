@@ -104,7 +104,7 @@ jobs:
             sh -c 'pg_dump --format=custom --no-owner --no-privileges -d "$DATABASE_URL" -f /out/before.dump'
           gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 -o before.dump.gpg before.dump
           rm -f before.dump
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: inputs.task != 'refresh-site'
         with:
           name: before-${{ inputs.task }}-${{ env.STAMP }}
