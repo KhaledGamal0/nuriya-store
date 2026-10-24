@@ -48,3 +48,15 @@ Check current docs before using any API (Next.js, Paymob, Better Auth change oft
 - Update `docs/02-decisions.md` whenever Khaled decides something. Update `docs/10-build-plan.md` progress. Commit small, clear commits.
 - Never invent product facts (fabric, care, stock). Use `TODO(khaled)` placeholders and list them.
 - When Khaled sends existing files for a fix: give each change as **FROM / TO** blocks he can copy-replace, keep fixes small and don't affect screens that already work.
+
+## Working process for every change (Khaled, Oct 24 2026: follow from begin to end, never skip)
+1. **Start:** list the points as a short to-do list. Ask only what decides money, prices or product facts; otherwise do it.
+2. **Never break what works.** Small, scoped changes. Orders, checkout, prices, stock and e-mails are touched only when the task is about them.
+3. **Money changes = migration first** (`db/migrations/000N`, pushed alone and applied), then the code that uses it.
+4. **Code goes through a branch + PR:** CI (typecheck, all tests incl. real database, build) must pass and the Vercel preview must build. Add a test for every new rule. Then merge.
+5. **After merge:** Vercel status success = live; then the UI audit (phone + desktop, buy flow, stress) and the live check must pass. Fix any finding before saying "done".
+6. **Tests never touch real data:** test visits are blocked from Vercel stats and Meta; never run the Meta test job without a fresh Test Events code from Khaled.
+7. **Database tasks** (stock, confirm/deliver orders, offers) only via `admin-tasks.yml` (backup first, one transaction, audit line, site refresh).
+8. **Secrets:** never ask for or print a key; Khaled pastes keys into Vercel / GitHub himself.
+9. **Costs:** tell Khaled about cost only when a change has one (free-tier limits, paid add-ons).
+10. **Report in English,** short and formatted: what changed, what was checked, anything he must do. Record every decision in `docs/02-decisions.md`.
