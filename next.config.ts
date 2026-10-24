@@ -6,6 +6,26 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(self)" },
+  // Content Security Policy: the browser only runs scripts and connects to our own site and Meta (Pixel).
+  // 'unsafe-inline' is needed by Next.js's pre-built pages (nonces would make every page slow, server-rendered).
+  // Blocks: other sites framing the shop, plugins, foreign forms, and any script/connection to unknown domains.
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://connect.facebook.net",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://www.facebook.com",
+      "font-src 'self' data:",
+      "connect-src 'self' https://www.facebook.com https://connect.facebook.net",
+      "frame-src https://www.facebook.com",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join("; "),
+  },
 ];
 
 const config: NextConfig = {

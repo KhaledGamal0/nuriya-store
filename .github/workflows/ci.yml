@@ -34,6 +34,9 @@ jobs:
         id: install
         run: mkdir -p ci-logs && npm ci --no-audit --no-fund 2>&1 | tee ci-logs/1-install.log; exit ${PIPESTATUS[0]}
       # Every check below runs even when an earlier one fails, so one push shows ALL problems in ci-logs.
+      - name: Dependency security audit (report only; Dependabot opens the fix PRs)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
       - name: Type check (whole project, including tests)
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: (npx next typegen || true; npm run typecheck) 2>&1 | tee ci-logs/5-typecheck.log; exit ${PIPESTATUS[0]}
