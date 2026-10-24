@@ -36,7 +36,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       WEEKLY: ${{ (github.event_name == 'workflow_dispatch' && inputs.weekly) && '1' || (github.event.schedule == '0 6 * * 0' && '1' || '0') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: 22

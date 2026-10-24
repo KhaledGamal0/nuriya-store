@@ -22,7 +22,7 @@ jobs:
       - name: Check access
         run: |
           [ -n "$NEON_API_KEY" ] || { echo "::warning::NEON_API_KEY secret not set."; echo "SKIP=1" >> "$GITHUB_ENV"; }
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         if: env.SKIP != '1'
         with:

@@ -90,7 +90,7 @@ jobs:
           elif [ "$TASK" = "reset-test-orders" ]; then
             [ "$CONFIRM" = "DELETE ALL ORDERS" ] || { echo "::error::To delete all orders, type DELETE ALL ORDERS in the confirm box."; exit 1; }
           fi
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: 22

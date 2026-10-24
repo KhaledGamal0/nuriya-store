@@ -42,7 +42,7 @@ jobs:
             echo "::warning::NEON_API_KEY and BACKUP_PASSPHRASE secrets are needed. Nothing to back up yet."
             echo "SKIP=1" >> "$GITHUB_ENV"
           fi
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         if: env.SKIP != '1'
         with:

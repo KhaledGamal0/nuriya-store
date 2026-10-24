@@ -39,7 +39,7 @@ jobs:
             echo "::warning::No NEON_API_KEY (or DATABASE_URL) secret yet. Nothing to do."
             echo "NO_DB=1" >> "$GITHUB_ENV"
           fi
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: env.NO_DB != '1'
       - uses: actions/setup-node@v5
         if: env.NO_DB != '1'

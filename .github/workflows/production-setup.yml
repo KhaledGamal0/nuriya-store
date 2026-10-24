@@ -34,7 +34,7 @@ jobs:
           [ -n "$NEON_API_KEY" ] || missing="$missing NEON_API_KEY"
           [ -n "$VERCEL_TOKEN" ] || missing="$missing VERCEL_TOKEN"
           if [ -n "$missing" ]; then echo "::error::Add these repository secrets first:$missing"; exit 1; fi
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: 22
