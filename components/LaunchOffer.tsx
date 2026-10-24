@@ -12,6 +12,10 @@ import { useCountdown } from "./useCountdown";
 const SEEN = "nuriya-sale-seen";
 
 /**
+ * Offer popup, two kinds (same look):
+ *  - timed sale: "25% off everything" with a countdown;
+ *  - limited-pieces launch offer (Khaled, Oct 24 2026): "17% off", 1,200 → 1,000, "Only N pieces left at this
+ *    price" (the real count from the database, no countdown). Hides by itself when the last offer piece sells.
  * Launch-day sale popup. Shown once per visit, a moment after the page has loaded (never delays the page
  * or blocks the first photo), never on checkout. Native dialog: focus moves inside, Escape and the
  * backdrop close it, the page behind is inert. Disappears by itself when the sale ends.
@@ -19,13 +23,15 @@ const SEEN = "nuriya-sale-seen";
 export function LaunchOffer() {
   const { catalog } = useStore();
   const sale = catalog.sale;
+  const piecesLeft = !sale && catalog.compareAtPiasters && (catalog.offerPiecesLeft ?? 0) > 0 ? catalog.offerPiecesLeft! : 0;
+  const active = Boolean(sale) || piecesLeft > 0;
   const path = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const left = useCountdown(sale?.endsAt, open);
 
   useEffect(() => {
-    if (!sale || path.startsWith("/checkout")) return;
+    if (!active || path.startsWith("/checkout")) return;
     try {
       if (sessionStorage.getItem(SEEN)) return;
     } catch {}
@@ -38,14 +44,14 @@ export function LaunchOffer() {
     };
     const t = window.setTimeout(show, 1200);
     return () => window.clearTimeout(t);
-  }, [sale, path]);
+  }, [active, path]);
 
-  // The sale ended while the popup was open.
+  // The sale (or the last offer piece) ended while the popup was open.
   useEffect(() => {
-    if (!sale) setOpen(false);
-  }, [sale]);
+    if (!active) setOpen(false);
+  }, [active]);
 
-  if (!sale) return null;
+  if (!active) return null;
   const was = catalog.compareAtPiasters;
   const pct = percentOff(catalog.pricePiasters, was);
   const onProduct = path.startsWith("/quiet-confidence");
@@ -57,9 +63,9 @@ export function LaunchOffer() {
           <CloseButton onClick={() => setOpen(false)} label="Close offer" />
         </div>
         <div className="lo-b">
-          <p className="lo-k">Launch day offer</p>
+          <p className="lo-k">{sale ? "Launch day offer" : "Limited launch offer"}</p>
           <h2 id="lo-title" tabIndex={-1} autoFocus>
-            {pct}% off everything
+            {sale ? `${pct}% off everything` : `${pct}% off`}
           </h2>
           <p className="lo-p">
             {was && (
@@ -71,9 +77,15 @@ export function LaunchOffer() {
             )}
             <b>{formatEgp(catalog.pricePiasters)}</b>
           </p>
-          <p className="lo-t" role="timer" aria-live="off">
-            Ends in <b>{left ? left.text : " "}</b>
-          </p>
+          {sale ? (
+            <p className="lo-t" role="timer" aria-live="off">
+              Ends in <b>{left ? left.text : " "}</b>
+            </p>
+          ) : (
+            <p className="lo-t">
+              Only <b className="lo-n">{piecesLeft}</b> {piecesLeft === 1 ? "piece" : "pieces"} left at this price
+            </p>
+          )}
           <p className="small">Both colours, every size. Cash on delivery across Egypt.</p>
           <button
             type="button"
