@@ -219,10 +219,14 @@ async function offerCheck(browser) {
   const page = await ctx.newPage();
   const sql = (await import("postgres")).default(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
   const refresh = () => fetch(BASE + "/api/revalidate", { method: "POST", headers: { authorization: `Bearer ${process.env.REVALIDATE_SECRET}` } });
+  // Remember the product's prices exactly, so the later tests (buy flow, stress) see the same state as before.
+  const [before] = await sql`SELECT price_piasters, compare_at_piasters, offer_pieces_limit, offer_started_at FROM products WHERE slug = 'quiet-confidence'`;
+  // Pages are pre-built and refreshed in the background: fetch once after a change so the next visit gets the new page.
+  const warm = async () => { await refresh(); for (const u of ["/", "/quiet-confidence/burgundy"]) await fetch(BASE + u).catch(() => {}); await new Promise((r) => setTimeout(r, 1500)); for (const u of ["/", "/quiet-confidence/burgundy"]) await fetch(BASE + u).catch(() => {}); };
   try {
     await sql`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 7, offer_started_at = now(),
               sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL WHERE slug = 'quiet-confidence'`;
-    await refresh();
+    await warm();
     await page.goto(BASE + "/quiet-confidence/burgundy", { waitUntil: "networkidle" });
     const dlg = page.locator("dialog[open]:has(.lo)");
     await dlg.waitFor({ timeout: 6000 }).catch(() => f("offer popup did not appear on the first page (burgundy product)"));
@@ -240,7 +244,7 @@ async function offerCheck(browser) {
     if (await page.locator("dialog[open]:has(.lo)").count()) f("offer popup showed again in the same visit");
     // When the last offer piece is gone, the popup is gone too.
     await sql`UPDATE products SET price_piasters = 120000, compare_at_piasters = NULL, offer_pieces_limit = NULL WHERE slug = 'quiet-confidence'`;
-    await refresh();
+    await warm();
     const c3 = await browser.newContext({ ...VIEWPORTS.mobile, popup: true });
     const p3 = await c3.newPage();
     await p3.goto(BASE + "/", { waitUntil: "networkidle" });
@@ -248,8 +252,9 @@ async function offerCheck(browser) {
     if (await p3.locator("dialog[open]:has(.lo)").count()) f("offer popup shows although the offer has ended");
     await c3.close();
   } finally {
-    await sql`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 7 WHERE slug = 'quiet-confidence'`;
-    await refresh();
+    await sql`UPDATE products SET price_piasters = ${before.price_piasters}, compare_at_piasters = ${before.compare_at_piasters},
+              offer_pieces_limit = ${before.offer_pieces_limit}, offer_started_at = ${before.offer_started_at} WHERE slug = 'quiet-confidence'`;
+    await warm();
     await sql.end();
     await ctx.close();
   }
