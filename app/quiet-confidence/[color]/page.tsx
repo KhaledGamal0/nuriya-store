@@ -58,7 +58,7 @@ export default async function ProductPage({ params }: Params) {
 
   return (
     <div className="wrap pdp">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <Gallery images={c.images} label={`${catalog.name}, ${c.name}`} />
       <div className="info">
         <div>

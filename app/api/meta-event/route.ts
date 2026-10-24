@@ -2,6 +2,7 @@ import { after } from "next/server";
 import { cookies } from "next/headers";
 import { parseClientEvent, sendServerEvents } from "@/lib/meta-capi";
 import { siteUrl } from "@/lib/site";
+import { allowIp } from "@/lib/ip-limit";
 
 // POST /api/meta-event — the browser's background note for ViewContent / AddToCart / InitiateCheckout.
 // The server forwards it to Meta (Conversions API) with the visitor's IP, browser and Meta cookies, using the
@@ -17,6 +18,9 @@ export async function POST(request: Request): Promise<Response> {
   } catch {}
   if (!ALLOWED_HOSTS.has(host)) return new Response(null, { status: 403 });
   if (!process.env.META_CAPI_TOKEN) return new Response(null, { status: 204 });
+  // A real visitor sends a handful of these per visit; 60 a minute per device is far above that.
+  const ipKey = request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!allowIp(`meta:${ipKey}`, 60, 60_000)) return new Response(null, { status: 429 });
   const text = await request.text();
   if (text.length > 4000) return new Response(null, { status: 413 });
   let raw: unknown = null;

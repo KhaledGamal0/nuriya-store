@@ -14,6 +14,7 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 9. `docs/11-tracker.md` — **master tracker of every business need. Update it in the same commit as the work.**
 11. `docs/13-test-plan.md` — **which test covers which business case. Add a test for every new rule.**
 12. `docs/14-operations.md` — **hosting, Neon setup, backups, uptime, outage runbook.**
+13. `docs/15-security.md` — **security checklist: check every item before calling a change done.**
 10. `docs/12-ui-standards.md` — **UI rules for every screen (one radius, no stray circles, hover only on mouse devices).**
 
 ## Non-negotiables
@@ -59,4 +60,5 @@ Check current docs before using any API (Next.js, Paymob, Better Auth change oft
 7. **Database tasks** (stock, confirm/deliver orders, offers) only via `admin-tasks.yml` (backup first, one transaction, audit line, site refresh).
 8. **Secrets:** never ask for or print a key; Khaled pastes keys into Vercel / GitHub himself.
 9. **Costs:** tell Khaled about cost only when a change has one (free-tier limits, paid add-ons).
-10. **Report in English,** short and formatted: what changed, what was checked, anything he must do. Record every decision in `docs/02-decisions.md`.
+10. **Security:** every change keeps `docs/15-security.md` true (new script/domain → CSP; new endpoint → validation + limit; no secrets in code or logs).
+11. **Report in English,** short and formatted: what changed, what was checked, anything he must do. Record every decision in `docs/02-decisions.md`.
