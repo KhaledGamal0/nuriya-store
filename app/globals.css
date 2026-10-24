@@ -247,7 +247,6 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .lo-p b { font-weight: 500; }
 .lo-t { padding: 8px var(--s2); background: var(--pink-tint); border-radius: var(--r); font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; }
 .lo-t b { font-weight: 500; display: inline-block; min-width: 11ch; text-align: left; }
-.lo-t b.lo-n { min-width: 0; }
 .lo .btn { width: 100%; }
 .lo-later { min-height: 44px; padding: 0 var(--s2); border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 @media (min-width: 520px) { .dlg-sheet:has(.lo) { inset: 0; margin: auto; height: fit-content; border-radius: var(--r); } .lo { border-radius: var(--r); } }

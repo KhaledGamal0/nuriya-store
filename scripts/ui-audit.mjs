@@ -228,9 +228,8 @@ async function offerCheck(browser) {
     await dlg.waitFor({ timeout: 6000 }).catch(() => f("offer popup did not appear on the first page (burgundy product)"));
     if (await dlg.isVisible()) {
       const text = await dlg.innerText();
-      for (const want of ["Limited launch offer", "17% off", "1,000 EGP", "1,200 EGP", "pieces left at this price", "Order now"]) if (!text.includes(want)) f(`offer popup does not show "${want}"`);
+      for (const want of ["Limited launch offer", "17% off", "1,000 EGP", "1,200 EGP", "Limited pieces left at this price", "Order now"]) if (!text.includes(want)) f(`offer popup does not show "${want}"`);
       if (/Ends in/.test(text)) f("offer popup must not show a countdown");
-      if (!/Only \d+ pieces? left/.test(text)) f("offer popup does not show the number of pieces left");
       await shot(page, "mobile-offer-popup");
       await page.keyboard.press("Escape");
       await page.waitForTimeout(500);

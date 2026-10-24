@@ -14,8 +14,8 @@ const SEEN = "nuriya-sale-seen";
 /**
  * Offer popup, two kinds (same look):
  *  - timed sale: "25% off everything" with a countdown;
- *  - limited-pieces launch offer (Khaled, Oct 24 2026): "17% off", 1,200 → 1,000, "Only N pieces left at this
- *    price" (the real count from the database, no countdown). Hides by itself when the last offer piece sells.
+ *  - limited-pieces launch offer (Khaled, Oct 24 2026): "17% off", 1,200 → 1,000, "Limited pieces left at this
+ *    price" (no number, no countdown). Hides by itself when the last offer piece sells.
  * Launch-day sale popup. Shown once per visit, a moment after the page has loaded (never delays the page
  * or blocks the first photo), never on checkout. Native dialog: focus moves inside, Escape and the
  * backdrop close it, the page behind is inert. Disappears by itself when the sale ends.
@@ -82,9 +82,7 @@ export function LaunchOffer() {
               Ends in <b>{left ? left.text : " "}</b>
             </p>
           ) : (
-            <p className="lo-t">
-              Only <b className="lo-n">{piecesLeft}</b> {piecesLeft === 1 ? "piece" : "pieces"} left at this price
-            </p>
+            <p className="lo-t">Limited pieces left at this price</p>
           )}
           <p className="small">Both colours, every size. Cash on delivery across Egypt.</p>
           <button
