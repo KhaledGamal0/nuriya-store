@@ -42,6 +42,7 @@ async function open(extra = {}) {
   const ctx = await phoneCtx({ ...extra, extraHTTPHeaders: { "x-forwarded-for": ip, ...(extra.extraHTTPHeaders ?? {}) } });
   // 30 phones share one small test machine: give each step time instead of failing on a slow machine.
   ctx.setDefaultTimeout(90000);
+  await ctx.addInitScript(() => { try { sessionStorage.setItem("nuriya-sale-seen", "1"); } catch {} }); // no offer popup in load tests
   const page = await ctx.newPage();
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));

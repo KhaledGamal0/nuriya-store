@@ -72,3 +72,5 @@
 - **Oct 23 2026 (Khaled, ad match quality):** Purchase now also sends the delivery area as Meta state/city (hashed); returning buyers are matched on every event by external_id = SHA-256 of their phone, saved in their own browser at their last order (never the phone). Phone/name at checkout before ordering stays off (not submitted). Privacy note mentions the delivery area.
 
 - **Oct 23 2026 (Khaled):** Advanced Matching on InitiateCheckout. Meta InitiateCheckout is now sent once per checkout visit as soon as she has typed a valid phone and her name (with ph 20XXXXXXXXXX, fn, ln, st/ct from the chosen area, country=eg; hashed by the Pixel in the browser and SHA-256 on the server, same event_id); if she leaves before that, it is sent without them. Vercel "5 · Opened checkout" unchanged. Checkout behaviour unchanged.
+
+- **Oct 24 2026 (Khaled):** the offer popup also shows for the limited-pieces offer: "Limited launch offer · 17% off · 1,200 → 1,000 EGP · Only N pieces left at this price" (real count, no countdown), once per visit on the first page opened (any page except checkout), same look as the sale popup; hides by itself when the last offer piece sells.

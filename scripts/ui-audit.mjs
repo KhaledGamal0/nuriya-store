@@ -163,7 +163,7 @@ async function saleCheck(browser) {
   const sql = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
   const refresh = () => fetch(BASE + "/api/revalidate", { method: "POST", headers: { authorization: `Bearer ${process.env.REVALIDATE_SECRET}` } });
   const f = (detail, kind = "flow") => add("mobile", "sale", kind, detail);
-  const ctx = await browser.newContext(VIEWPORTS.mobile);
+  const ctx = await browser.newContext({ ...VIEWPORTS.mobile, popup: true });
   const page = await ctx.newPage();
   try {
     await sql`UPDATE products SET sale_price_piasters = 90000, sale_starts_at = now() - interval '1 minute', sale_ends_at = now() + interval '30 hours' WHERE slug = 'quiet-confidence'`;
@@ -205,6 +205,51 @@ async function saleCheck(browser) {
     if (await page.locator("dialog[open]:has(.lo)").count()) f("popup must never show on checkout");
   } finally {
     await sql`UPDATE products SET sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL WHERE slug = 'quiet-confidence'`;
+    await refresh();
+    await sql.end();
+    await ctx.close();
+  }
+}
+
+// Limited-pieces offer popup: first page of a visit (here a product page), real pieces-left count, no countdown.
+async function offerCheck(browser) {
+  if (!db) return;
+  const f = (detail, kind = "flow") => add("mobile", "offer", kind, detail);
+  const ctx = await browser.newContext({ ...VIEWPORTS.mobile, popup: true });
+  const page = await ctx.newPage();
+  const sql = (await import("postgres")).default(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
+  const refresh = () => fetch(BASE + "/api/revalidate", { method: "POST", headers: { authorization: `Bearer ${process.env.REVALIDATE_SECRET}` } });
+  try {
+    await sql`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 7, offer_started_at = now(),
+              sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL WHERE slug = 'quiet-confidence'`;
+    await refresh();
+    await page.goto(BASE + "/quiet-confidence/burgundy", { waitUntil: "networkidle" });
+    const dlg = page.locator("dialog[open]:has(.lo)");
+    await dlg.waitFor({ timeout: 6000 }).catch(() => f("offer popup did not appear on the first page (burgundy product)"));
+    if (await dlg.isVisible()) {
+      const text = await dlg.innerText();
+      for (const want of ["Limited launch offer", "17% off", "1,000 EGP", "1,200 EGP", "pieces left at this price", "Order now"]) if (!text.includes(want)) f(`offer popup does not show "${want}"`);
+      if (/Ends in/.test(text)) f("offer popup must not show a countdown");
+      if (!/Only \d+ pieces? left/.test(text)) f("offer popup does not show the number of pieces left");
+      await shot(page, "mobile-offer-popup");
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(500);
+      if (await dlg.isVisible()) f("Escape did not close the offer popup", "a11y");
+    }
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    await page.waitForTimeout(1800);
+    if (await page.locator("dialog[open]:has(.lo)").count()) f("offer popup showed again in the same visit");
+    // When the last offer piece is gone, the popup is gone too.
+    await sql`UPDATE products SET price_piasters = 120000, compare_at_piasters = NULL, offer_pieces_limit = NULL WHERE slug = 'quiet-confidence'`;
+    await refresh();
+    const c3 = await browser.newContext({ ...VIEWPORTS.mobile, popup: true });
+    const p3 = await c3.newPage();
+    await p3.goto(BASE + "/", { waitUntil: "networkidle" });
+    await p3.waitForTimeout(1800);
+    if (await p3.locator("dialog[open]:has(.lo)").count()) f("offer popup shows although the offer has ended");
+    await c3.close();
+  } finally {
+    await sql`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 7 WHERE slug = 'quiet-confidence'`;
     await refresh();
     await sql.end();
     await ctx.close();
@@ -287,6 +332,13 @@ const db = process.env.DATABASE_URL ? (await import("postgres")).default(process
 const PHONES = { mobile: "010 1234 5678", desktop: "011 1234 5678" };
 
 const browser = await chromium.launch();
+// The offer popup would cover every page: hide it in all flows, except the popup checks ({ popup: true }).
+const newContext = browser.newContext.bind(browser);
+browser.newContext = async ({ popup = false, ...o } = {}) => {
+  const c = await newContext(o);
+  if (!popup) await c.addInitScript(() => { try { sessionStorage.setItem("nuriya-sale-seen", "1"); } catch {} });
+  return c;
+};
 for (const [vp, opts] of Object.entries(VIEWPORTS)) {
   const ctx = await browser.newContext({ ...opts, reducedMotion: "reduce" });
   const page = await ctx.newPage();
@@ -532,6 +584,7 @@ await (async () => {
   await ctx.close();
 })().catch((e) => add("mobile", "loading", "audit-step-failed", String(e.message).slice(0, 160)));
 await saleCheck(browser).catch((e) => add("mobile", "sale", "audit-step-failed", String(e.message).slice(0, 160)));
+await offerCheck(browser).catch((e) => add("mobile", "offer", "audit-step-failed", String(e.message).slice(0, 160)));
 await refreshCheck(browser).catch((e) => add("mobile", "refresh", "audit-step-failed", String(e.message).slice(0, 160)));
 await browser.close();
 await db?.end();
