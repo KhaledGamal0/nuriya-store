@@ -1,5 +1,6 @@
 # Automatic dependency updates (security first). Each update arrives as a pull request: CI, the database tests
 # and a preview build run on it; nothing reaches the live site until it is merged.
+# Security fixes are merged after CI passes; never during an ad's learning phase without a check.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -8,6 +9,13 @@ updates:
     open-pull-requests-limit: 5
     groups:
       minor-and-patch: { update-types: [minor, patch] }
+    # Big version jumps (e.g. TypeScript 7) can break the build: only on request, never automatic.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule: { interval: monthly }
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
