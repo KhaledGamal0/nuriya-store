@@ -75,4 +75,4 @@
 
 - **Oct 24 2026 (Khaled):** the offer popup also shows for the limited-pieces offer: "Limited launch offer · 17% off · 1,200 → 1,000 EGP · Only N pieces left at this price" (real count, no countdown), once per visit on the first page opened (any page except checkout), same look as the sale popup; hides by itself when the last offer piece sells.
 
-- **Oct 25 2026 (Khaled, security hardening, no UI change):** added Content-Security-Policy, JSON-LD escaping, per-device limit on /api/meta-event, Dependabot + npm audit in CI, docs/15-security.md checklist. Repo visibility: see open question below.
+- **Oct 25 2026 (Khaled, security hardening, no UI change):** added Content-Security-Policy, JSON-LD escaping, per-device limit on /api/meta-event, Dependabot + npm audit in CI, docs/15-security.md checklist. Repo stays PUBLIC (Khaled, Oct 25 2026): no secrets in code; private would cost ~$25/month in GitHub Actions minutes and lose free secret scanning.
