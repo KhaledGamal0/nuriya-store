@@ -64,7 +64,7 @@ export default async function ReturnsPage() {
         <h2 id="data-title">Your details</h2>
         <p style={{ color: "var(--ink-2)" }}>
           We use your name, phone and address only to deliver your order. To measure our Instagram and Facebook ads, we share a
-          scrambled (hashed) version of your phone number, name and delivery area (once you enter them at checkout) with Meta. We never sell your details.
+          scrambled (hashed) version of your phone number, name and delivery area (once you enter them at checkout) and a random visitor ID with Meta. We never sell your details.
         </p>
       </section>
 

@@ -94,3 +94,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Meta InitiateCheckout customer details: only on IC, valid phone only, hashed, same event_id | tests/meta.test.ts |
 | Security headers (CSP, HSTS, framing, nosniff) and per-device limit | tests/security.test.ts |
 | Offer counted from a future time: no piece limit and no split before it (bag and order), then N pieces, then full price | tests/orders.test.ts, tests/checkout.test.ts |
+| Meta: visitor id external_id on all events, PageView server copy (dedup by event_id), visitor id in Purchase | tests/meta.test.ts |
