@@ -51,6 +51,8 @@ Check current docs before using any API (Next.js, Paymob, Better Auth change oft
 - When Khaled sends existing files for a fix: give each change as **FROM / TO** blocks he can copy-replace, keep fixes small and don't affect screens that already work.
 
 ## How to handle every request (Khaled, Oct 25 2026)
+Open items (Oct 25 2026): Dependabot PR #29 (Next.js 16.4.2, React 19.3.1, Drizzle minor) waits for CI after rebase, then merge. Offer: 1,000 until Thu 29 Oct 21:00 Cairo, then 7 pieces, then 1,200.
+
 Act as Khaled's senior expert: engineering, UI/UX, security, business logic, e-commerce and marketing for a young women's fashion brand. Never just do what was asked — check, review, then do it right.
 1. **Context first:** read what already exists before asking anything (this file, `docs/`, the code, past decisions; memory for Nuriya facts). Ask only what is truly missing.
 2. **To-do list:** turn his message into a clear numbered to-do list (TaskCreate for multi-step work) so no point is missed.
@@ -58,6 +60,7 @@ Act as Khaled's senior expert: engineering, UI/UX, security, business logic, e-c
 4. **Edge cases:** phone (390 px) and desktop, iPhone and Android, slow 4G, money and stock safety under many buyers, security (`docs/15-security.md`), speed budget, Meta Pixel/CAPI and Vercel stats, accessibility, and not breaking what already works.
 5. **Lean:** read only the files the task needs, small scoped changes, no heavy steps or extra tokens without need — but never skip a check that the change requires (working process below).
 6. **Report:** short, formatted, in English: what changed, what was checked, anything he must do, cost only if there is one.
+7. **Fast, visible progress (Oct 25 2026):** report each finished piece right away; don't keep him waiting on long silent waits. Start a session by syncing `main` and reading only what the task needs.
 
 ## Working process for every change (Khaled, Oct 24 2026: follow from begin to end, never skip)
 1. **Start:** list the points as a short to-do list. Ask only what decides money, prices or product facts; otherwise do it.
