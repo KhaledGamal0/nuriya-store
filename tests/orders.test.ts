@@ -311,6 +311,26 @@ test("launch offer ends by itself after the set number of pieces; the next order
   assert.equal(v.stock_on_hand, 7, "3 orders took 3 pieces out of stock");
 });
 
+test("offer counted from a future time: never runs out before it, then counts pieces from that moment", { skip }, async () => {
+  // Khaled, Oct 25 2026: keep 1,000 while the ad runs (to Oct 29 9 pm), then the first N pieces, then 1,200.
+  await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 1, offer_started_at = now() + interval '1 hour' WHERE slug = 'quiet-confidence'`;
+  await sql!`UPDATE variants SET track_inventory = true, stock_on_hand = 10, stock_reserved = 0 WHERE sku = 'NUR-QC-CRM-SM'`;
+  const unitOf = async (n: string) => (await sql!`SELECT i.unit_piasters AS u FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.number = ${n}`)[0]?.u;
+  for (let i = 0; i < 3; i++) {
+    const r = await place(await valid(nextPhone()));
+    assert.ok(r.ok && !r.offerEnded, `order ${i + 1} before the count-from time keeps the offer`);
+    assert.equal(await unitOf(r.ok ? r.number : ""), 100000);
+  }
+  // The count-from moment arrives: only orders from now on use up offer pieces.
+  await sql!`UPDATE products SET offer_started_at = now() WHERE slug = 'quiet-confidence'`;
+  const last = await place(await valid(nextPhone()));
+  assert.ok(last.ok && last.offerEnded, "the 1 offer piece after the count-from time ends the offer");
+  assert.equal(await unitOf(last.ok ? last.number : ""), 100000);
+  const full = await place(await valid(nextPhone()));
+  assert.ok(full.ok);
+  assert.equal(await unitOf(full.ok ? full.number : ""), 120000, "then the full price for everyone");
+});
+
 test("offer count is exact when many orders arrive at once", { skip }, async () => {
   await sql!`UPDATE products SET price_piasters = 100000, compare_at_piasters = 120000, offer_pieces_limit = 3, offer_started_at = now() WHERE slug = 'quiet-confidence'`;
   const orders = await Promise.all(Array.from({ length: 6 }, () => valid(nextPhone())));

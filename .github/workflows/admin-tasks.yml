@@ -38,7 +38,7 @@ on:
         description: "start-offer: how many pieces at the offer price, all customers together (e.g. 7); blank = no limit"
         default: ""
       ends:
-        description: "start-sale: last day of the sale, YYYY-MM-DD (ends 11:59 pm Cairo that day)"
+        description: "start-sale: last day of the sale, YYYY-MM-DD (ends 11:59 pm Cairo that day) · start-offer: when to start counting offer pieces, YYYY-MM-DD HH:MM Cairo (blank = now)"
         default: ""
 
 permissions:
@@ -84,6 +84,8 @@ jobs:
             [ -z "$WAS" ] || { [[ "$WAS" =~ ^[0-9]{2,5}$ ]] && [ "$WAS" -gt "$PRICE" ]; } || { echo "::error::Old price must be a whole number of EGP, higher than the offer price (or blank)."; exit 1; }
             [ -z "$PIECES" ] || [[ "$PIECES" =~ ^[1-9][0-9]{0,3}$ ]] || { echo "::error::Pieces must be a whole number 1–9999 (or blank for no limit)."; exit 1; }
             [ -z "$PIECES" ] || [ -n "$WAS" ] || { echo "::error::A piece limit needs the old price (the price after the offer pieces run out)."; exit 1; }
+            [ -z "$ENDS" ] || [[ "$ENDS" =~ ^20[0-9]{2}-[01][0-9]-[0-3][0-9]\ [0-2][0-9]:[0-5][0-9]$ ]] || { echo "::error::Count-from time must look like 2026-10-29 21:00 (Cairo), or be blank for now."; exit 1; }
+            [ -z "$ENDS" ] || [ -n "$PIECES" ] || { echo "::error::A count-from time only makes sense with a piece limit."; exit 1; }
           elif [ "$TASK" = "start-sale" ]; then
             [[ "$PRICE" =~ ^[0-9]{2,5}$ ]] || { echo "::error::Sale price must be a whole number of EGP, e.g. 900."; exit 1; }
             [[ "$ENDS" =~ ^20[0-9]{2}-[01][0-9]-[0-3][0-9]$ ]] || { echo "::error::Sale end must be a date like 2026-10-30."; exit 1; }
@@ -141,15 +143,21 @@ jobs:
           elif [ "$TASK" = "start-offer" ]; then
             # New regular offer from now: price, optional crossed-out old price, optional piece limit (all customers).
             # Ends any timed sale. When the pieces run out the old price applies by itself (lib/orders.ts).
+            # Optional count-from time (Khaled, Oct 25 2026): pieces are counted only from orders placed at or after it,
+            # so before that moment the offer can never run out (e.g. keep 1,000 while an ad runs, then N pieces).
             WAS_SQL=${WAS:+$((WAS * 100))}; PIECES_SQL=${PIECES:-NULL}
+            FROM_SQL="now()"; [ -z "$ENDS" ] || FROM_SQL="('${ENDS}:00')::timestamp AT TIME ZONE 'Africa/Cairo'"
             cat > task.sql <<SQL
           BEGIN;
           INSERT INTO audit_log (actor, action, entity, entity_id, before)
           SELECT 'khaled', 'start_offer', 'product', slug, to_jsonb(p) - 'details_en' - 'details_ar' FROM products p WHERE slug = 'quiet-confidence';
           UPDATE products SET price_piasters = $((PRICE * 100)), compare_at_piasters = ${WAS_SQL:-NULL},
-                 offer_pieces_limit = ${PIECES_SQL}, offer_orders_limit = NULL, offer_started_at = now(),
+                 offer_pieces_limit = ${PIECES_SQL}, offer_orders_limit = NULL, offer_started_at = ${FROM_SQL},
                  sale_price_piasters = NULL, sale_starts_at = NULL, sale_ends_at = NULL, updated_at = now()
           WHERE slug = 'quiet-confidence';
+          DO \$\$ BEGIN
+            IF (SELECT offer_started_at < now() - interval '5 minutes' FROM products WHERE slug = 'quiet-confidence') THEN RAISE EXCEPTION 'the count-from time is in the past'; END IF;
+          END \$\$;
           COMMIT;
           SQL
           elif [ "$TASK" = "start-sale" ]; then
@@ -232,7 +240,7 @@ jobs:
               echo "::notice::$sku — available $avail, reserved for open orders $reserved"
             done
           docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT 'orders in database: ' || count(*) FROM orders" | sed 's/^/::notice::/'
-          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT 'price now: ' || price_piasters/100 || ' EGP' || coalesce(' · crossed out: ' || compare_at_piasters/100, '') || coalesce(' · offer pieces: ' || offer_pieces_limit, '') || coalesce(' · sale: ' || sale_price_piasters/100 || ' until ' || to_char(sale_ends_at AT TIME ZONE 'Africa/Cairo', 'Dy DD Mon HH24:MI') || ' Cairo', '') FROM products WHERE slug = 'quiet-confidence'" | sed 's/^/::notice::/'
+          docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT 'price now: ' || price_piasters/100 || ' EGP' || coalesce(' · crossed out: ' || compare_at_piasters/100, '') || coalesce(' · offer pieces: ' || offer_pieces_limit || ' counted from ' || to_char(offer_started_at AT TIME ZONE 'Africa/Cairo', 'Dy DD Mon HH24:MI') || ' Cairo', '') || coalesce(' · sale: ' || sale_price_piasters/100 || ' until ' || to_char(sale_ends_at AT TIME ZONE 'Africa/Cairo', 'Dy DD Mon HH24:MI') || ' Cairo', '') FROM products WHERE slug = 'quiet-confidence'" | sed 's/^/::notice::/'
           docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c "SELECT status || ': ' || count(*) || ' (' || string_agg(number, ', ' ORDER BY created_at) || ')' FROM orders GROUP BY status" | sed 's/^/::notice::/'
       - name: Refresh the live site
         run: |

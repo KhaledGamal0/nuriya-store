@@ -101,7 +101,7 @@ Names before Oct 9 2026 evening (Visit, Visitor city, Add to bag, Order placedâ€
 Every task takes an encrypted backup first, changes the database in one transaction, writes an audit line and refreshes the site.
 | Task | Fill in | What happens |
 |---|---|---|
-| **start-offer** | `price` (e.g. 1000), `was` crossed-out price (e.g. 1200, optional), `pieces` (e.g. 7, optional) | From now: the price is `price`, `was` shown crossed out. With `pieces`: the first N pieces sold (all customers, both colours) are at `price`, then `was` for everyone, even inside the same bag (line split). |
+| **start-offer** | `price` (e.g. 1000), `was` crossed-out price (e.g. 1200, optional), `pieces` (e.g. 7, optional), `ends` count-from time (optional) | From now: the price is `price`, `was` shown crossed out. With `pieces`: the first N pieces sold (all customers, both colours) are at `price`, then `was` for everyone, even inside the same bag (line split). Optional `ends` = count-from time `2026-10-29 21:00` (Cairo): pieces are counted only from orders at or after it, so the offer can't run out before then. |
 | **start-sale** | `price` (e.g. 900), `ends` (e.g. 2026-10-30) | Timed sale on top of the current price/offer, from now until 11:59 pm Cairo on `ends`; then the current price/offer is back by itself. Sale pieces don't use up offer pieces. |
 | **end-offers** | nothing | Back to the normal price now (the crossed-out price becomes the price); no offer, no sale. |
 Rules (lib/catalog.ts priceBag + lib/orders.ts): prices are always recomputed in the database at checkout under the product lock; a bag priced before a change is refused with "price changed, refresh"; cancelled orders don't use up offer pieces.

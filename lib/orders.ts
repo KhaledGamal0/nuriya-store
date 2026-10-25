@@ -131,8 +131,9 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
 
         // Lock the product row: orders queue here for a moment, so the offer count below is exact and an order
         // placed after the offer ended is priced at the new price (price_changed → the customer refreshes).
-        const [offer = noRow("product")] = await tx<{ id: number; limit: number | null; started: Date | null; was: number | null; sale_on: boolean; price: number }[]>`
+        const [offer = noRow("product")] = await tx<{ id: number; limit: number | null; started: Date | null; was: number | null; sale_on: boolean; price: number; counting: boolean }[]>`
           SELECT id, offer_pieces_limit AS limit, offer_started_at AS started, compare_at_piasters AS was, price_piasters AS price,
+                 coalesce(offer_started_at <= now(), true) AS counting,
                  coalesce(sale_price_piasters IS NOT NULL AND now() >= sale_starts_at AND now() < sale_ends_at, false) AS sale_on
           FROM products WHERE slug = ${PRODUCT_SLUG} FOR UPDATE`;
 
@@ -155,7 +156,9 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
         // customers together, pay the offer price; every piece after that pays the full price (`was`), even inside
         // the same bag (the bag's lines arrive already split, e.g. 2 × 1,000 + 1 × 1,200). Counted here, under the
         // product lock above, so two buyers at the same second can never both get the last offer piece.
-        const offerOn = offer.limit !== null && offer.was !== null && !offer.sale_on;
+        // Before the count-from time (offer_started_at in the future) the offer has no piece limit: every piece pays
+        // the offer price and the offer cannot end (Khaled, Oct 25 2026: keep 1,000 while the ad runs).
+        const offerOn = offer.limit !== null && offer.was !== null && !offer.sale_on && offer.counting;
         let offerLeft = 0;
         if (offerOn) {
           const [{ n } = noRow("offer pieces")] = await tx<{ n: number }[]>`

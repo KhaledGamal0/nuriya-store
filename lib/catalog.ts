@@ -115,6 +115,11 @@ export type CatalogData = {
    * server recounts inside the order transaction.
    */
   offerPiecesLeft?: number | null;
+  /**
+   * When offer pieces start being counted (ISO time), or null = already counting. Before it the offer price
+   * has no piece limit (Khaled, Oct 25 2026: keep 1,000 while the ad runs, then the first N pieces).
+   */
+  offerCountsFrom?: string | null;
   sizeChart: readonly SizeChartRow[];
   colorOrder: readonly ColorId[];
   colors: Record<ColorId, ColorwayData>;
@@ -170,9 +175,10 @@ export type PricedPiece = { color: ColorId; size: SizeId; qty: number; unitPiast
  * 2 × 1,000 + 1 × 1,200. During a timed sale there is no split (sale pieces don't use up the offer).
  * Returns null if any line can't be sold. The same rule runs again in the database at checkout (lib/orders.ts).
  */
-export function priceBag(catalog: CatalogData, lines: readonly { color: ColorId; size: SizeId; qty: number }[]): PricedPiece[] | null {
+export function priceBag(catalog: CatalogData, lines: readonly { color: ColorId; size: SizeId; qty: number }[], now = Date.now()): PricedPiece[] | null {
   const full = catalog.compareAtPiasters;
-  const limited = !catalog.sale && full != null && catalog.offerPiecesLeft != null;
+  const counting = !catalog.offerCountsFrom || Date.parse(catalog.offerCountsFrom) <= now;
+  const limited = !catalog.sale && full != null && catalog.offerPiecesLeft != null && counting;
   let left = limited ? Math.max(0, catalog.offerPiecesLeft!) : Infinity;
   const out: PricedPiece[] = [];
   for (const l of lines) {
