@@ -264,6 +264,11 @@ await scenario("bot fills the hidden field", async () => {
 });
 
 await scenario("one device spamming orders", async () => {
+  // The device limit counts in fixed 10-minute blocks (lib/orders.ts allow). If this run would cross a
+  // block boundary the counter resets mid-test and a 31st order passes (seen Oct 25 2026) — a test artefact,
+  // not a shop bug. So start just after a boundary when less than 2 minutes of the current block remain.
+  const left = 600_000 - (Date.now() % 600_000);
+  if (left < 120_000) await new Promise((r) => setTimeout(r, left + 2_000));
   const { ctx, page } = await open({ extraHTTPHeaders: { "x-forwarded-for": "203.0.113.9" } });
   const outcomes = [];
   for (let i = 0; i < CHECKOUT_LIMIT + 1; i++) {
