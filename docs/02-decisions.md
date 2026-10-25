@@ -78,3 +78,5 @@
 - **Oct 25 2026 (Khaled, security hardening, no UI change):** added Content-Security-Policy, JSON-LD escaping, per-device limit on /api/meta-event, Dependabot + npm audit in CI, docs/15-security.md checklist. Repo stays PUBLIC (Khaled, Oct 25 2026): no secrets in code; private would cost ~$25/month in GitHub Actions minutes and lose free secret scanning.
 
 - **Oct 25 2026 (Khaled):** every request is handled as his senior expert: context first, numbered to-do list, validate each point (technical, business, UI/UX, security) and propose a better option when needed, cover edge cases, stay lean, short English report. Saved in CLAUDE.md ("How to handle every request").
+
+- **Oct 25 2026 (Khaled):** keep the 1,000 EGP offer for every order until the Meta ad ends, **Thu 29 Oct 2026, 9:00 pm Cairo**; from that second the first **7 pieces** (all customers, both colours) are 1,000, then 1,200 automatically. Done with start-offer `ends` = count-from time (offer_started_at in the future): before it no piece limit and the offer cannot end (bag + order).

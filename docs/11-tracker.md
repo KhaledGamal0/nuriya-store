@@ -1,7 +1,7 @@
 # 11 — Master tracker: every business need, and where it stands
 
 Status: **DONE** · **PARTIAL** (started, not finished) · **P2–P7** (planned phase, see `10-build-plan.md`) · **LATER** (after launch) · **KHALED** (needs a decision or input from Khaled).
-Update this file in the same commit as the work. Last update: 2026-10-07.
+Update this file in the same commit as the work. Last update: 2026-10-25.
 
 ## A. Brand and content
 | Need | Status | Notes |
@@ -174,3 +174,4 @@ Update this file in the same commit as the work. Last update: 2026-10-07.
 | Operations runbook (setup, backups, restore, rollback, outages) | DONE | `docs/14-operations.md` |
 | Move Neon to Launch plan (7-day restore) when real orders start | KHALED | Free plan has a 6-hour restore window |
 | Real-phone test, test orders, courier dry run | P7 | |
+| Offer kept at 1,000 until a set time (ad end), then the first N pieces, then 1,200 | DONE | Oct 25: admin task start-offer `ends` = count-from time; live: 7 pieces from Thu 29 Oct 21:00 Cairo |
