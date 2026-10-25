@@ -151,4 +151,9 @@ test("offer pieces: the bag is priced 1,000 until the offer pieces run out, then
   assert.equal(priceBag({ ...c, offerPiecesLeft: null }, [{ color: "cream", size: "S/M", qty: 9 }])?.length, 1, "no piece limit: no split");
   const sale = { ...c, pricePiasters: 90_000, sale: { endsAt: "2099-01-01T00:00:00Z", after: { pricePiasters: 100_000, compareAtPiasters: 120_000 } } };
   assert.equal(priceBag(sale, [{ color: "cream", size: "S/M", qty: 9 }])?.length, 1, "during a timed sale: no split");
+  // Count-from time (Oct 25 2026): before it no piece limit; from that second the first N pieces, then full price.
+  const from = { ...c, offerCountsFrom: "2026-10-29T18:00:00Z" }; // Thu Oct 29, 9:00 pm Cairo
+  const nine = [{ color: "cream" as const, size: "S/M" as const, qty: 5 }, { color: "burgundy" as const, size: "L/XL" as const, qty: 4 }];
+  assert.ok(priceBag(from, nine, Date.parse("2026-10-29T17:59:59Z"))?.every((l) => l.unitPiasters === 100_000), "before 9 pm: every piece at the offer, no split");
+  assert.deepEqual(priceBag(from, nine, Date.parse("2026-10-29T18:00:00Z"))?.map((l) => l.unitPiasters), [100_000, 120_000, 120_000], "from 9 pm: 3 left → split");
 });

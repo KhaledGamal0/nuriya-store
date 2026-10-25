@@ -95,6 +95,7 @@ async function loadCatalog(): Promise<CatalogData> {
     compareAtPiasters: compareAt,
     sale,
     offerPiecesLeft,
+    offerCountsFrom: offerPiecesLeft != null && product.offerStartedAt ? new Date(product.offerStartedAt).toISOString() : null,
     sizeChart: sizeRows.length ? sizeRows : fallback.sizeChart,
     colorOrder: order.length ? order : COLORS,
     colors,

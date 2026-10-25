@@ -93,4 +93,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Offer in pieces: split line, offer ends on the last piece, stale bag refused, two buyers at once never exceed the limit | tests/orders.test.ts, tests/checkout.test.ts |
 | Meta InitiateCheckout customer details: only on IC, valid phone only, hashed, same event_id | tests/meta.test.ts |
 | Security headers (CSP, HSTS, framing, nosniff) and per-device limit | tests/security.test.ts |
-| Offer counted from a future time: never runs out before it, then N pieces, then full price | tests/orders.test.ts |
+| Offer counted from a future time: no piece limit and no split before it (bag and order), then N pieces, then full price | tests/orders.test.ts, tests/checkout.test.ts |
