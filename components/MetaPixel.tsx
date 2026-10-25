@@ -2,23 +2,16 @@
 
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { pixel, pixelReturning } from "@/lib/pixel";
+import { useEffect } from "react";
+import { pixelBoth } from "@/lib/pixel";
 
-/** Meta Pixel: Meta's script after the page has loaded, and PageView on every in-site page change. */
+/**
+ * Meta Pixel: Meta's script after the page has loaded, and PageView on the first page and every in-site page
+ * change — browser + server copy with one event id (the start-up snippet only queues; Meta's script sends later).
+ */
 export function MetaPixel() {
   const path = usePathname();
-  const first = useRef(true);
-  // A returning buyer: matched by her scrambled id from her last order (once per page load).
-  useEffect(() => pixelReturning(), []);
-  useEffect(() => {
-    // The first PageView is sent by the start-up snippet below; later ones on each in-site navigation.
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    pixel("PageView");
-  }, [path]);
+  useEffect(() => pixelBoth("PageView", {}), [path]);
 
   return (
     <>

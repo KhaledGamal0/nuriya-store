@@ -4,7 +4,7 @@ import { parseClientEvent, sendServerEvents } from "@/lib/meta-capi";
 import { siteUrl } from "@/lib/site";
 import { allowIp } from "@/lib/ip-limit";
 
-// POST /api/meta-event — the browser's background note for ViewContent / AddToCart / InitiateCheckout.
+// POST /api/meta-event — the browser's background note for PageView / ViewContent / AddToCart / InitiateCheckout.
 // The server forwards it to Meta (Conversions API) with the visitor's IP, browser and Meta cookies, using the
 // same event_id as the browser Pixel, so Meta keeps one copy. Answers at once; Meta is called afterwards.
 // Guards: our own site only, small body, only our three event names and known products, numbers range-checked.
@@ -37,6 +37,8 @@ export async function POST(request: Request): Promise<Response> {
     fbp: jar.get("_fbp")?.value,
     fbc: jar.get("_fbc")?.value,
     externalId: e.externalId,
+    // The cookie is the source of truth; the note's copy covers a browser that didn't send cookies.
+    visitorId: /^[0-9a-f]{64}$/.test(jar.get("nuriya_vid")?.value ?? "") ? jar.get("nuriya_vid")!.value : e.visitorId,
     phone: e.user?.phone,
     name: e.user?.name,
     area: e.user?.area,

@@ -105,6 +105,7 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
       userAgent: h.get("user-agent"),
       fbp: jar.get("_fbp")?.value,
       fbc: jar.get("_fbc")?.value,
+      visitorId: /^[0-9a-f]{64}$/.test(jar.get("nuriya_vid")?.value ?? "") ? jar.get("nuriya_vid")!.value : undefined,
       url: `${siteUrl()}/checkout`,
     };
     after(() => sendServerPurchase(purchase).catch((e) => console.error("meta.capi.error", e instanceof Error ? e.name : "error")));

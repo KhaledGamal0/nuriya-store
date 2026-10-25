@@ -49,10 +49,12 @@ export type Visitor = {
   area?: string;
   /** A returning buyer's id: the SHA-256 of her phone (already hashed in her browser at her last order). */
   externalId?: string;
+  /** Anonymous visitor id (nuriya_vid cookie, 64 random hex): the first external_id on every event. */
+  visitorId?: string;
 };
 
 export type ServerEvent = {
-  name: "ViewContent" | "AddToCart" | "InitiateCheckout" | "Purchase";
+  name: "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "Purchase";
   eventId: string;
   url: string;
   visitor: Visitor;
@@ -65,11 +67,13 @@ function userData(v: Visitor): Record<string, unknown> {
   const ph = v.phone ? metaPhone(v.phone) : null;
   const { fn, ln } = v.name ? metaName(v.name) : {};
   const { st, ct } = v.area ? metaPlace(v.area) : {};
-  const xid = ph ? sha(ph) : v.externalId && /^[0-9a-f]{64}$/.test(v.externalId) ? v.externalId : null;
+  const hex = (x?: string) => (x && /^[0-9a-f]{64}$/.test(x) ? x : null);
+  // external_id: the visitor id first (same value the browser Pixel sends), then her scrambled phone if known.
+  const xids = [...new Set([hex(v.visitorId), ph ? sha(ph) : hex(v.externalId)].filter((x): x is string => !!x))];
   return {
     country: [sha("eg")],
     ...(ph && { ph: [sha(ph)] }),
-    ...(xid && { external_id: [xid] }),
+    ...(xids.length && { external_id: xids }),
     ...(st && { st: [sha(st)] }),
     ...(ct && { ct: [sha(ct)] }),
     ...(fn && { fn: [sha(fn)] }),
@@ -95,7 +99,7 @@ export async function sendServerEvents(events: ServerEvent[], testCode?: string)
       action_source: "website",
       event_source_url: e.url,
       user_data: userData(e.visitor),
-      custom_data: { currency: "EGP", content_type: "product", ...e.custom },
+      ...(e.name !== "PageView" && { custom_data: { currency: "EGP", content_type: "product", ...e.custom } }),
     })),
     ...(testCode && { test_event_code: testCode }),
   };
@@ -124,6 +128,7 @@ export type ServerPurchase = {
   userAgent: string | null;
   fbp?: string;
   fbc?: string;
+  visitorId?: string;
   url: string;
 };
 
@@ -132,7 +137,7 @@ export function purchaseEvent(p: ServerPurchase): ServerEvent {
     name: "Purchase",
     eventId: p.orderNumber,
     url: p.url,
-    visitor: { ip: p.ip, userAgent: p.userAgent, fbp: p.fbp, fbc: p.fbc, phone: p.phone, name: p.name, area: p.area },
+    visitor: { ip: p.ip, userAgent: p.userAgent, fbp: p.fbp, fbc: p.fbc, visitorId: p.visitorId, phone: p.phone, name: p.name, area: p.area },
     custom: {
       value: p.totalPiasters / 100,
       content_ids: [...new Set(p.lines.map((l) => l.color))],
@@ -149,14 +154,14 @@ export function sendServerPurchase(p: ServerPurchase, testCode?: string): Promis
 
 // ---------- Browser notes for ViewContent / AddToCart / InitiateCheckout ----------
 
-const CLIENT_EVENTS = new Set(["ViewContent", "AddToCart", "InitiateCheckout"]);
+const CLIENT_EVENTS = new Set(["PageView", "ViewContent", "AddToCart", "InitiateCheckout"]);
 const COLORS = new Set(["cream", "burgundy"]);
 
 /**
  * Checks a note posted by the browser and keeps only safe, expected fields (anything else is dropped).
  * Returns null for anything that doesn't look like one of our own events.
  */
-export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eventId: string; path: string; custom: Record<string, unknown>; externalId?: string; user?: { phone: string; name: string; area?: string } } | null {
+export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eventId: string; path: string; custom: Record<string, unknown>; externalId?: string; visitorId?: string; user?: { phone: string; name: string; area?: string } } | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const name = r.name;
@@ -181,6 +186,7 @@ export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eve
     : [];
   const contentName = typeof c.content_name === "string" ? c.content_name.slice(0, 60) : undefined;
   const xid = typeof r.xid === "string" && /^[0-9a-f]{64}$/.test(r.xid) ? r.xid : undefined;
+  const vid = typeof r.vid === "string" && /^[0-9a-f]{64}$/.test(r.vid) ? r.vid : undefined;
   // InitiateCheckout only: what she typed at checkout (hashed by sendServerEvents before it leaves the server).
   const u = name === "InitiateCheckout" && r.user && typeof r.user === "object" ? (r.user as Record<string, unknown>) : null;
   const user =
@@ -192,6 +198,7 @@ export function parseClientEvent(raw: unknown): { name: ServerEvent["name"]; eve
     eventId,
     path,
     ...(xid && { externalId: xid }),
+    ...(vid && { visitorId: vid }),
     ...(user && { user }),
     custom: {
       ...(ids.length && { content_ids: ids }),

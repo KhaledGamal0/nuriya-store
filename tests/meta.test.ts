@@ -110,3 +110,54 @@ test("InitiateCheckout: customer details accepted only on InitiateCheckout, only
   for (const k of ["ph", "fn", "ln", "st", "ct", "country", "external_id"]) assert.match(e.user_data[k][0], /^[0-9a-f]{64}$/, k);
   assert.ok(!/1012345678|sara|ahmed|alexandria/i.test(body), "nothing in clear");
 });
+
+// Oct 25 2026: anonymous visitor id (nuriya_vid) as external_id on every event; server PageView copy.
+test("external_id: visitor id first, then her scrambled phone; PageView server copy has no product data", async () => {
+  const { sendServerEvents, purchaseEvent, parseClientEvent } = await import("../lib/meta-capi.ts");
+  const { createHash } = await import("node:crypto");
+  process.env.META_CAPI_TOKEN = "test-token";
+  const vid = "a1".repeat(32);
+  let body = "";
+  const real = globalThis.fetch;
+  globalThis.fetch = (async (_u: unknown, init?: RequestInit) => { body = String(init?.body); return new Response("{}"); }) as typeof fetch;
+  try {
+    await sendServerEvents([purchaseEvent({ ...order, visitorId: vid })]);
+    const p = JSON.parse(body).data[0].user_data;
+    assert.deepEqual(p.external_id, [vid, createHash("sha256").update("201012345678").digest("hex")]);
+    assert.ok(!body.includes("01012345678") && !body.includes("Sara"), "no phone or name in clear");
+    await sendServerEvents([{ name: "PageView", eventId: "pv-abcdef123456", url: "https://nuriya.app/", visitor: { ip: "198.51.100.7", userAgent: "ua", visitorId: vid, fbp: "fb.1.1.1" }, custom: {} }]);
+    const pv = JSON.parse(body).data[0];
+    assert.equal(pv.event_name, "PageView");
+    assert.equal(pv.event_id, "pv-abcdef123456");
+    assert.equal(pv.custom_data, undefined);
+    assert.deepEqual(pv.user_data.external_id, [vid]);
+    assert.equal(pv.user_data.client_ip_address, "198.51.100.7");
+    assert.equal(pv.user_data.fbp, "fb.1.1.1");
+    await sendServerEvents([{ name: "ViewContent", eventId: "vc-abcdef123456", url: "https://nuriya.app/", visitor: { ip: null, userAgent: null, visitorId: "not-hex" }, custom: {} }]);
+    assert.equal(JSON.parse(body).data[0].user_data.external_id, undefined, "a malformed visitor id is dropped");
+  } finally {
+    globalThis.fetch = real;
+  }
+  const n = parseClientEvent({ name: "PageView", eventId: "pv-abcdef123456", path: "/", custom: {}, vid });
+  assert.equal(n?.name, "PageView");
+  assert.equal(n?.visitorId, vid);
+  assert.equal(parseClientEvent({ name: "PageView", eventId: "pv-abcdef123456", path: "/", custom: {}, vid: "x" })?.visitorId, undefined);
+  assert.equal(parseClientEvent({ name: "Lead", eventId: "ld-abcdef123456", path: "/", custom: {} }), null, "unknown events still refused");
+});
+
+test("start-up snippets: visitor id cookie made once (64 hex, 1 year) and passed to the Pixel as external_id", async () => {
+  const { fbCookies, fbInit } = await import("../lib/pixel.ts");
+  const jar: string[] = [];
+  const doc = { get cookie() { return jar.map((c) => c.split(";")[0]).join("; "); }, set cookie(v: string) { const k = v.split("=")[0]; const i = jar.findIndex((c) => c.startsWith(k + "=")); if (i >= 0) jar[i] = v; else jar.push(v); } };
+  const calls: unknown[][] = [];
+  const win: Record<string, unknown> = {};
+  const run = (code: string) => new Function("document", "location", "crypto", "window", "fbq", code)(doc, { search: "" }, globalThis.crypto, win, (...a: unknown[]) => calls.push(a));
+  run(fbCookies);
+  const first = /nuriya_vid=([0-9a-f]{64})/.exec(doc.cookie)?.[1];
+  assert.ok(first, "cookie created");
+  assert.match(jar.find((c) => c.startsWith("nuriya_vid="))!, /max-age=31536000; SameSite=Lax; Secure/);
+  run(fbCookies);
+  assert.equal(/nuriya_vid=([0-9a-f]{64})/.exec(doc.cookie)?.[1], first, "same id on the next visit");
+  assert.match(fbInit("123"), /external_id/);
+  assert.doesNotMatch(fbInit("123"), /track','PageView/, "first PageView now comes from MetaPixel with an event id");
+});

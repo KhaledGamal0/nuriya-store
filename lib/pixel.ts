@@ -19,9 +19,27 @@ export function pixel(event: string, params: Record<string, unknown> = {}, event
 
 export const egp = (piasters: number) => Math.round(piasters) / 100;
 
-/** Start-up snippet (inline, runs before the page starts): a tiny queue + init + first PageView. */
+/**
+ * Start-up snippet (inline, runs before the page starts): a tiny queue + init with the visitor id (external_id).
+ * Every PageView, the first included, is sent by components/MetaPixel.tsx with an event id and a server copy.
+ */
 export const fbInit = (id: string) =>
-  `!function(f,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}(window);fbq('init','${id}');fbq('track','PageView');`;
+  `!function(f,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}(window);var v=/(?:^|; )nuriya_vid=([0-9a-f]{64})/.exec(document.cookie);fbq('init','${id}',v?{external_id:v[1]}:{});`;
+
+/**
+ * Anonymous visitor id (Khaled, Oct 25 2026): 64 random hex characters in a first-party cookie (1 year), set by the
+ * start-up snippet. Sent to Meta as external_id on every event (browser and server), so all of one visitor's
+ * events join up. Random, not derived from anything about her.
+ */
+const VID_COOKIE = "nuriya_vid";
+export function visitorId(): string | undefined {
+  try {
+    const m = new RegExp(`(?:^|; )${VID_COOKIE}=([0-9a-f]{64})`).exec(document.cookie);
+    return m?.[1];
+  } catch {
+    return undefined;
+  }
+}
 
 
 /** A unique id per event, shared by the browser Pixel and its server copy (so Meta keeps one). */
@@ -44,15 +62,6 @@ function returningId(): string | undefined {
   }
 }
 
-/** On every page load: if she bought here before, tell the Pixel who she is (scrambled id only). */
-export function pixelReturning(): void {
-  if (typeof window === "undefined") return;
-  try {
-    const fbq = (window as unknown as { fbq?: Fbq }).fbq;
-    const xid = returningId();
-    if (fbq && xid) fbq("init", META_PIXEL_ID, { external_id: xid });
-  } catch {}
-}
 
 /** What she typed at checkout, for Advanced Matching (the Pixel scrambles it on the phone before sending). */
 export type CheckoutCustomer = { phone: string; name: string; area?: string };
@@ -75,25 +84,26 @@ function matchData(c: CheckoutCustomer): Record<string, string> {
   return data;
 }
 
-const PREFIX: Record<string, string> = { ViewContent: "vc", AddToCart: "atc", InitiateCheckout: "ic" };
+const PREFIX: Record<string, string> = { PageView: "pv", ViewContent: "vc", AddToCart: "atc", InitiateCheckout: "ic" };
 
 /**
  * Browser Pixel event + the same event from the server (Conversions API), sharing one event id.
  * The server copy is a tiny background note (sendBeacon) that never delays the page. Only on the live
  * site (where the Pixel exists); local and test runs send nothing.
  */
-export function pixelBoth(event: "ViewContent" | "AddToCart" | "InitiateCheckout", params: Record<string, unknown>, customer?: CheckoutCustomer): void {
+export function pixelBoth(event: "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout", params: Record<string, unknown>, customer?: CheckoutCustomer): void {
   if (typeof window === "undefined") return;
   try {
     const fbq = (window as unknown as { fbq?: Fbq }).fbq;
     if (!fbq) return;
     const eventId = newEventId(PREFIX[event] ?? "ev");
     // InitiateCheckout with what she typed (Khaled, Oct 23 2026): Advanced Matching first, then the event.
-    if (customer) fbq("init", META_PIXEL_ID, matchData(customer));
+    const vid = visitorId();
+    if (customer) fbq("init", META_PIXEL_ID, { ...matchData(customer), ...(vid && { external_id: vid }) });
     pixel(event, params, eventId);
     const xid = returningId();
     const user = customer ? { phone: customer.phone.replace(/\D/g, ""), name: customer.name.trim(), ...(customer.area && { area: customer.area }) } : undefined;
-    const note = JSON.stringify({ name: event, eventId, path: location.pathname, custom: params, ...(xid && { xid }), ...(user && { user }) });
+    const note = JSON.stringify({ name: event, eventId, path: location.pathname, custom: params, ...(vid && { vid }), ...(xid && { xid }), ...(user && { user }) });
     const blob = new Blob([note], { type: "application/json" });
     if (!navigator.sendBeacon?.("/api/meta-event", blob)) {
       void fetch("/api/meta-event", { method: "POST", body: note, headers: { "content-type": "application/json" }, keepalive: true }).catch(() => {});
@@ -106,7 +116,7 @@ export function pixelBoth(event: "ViewContent" | "AddToCart" | "InitiateCheckout
  * but it loads late (for speed), so a visitor who leaves quickly would be lost. This tiny start-up snippet
  * saves _fbc (and the _fbp browser id) at once, in Meta's own format, so every event can be matched to the ad.
  */
-export const fbCookies = `(function(){try{var d=document,n=Date.now(),m=/(?:^|; )_fbc=([^;]*)/.exec(d.cookie),q=new URLSearchParams(location.search).get('fbclid'),a='; path=/; max-age=7776000; SameSite=Lax; Secure';if(q&&!(m&&m[1].split('.').slice(3).join('.')===q))d.cookie='_fbc=fb.1.'+n+'.'+q+a;if(!/(?:^|; )_fbp=/.test(d.cookie))d.cookie='_fbp=fb.1.'+n+'.'+Math.floor(Math.random()*9e9+1e9)+a}catch(e){}})()`;
+export const fbCookies = `(function(){try{var d=document,n=Date.now(),m=/(?:^|; )_fbc=([^;]*)/.exec(d.cookie),q=new URLSearchParams(location.search).get('fbclid'),a='; path=/; max-age=7776000; SameSite=Lax; Secure';if(q&&!(m&&m[1].split('.').slice(3).join('.')===q))d.cookie='_fbc=fb.1.'+n+'.'+q+a;if(!/(?:^|; )_fbp=/.test(d.cookie))d.cookie='_fbp=fb.1.'+n+'.'+Math.floor(Math.random()*9e9+1e9)+a;var v=/(?:^|; )nuriya_vid=([0-9a-f]{64})/.exec(d.cookie),h='';if(v)h=v[1];else{var r=new Uint8Array(32);crypto.getRandomValues(r);for(var i=0;i<32;i++)h+=(r[i]+256).toString(16).slice(1)}d.cookie='nuriya_vid='+h+'; path=/; max-age=31536000; SameSite=Lax; Secure'}catch(e){}})()`;
 
 /**
  * Advanced Matching: tell the Pixel who bought (phone + name), so Meta can match the order to her
@@ -119,14 +129,14 @@ export async function pixelCustomer(phone: string, fullName: string, area?: stri
     const fbq = (window as unknown as { fbq?: Fbq }).fbq;
     if (!fbq) return;
     const data = matchData({ phone, name: fullName, area });
-    // external_id: the same scrambled phone the server sends, so browser and server events join up.
+    // Her scrambled phone, saved on this phone so the server can add it to her next visits' events (2nd external_id).
     if (data.ph && crypto?.subtle) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data.ph));
-      data.external_id = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
       try {
-        localStorage.setItem(XID_KEY, data.external_id); // so her next visits are matched too (scrambled id only)
+        localStorage.setItem(XID_KEY, [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join(""));
       } catch {}
     }
-    fbq("init", META_PIXEL_ID, data);
+    const vid = visitorId();
+    fbq("init", META_PIXEL_ID, { ...data, ...(vid && { external_id: vid }) });
   } catch {}
 }
