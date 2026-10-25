@@ -73,6 +73,8 @@
 
 - **Oct 23 2026 (Khaled):** Advanced Matching on InitiateCheckout. Meta InitiateCheckout is now sent once per checkout visit as soon as she has typed a valid phone and her name (with ph 20XXXXXXXXXX, fn, ln, st/ct from the chosen area, country=eg; hashed by the Pixel in the browser and SHA-256 on the server, same event_id); if she leaves before that, it is sent without them. Vercel "5 · Opened checkout" unchanged. Checkout behaviour unchanged.
 
-- **Oct 24 2026 (Khaled):** the offer popup also shows for the limited-pieces offer: "Limited launch offer · 17% off · 1,200 → 1,000 EGP · Only N pieces left at this price" (real count, no countdown), once per visit on the first page opened (any page except checkout), same look as the sale popup; hides by itself when the last offer piece sells.
+- **Oct 24 2026 (Khaled):** the offer popup also shows for the limited-pieces offer: "Limited launch offer · 17% off · 1,200 → 1,000 EGP · Limited pieces left at this price" (Khaled, same day: no number shown; no countdown), once per visit on the first page opened (any page except checkout), same look as the sale popup; hides by itself when the last offer piece sells.
 
 - **Oct 25 2026 (Khaled, security hardening, no UI change):** added Content-Security-Policy, JSON-LD escaping, per-device limit on /api/meta-event, Dependabot + npm audit in CI, docs/15-security.md checklist. Repo stays PUBLIC (Khaled, Oct 25 2026): no secrets in code; private would cost ~$25/month in GitHub Actions minutes and lose free secret scanning.
+
+- **Oct 25 2026 (Khaled):** every request is handled as his senior expert: context first, numbered to-do list, validate each point (technical, business, UI/UX, security) and propose a better option when needed, cover edge cases, stay lean, short English report. Saved in CLAUDE.md ("How to handle every request").

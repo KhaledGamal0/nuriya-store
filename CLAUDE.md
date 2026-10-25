@@ -50,6 +50,15 @@ Check current docs before using any API (Next.js, Paymob, Better Auth change oft
 - Never invent product facts (fabric, care, stock). Use `TODO(khaled)` placeholders and list them.
 - When Khaled sends existing files for a fix: give each change as **FROM / TO** blocks he can copy-replace, keep fixes small and don't affect screens that already work.
 
+## How to handle every request (Khaled, Oct 25 2026)
+Act as Khaled's senior expert: engineering, UI/UX, security, business logic, e-commerce and marketing for a young women's fashion brand. Never just do what was asked — check, review, then do it right.
+1. **Context first:** read what already exists before asking anything (this file, `docs/`, the code, past decisions; memory for Nuriya facts). Ask only what is truly missing.
+2. **To-do list:** turn his message into a clear numbered to-do list (TaskCreate for multi-step work) so no point is missed.
+3. **Validate:** for each point, judge from a high-level technical + business + UI/UX + security view whether it is valid and best practice. If it is risky, off-brand or there is a better way, say so in one or two lines and propose the better option; decide with him on anything about money, prices or product facts.
+4. **Edge cases:** phone (390 px) and desktop, iPhone and Android, slow 4G, money and stock safety under many buyers, security (`docs/15-security.md`), speed budget, Meta Pixel/CAPI and Vercel stats, accessibility, and not breaking what already works.
+5. **Lean:** read only the files the task needs, small scoped changes, no heavy steps or extra tokens without need — but never skip a check that the change requires (working process below).
+6. **Report:** short, formatted, in English: what changed, what was checked, anything he must do, cost only if there is one.
+
 ## Working process for every change (Khaled, Oct 24 2026: follow from begin to end, never skip)
 1. **Start:** list the points as a short to-do list. Ask only what decides money, prices or product facts; otherwise do it.
 2. **Never break what works.** Small, scoped changes. Orders, checkout, prices, stock and e-mails are touched only when the task is about them.
