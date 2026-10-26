@@ -9,7 +9,7 @@ import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
 import { formatEgp, formatFee } from "@/lib/money";
-import { AREA_NOTES, areasForPicker } from "@/lib/shipping";
+import { AREA_NOTES, areasForPicker } from "@/lib/delivery";
 import { useStore } from "./StoreProvider";
 import { keepReceipt } from "@/lib/receipt";
 import { fieldError, formatPhoneInput, normalizePhone, type FieldErrors } from "@/lib/checkout";

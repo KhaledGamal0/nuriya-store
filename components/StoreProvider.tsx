@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { afterSale, priceFor, type CatalogData, type ColorId, type SizeId } from "@/lib/catalog";
-import type { Area } from "@/lib/shipping";
+import type { Area } from "@/lib/delivery";
 
 type Store = {
   catalog: CatalogData;
