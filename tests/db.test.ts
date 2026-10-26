@@ -45,7 +45,8 @@ test("a price change in the database is what checkout charges", { skip }, async 
       { catalog: await getCatalog(), areas: await getAreas() },
     );
     assert.ok(r.ok);
-    if (r.ok) assert.equal(r.order.totalPiasters, 2 * 125_000 + 7_500);
+    const cairoFee = (await getAreas()).find((a) => a.id === "cairo")!.feePiasters; // 0 while delivery is free
+    if (r.ok) assert.equal(r.order.totalPiasters, 2 * 125_000 + cairoFee);
   } finally {
     await sql!`UPDATE products SET price_piasters = 100000 WHERE slug = 'quiet-confidence'`;
   }

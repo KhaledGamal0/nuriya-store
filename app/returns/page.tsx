@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { ReturnsPolicy } from "@/components/ReturnsPolicy";
-import { AREA_NOTES, areasByFee, minFee } from "@/lib/shipping";
+import { AREA_NOTES, areasByFee, deliveryLine, freeDeliveryLabel, minFee } from "@/lib/shipping";
 import { getAreas } from "@/lib/store";
-import { formatEgp } from "@/lib/money";
+import { formatEgp, formatFee } from "@/lib/money";
 import { cardPaymentsEnabled } from "@/lib/orders";
 
 export const metadata: Metadata = {
@@ -33,11 +33,11 @@ export default async function ReturnsPage() {
                   ? AREA_NOTES[g.areas[0]!.id] && <small>{AREA_NOTES[g.areas[0]!.id]}</small>
                   : <small>{g.areas.map((a) => a.nameEn).join(" · ")}</small>}
               </div>
-              <span className="fee">{formatEgp(g.feePiasters)}</span>
+              <span className="fee">{formatFee(g.feePiasters)}</span>
             </li>
           ))}
         </ul>
-        <p className="small">The exact fee for your area shows at checkout, from {formatEgp(minFee(areas))}.</p>
+        <p className="small">{freeDeliveryLabel(areas) ? `${deliveryLine(areas)}.` : `The exact fee for your area shows at checkout, from ${formatEgp(minFee(areas))}.`}</p>
       </section>
 
       <section className="page-sec" aria-labelledby="pay-title">

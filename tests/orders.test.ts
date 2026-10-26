@@ -399,3 +399,25 @@ test("the optional second number is saved with the order", { skip }, async () =>
   assert.equal(o.alt_phone, "01223334444");
   await assert.rejects(sql!`UPDATE orders SET alt_phone = '12345' WHERE number = ${r.ok ? r.number : ""}`, "the database refuses a malformed number");
 });
+
+test("free delivery in Cairo & Giza: order saved with 0 delivery; a bag priced before the change is refused, never charged", { skip }, async () => {
+  const [{ zone } = noRow()] = await sql!`SELECT zone_id AS zone FROM shipping_areas WHERE slug = 'cairo'`;
+  const [{ fee: before } = noRow()] = await sql!`SELECT fee_piasters AS fee FROM shipping_zones WHERE id = ${zone}`;
+  await sql!`UPDATE shipping_zones SET fee_piasters = 7500 WHERE id = ${zone}`;
+  try {
+    const stale = await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 1 }], "cairo"); // priced with 75 delivery
+    await sql!`UPDATE shipping_zones SET fee_piasters = 0 WHERE id = ${zone}`;
+    assert.deepEqual(await place(stale), { ok: false, reason: "price_changed" }, "old total refused, she refreshes and sees Free");
+    const r = await place(await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 2 }], "cairo"));
+    assert.ok(r.ok);
+    const [o = noRow()] = await sql!`SELECT shipping_piasters, subtotal_piasters, total_piasters FROM orders WHERE number = ${r.ok ? r.number : ""}`;
+    assert.equal(o.shipping_piasters, 0);
+    assert.equal(o.total_piasters, o.subtotal_piasters);
+    const a = await place(await valid(nextPhone()));
+    assert.ok(a.ok);
+    const [x = noRow()] = await sql!`SELECT shipping_piasters FROM orders WHERE number = ${a.ok ? a.number : ""}`;
+    assert.equal(x.shipping_piasters, 9_000, "Alexandria still pays 90");
+  } finally {
+    await sql!`UPDATE shipping_zones SET fee_piasters = ${before} WHERE id = ${zone}`;
+  }
+});

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { COLORS, colorFromSlug, productPath, COLOR_SLUG } from "@/lib/catalog";
 import { getAreas, getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
-import { minFee } from "@/lib/shipping";
+import { deliveryLine, freeDeliveryLabel, minFee } from "@/lib/shipping";
 import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
@@ -70,7 +70,10 @@ export default async function ProductPage({ params }: Params) {
           <SaleNote />
         </div>
         <ProductPurchase color={color} />
-        <p className="small">Cash on delivery. Check your order with the courier before you accept.</p>
+        <p className="small">
+          {freeDeliveryLabel(areas) && <b>Free delivery in {freeDeliveryLabel(areas)}. </b>}
+          Cash on delivery. Check your order with the courier before you accept.
+        </p>
         <div className="acc">
           <details>
             <summary>Details</summary>
@@ -92,7 +95,7 @@ export default async function ProductPage({ params }: Params) {
           <details>
             <summary>Delivery and returns</summary>
             <div className="acc-in">
-              <p>Delivery across Egypt from {formatEgp(minFee(areas))}. The exact fee shows at checkout.</p>
+              <p>{freeDeliveryLabel(areas) ? `${deliveryLine(areas)}.` : `Delivery across Egypt from ${formatEgp(minFee(areas))}.`} The exact fee shows at checkout.</p>
               <p>Open your parcel and check it while the courier is with you. After the courier leaves, returns and exchanges are closed.</p>
             </div>
           </details>

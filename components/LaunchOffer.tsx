@@ -4,6 +4,7 @@ import { track } from "@/lib/track";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatEgp } from "@/lib/money";
+import { freeDeliveryLabel } from "@/lib/shipping";
 import { percentOff } from "@/lib/catalog";
 import { Dialog, CloseButton } from "./Dialog";
 import { useStore } from "./StoreProvider";
@@ -21,7 +22,8 @@ const SEEN = "nuriya-sale-seen";
  * backdrop close it, the page behind is inert. Disappears by itself when the sale ends.
  */
 export function LaunchOffer() {
-  const { catalog } = useStore();
+  const { catalog, areas } = useStore();
+  const free = freeDeliveryLabel(areas);
   const sale = catalog.sale;
   const piecesLeft = !sale && catalog.compareAtPiasters && (catalog.offerPiecesLeft ?? 0) > 0 ? catalog.offerPiecesLeft! : 0;
   const active = Boolean(sale) || piecesLeft > 0;
@@ -84,6 +86,7 @@ export function LaunchOffer() {
           ) : (
             <p className="lo-t">Limited pieces left at this price</p>
           )}
+          {free && <p className="lo-f">Free delivery in {free}</p>}
           <p className="small">Both colours, every size. Cash on delivery across Egypt.</p>
           <button
             type="button"

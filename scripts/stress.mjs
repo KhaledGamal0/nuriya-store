@@ -20,6 +20,9 @@ const CHECKOUT_LIMIT = 30; // LIMITS.checkoutPerDevice.max in lib/orders.ts
 let ipSeq = 1;
 let seq = 0;
 const nextPhone = () => `0107${String(Date.now() % 1000).padStart(3, "0")}${String(seq++).padStart(4, "0")}`;
+// Cairo & Giza delivery fee from the database (0 while delivery there is free, Oct 26 2026), so totals stay exact.
+const [{ fee: CAIRO_FEE } = { fee: 7500 }] = await db`SELECT z.fee_piasters AS fee FROM shipping_areas a JOIN shipping_zones z ON z.id = a.zone_id WHERE a.slug = 'cairo'`;
+const egpText = (piasters) => `${(piasters / 100).toLocaleString("en-US")} EGP`;
 const ordersFor = async (phone) => (await db`SELECT number, total_piasters FROM orders WHERE customer_phone = ${phone}`).map((r) => ({ ...r }));
 
 async function scenario(name, fn) {
@@ -205,7 +208,8 @@ await scenario("order saved but the answer is lost", async () => {
   // Refresh keeps the confirmation; Back does not re-order.
   await page.reload({ waitUntil: "networkidle" });
   if (!(await page.getByText("Order placed successfully").isVisible())) add("refresh", "thank-you page lost its confirmation after refresh");
-  if (!(await page.evaluate(() => document.body.innerText.includes("2,075 EGP")))) add("refresh", "order summary missing after refresh (expected 2,075 EGP)");
+  const want2 = egpText(200000 + CAIRO_FEE);
+  if (!(await page.evaluate((w) => document.body.innerText.includes(w), want2))) add("refresh", `order summary missing after refresh (expected ${want2})`);
   await page.goBack({ waitUntil: "networkidle" }).catch(() => {});
   await page.waitForTimeout(800);
   if ((await ordersFor(phone)).length !== 1) add("back button", "going back created another order");
@@ -226,7 +230,8 @@ await scenario("tampered bag", async () => {
   await fillCheckout(page, phone);
   if (page.errors.length) add("tampered bag", `checkout crashed: ${page.errors[0].slice(0, 120)}`);
   const text = await page.evaluate(() => document.body.innerText);
-  if (!text.includes("5,075 EGP")) add("tampered bag", "checkout total should be 5,075 EGP (5 pieces max + Cairo delivery)");
+  const want5 = egpText(500000 + CAIRO_FEE);
+  if (!text.includes(want5)) add("tampered bag", `checkout total should be ${want5} (5 pieces max + Cairo delivery)`);
   const r = await submit(page);
   const [o] = await ordersFor(phone);
   if (!r.done || !o) add("tampered bag", `order did not go through: ${r.message}`);

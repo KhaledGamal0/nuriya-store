@@ -176,3 +176,4 @@ Update this file in the same commit as the work. Last update: 2026-10-25.
 | Real-phone test, test orders, courier dry run | P7 | |
 | Offer kept at 1,000 until a set time (ad end), then the first N pieces, then 1,200 | DONE | Oct 25: admin task start-offer `ends` = count-from time; live: 7 pieces from Thu 29 Oct 21:00 Cairo |
 | Meta external_id for every visitor (random first-party id) + PageView via Conversions API | DONE | Oct 25: `lib/pixel.ts`, `lib/meta-capi.ts` |
+| Free delivery in Cairo & Giza (until Khaled says stop), shown as "Free" everywhere, popup line; admin task set-delivery-fee | DONE | Oct 26: migration 0015, `lib/shipping.ts` deliveryLine/freeDeliveryLabel, `lib/money.ts` formatFee |
