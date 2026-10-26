@@ -8,7 +8,7 @@ import { startTransition, useActionState, useEffect, useRef, useState, type Reac
 import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
-import { formatEgp } from "@/lib/money";
+import { formatEgp, formatFee } from "@/lib/money";
 import { AREA_NOTES, areasForPicker } from "@/lib/shipping";
 import { useStore } from "./StoreProvider";
 import { keepReceipt } from "@/lib/receipt";
@@ -51,7 +51,7 @@ function Summary({ feePiasters }: { feePiasters?: number }) {
         </div>
         <div>
           <dt>Delivery</dt>
-          <dd>{feePiasters === undefined ? "Choose area" : formatEgp(feePiasters)}</dd>
+          <dd>{feePiasters === undefined ? "Choose area" : formatFee(feePiasters)}</dd>
         </div>
         <div className="big">
           <dt>Total</dt>
@@ -314,7 +314,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
             >
               <option value="">Choose your area</option>
               {picker.map((g) => (
-                <optgroup key={g.feePiasters} label={`${g.label} · ${formatEgp(g.feePiasters)}`}>
+                <optgroup key={g.feePiasters} label={`${g.label} · ${g.feePiasters === 0 ? "Free delivery" : formatEgp(g.feePiasters)}`}>
                   {g.areas.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.nameEn}

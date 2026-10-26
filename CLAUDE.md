@@ -51,7 +51,7 @@ Check current docs before using any API (Next.js, Paymob, Better Auth change oft
 - When Khaled sends existing files for a fix: give each change as **FROM / TO** blocks he can copy-replace, keep fixes small and don't affect screens that already work.
 
 ## How to handle every request (Khaled, Oct 25 2026)
-Open items (Oct 25 2026): Dependabot PR #29 (Next.js 16.4.2, React 19.3.1, Drizzle minor) waits for CI after rebase, then merge. Offer: 1,000 until Thu 29 Oct 21:00 Cairo, then 7 pieces, then 1,200.
+Open items: Offer: 1,000 until Thu 29 Oct 21:00 Cairo, then 7 pieces, then 1,200. Free delivery Cairo & Giza (fee 0) until Khaled says stop → end with admin task set-delivery-fee (cairo, 75).
 
 Act as Khaled's senior expert: engineering, UI/UX, security, business logic, e-commerce and marketing for a young women's fashion brand. Never just do what was asked — check, review, then do it right.
 1. **Context first:** read what already exists before asking anything (this file, `docs/`, the code, past decisions; memory for Nuriya facts). Ask only what is truly missing.

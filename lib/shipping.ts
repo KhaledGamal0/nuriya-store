@@ -55,3 +55,26 @@ export function areasByFee(list: readonly Area[] = AREAS): { feePiasters: number
 export function minFee(list: readonly Area[] = AREAS): number {
   return list.length ? Math.min(...list.map((a) => a.feePiasters)) : 0;
 }
+
+/** The lowest fee that isn't free (e.g. 90 EGP while Cairo & Giza is free). */
+export function minPaidFee(list: readonly Area[] = AREAS): number {
+  const paid = list.map((a) => a.feePiasters).filter((f) => f > 0);
+  return paid.length ? Math.min(...paid) : 0;
+}
+
+/**
+ * Where delivery is free right now ("Cairo & Giza"), or null. Read from the fees themselves (the database), so
+ * free delivery shows or hides everywhere on its own when the fee changes (admin task set-delivery-fee).
+ */
+export function freeDeliveryLabel(list: readonly Area[] = AREAS): string | null {
+  return areasByFee(list).find((g) => g.feePiasters === 0)?.label ?? null;
+}
+
+/** One short line about delivery: "Free delivery in Cairo & Giza. Other areas from 90 EGP" / "Delivery from 75 EGP". */
+export function deliveryLine(list: readonly Area[] = AREAS): string {
+  const free = freeDeliveryLabel(list);
+  const from = (free ? minPaidFee(list) : minFee(list)) / 100;
+  const egp = `${from.toLocaleString("en-US")} EGP`;
+  if (!free) return `Delivery from ${egp}`;
+  return from ? `Free delivery in ${free}. Other areas from ${egp}` : `Free delivery in ${free}`;
+}

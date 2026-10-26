@@ -157,3 +157,31 @@ test("offer pieces: the bag is priced 1,000 until the offer pieces run out, then
   assert.ok(priceBag(from, nine, Date.parse("2026-10-29T17:59:59Z"))?.every((l) => l.unitPiasters === 100_000), "before 9 pm: every piece at the offer, no split");
   assert.deepEqual(priceBag(from, nine, Date.parse("2026-10-29T18:00:00Z"))?.map((l) => l.unitPiasters), [100_000, 120_000, 120_000], "from 9 pm: 3 left → split");
 });
+
+// Oct 26 2026 (Khaled): free delivery in Cairo & Giza — fee 0 in the database; every screen says "Free".
+test("free delivery: fee 0 shows as Free, the total adds nothing, other areas keep their fee", async () => {
+  const { formatFee } = await import("../lib/money.ts");
+  const { deliveryLine, freeDeliveryLabel, minPaidFee, areasForPicker } = await import("../lib/shipping.ts");
+  const { staticCatalog } = await import("../lib/catalog.ts");
+  assert.equal(formatFee(0), "Free");
+  assert.equal(formatFee(9_000), "90 EGP");
+  const free = AREAS.map((a) => (a.id === "cairo" ? { ...a, feePiasters: 0 } : a));
+  assert.equal(freeDeliveryLabel(free), "Cairo & Giza");
+  assert.equal(freeDeliveryLabel(AREAS), null, "no free area: nothing says free");
+  assert.equal(minPaidFee(free), 9_000);
+  assert.equal(deliveryLine(free), "Free delivery in Cairo & Giza. Other areas from 90 EGP");
+  assert.equal(deliveryLine(AREAS), "Delivery from 75 EGP");
+  assert.equal(areasForPicker(free)[0]?.feePiasters, 0, "Cairo & Giza stays first in the picker");
+  const ctx = { catalog: { ...staticCatalog(), pricePiasters: 100_000 }, areas: free };
+  const cart = [{ color: "cream", size: "S/M", qty: 2 }];
+  const cairo = validateCheckout({ ...good, areaId: "cairo", cart }, ctx);
+  assert.ok(cairo.ok && cairo.order.shippingPiasters === 0 && cairo.order.totalPiasters === cairo.order.subtotalPiasters, "Cairo & Giza: total = pieces only");
+  const alex = validateCheckout({ ...good, areaId: "alexandria", cart }, ctx);
+  assert.ok(alex.ok && alex.order.shippingPiasters === 9_000, "Alexandria still pays 90");
+  const gizaCountry = validateCheckout({ ...good, areaId: "giza-countryside", cart }, ctx);
+  assert.ok(gizaCountry.ok && gizaCountry.order.shippingPiasters === 9_000, "Giza countryside still pays 90");
+  const capital = validateCheckout({ ...good, areaId: "new-administrative-capital", cart }, ctx);
+  assert.ok(capital.ok && capital.order.shippingPiasters === 13_500, "New Capital still pays 135");
+  const tampered = validateCheckout({ ...good, areaId: "alexandria", cart, shippingPiasters: 0 } as unknown as Parameters<typeof validateCheckout>[0], ctx);
+  assert.ok(tampered.ok && tampered.order.shippingPiasters === 9_000, "a fee sent by the browser is ignored");
+});

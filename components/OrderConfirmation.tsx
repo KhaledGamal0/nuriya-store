@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useStore } from "./StoreProvider";
 import { ClearBag } from "./ClearBag";
-import { formatEgp } from "@/lib/money";
+import { formatEgp, formatFee } from "@/lib/money";
 import { prettyPhone, readReceipt, type Receipt } from "@/lib/receipt";
 import { preview } from "@/lib/blur";
 
@@ -164,7 +164,7 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
               </div>
               <div>
                 <dt>Delivery</dt>
-                <dd>{formatEgp(receipt.shippingPiasters)}</dd>
+                <dd>{formatFee(receipt.shippingPiasters)}</dd>
               </div>
               <div className="big">
                 <dt>Total</dt>

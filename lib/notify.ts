@@ -3,7 +3,7 @@
 // retries it (for up to 7 days, so a wrong setting fixed later still delivers every waiting order),
 // and the hourly "Order watch" workflow raises a phone alert.
 import type { Sql } from "./db/index.ts";
-import { formatEgp } from "./money.ts";
+import { formatEgp, formatFee } from "./money.ts";
 import { siteUrl } from "./site.ts";
 
 type Fetch = typeof fetch;
@@ -54,7 +54,7 @@ export function whatsappLink(o: Omit<OrderForEmail, "id" | "created_at">): strin
     ...o.items.map((i) => `• ${i.qty} × ${plain(i.product_name)} — ${plain(i.color_name)}, ${i.size}  ·  ${formatEgp(i.line_piasters)}`),
     ``,
     `Subtotal: ${formatEgp(o.subtotal_piasters)}`,
-    `Delivery (${plain(o.area_name)}): ${formatEgp(o.shipping_piasters)}`,
+    `Delivery (${plain(o.area_name)}): ${formatFee(o.shipping_piasters)}`,
     `*Total: ${formatEgp(o.total_piasters)}*`,
     `*Payment:* ${cod ? "cash on delivery" : "paid by card"}`,
     ``,
@@ -89,7 +89,7 @@ export function orderEmail(o: OrderForEmail, stock: StockRow[] = []): { subject:
     "",
     "ITEMS",
     ...o.items.map((i) => `  ${i.qty} × ${i.product_name} — ${i.color_name}, ${i.size} ........ ${formatEgp(i.line_piasters)}`),
-    `  Subtotal ${formatEgp(o.subtotal_piasters)} · Delivery ${formatEgp(o.shipping_piasters)}`,
+    `  Subtotal ${formatEgp(o.subtotal_piasters)} · Delivery ${formatFee(o.shipping_piasters)}`,
     `  TOTAL ${formatEgp(o.total_piasters)}${cod ? " — collect in cash" : ""}`,
     "",
     "CUSTOMER",
@@ -162,7 +162,7 @@ export function orderEmail(o: OrderForEmail, stock: StockRow[] = []): { subject:
   <div style="${label}">Items</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${itemRows}</table>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #E7C7D1;margin-top:4px;padding-top:8px">
-    ${money("Subtotal", formatEgp(o.subtotal_piasters))}${money("Delivery", formatEgp(o.shipping_piasters))}${money("Total", formatEgp(o.total_piasters), true)}
+    ${money("Subtotal", formatEgp(o.subtotal_piasters))}${money("Delivery", formatFee(o.shipping_piasters))}${money("Total", formatEgp(o.total_piasters), true)}
   </table>
 </td></tr>
 ${

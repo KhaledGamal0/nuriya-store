@@ -95,3 +95,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Security headers (CSP, HSTS, framing, nosniff) and per-device limit | tests/security.test.ts |
 | Offer counted from a future time: no piece limit and no split before it (bag and order), then N pieces, then full price | tests/orders.test.ts, tests/checkout.test.ts |
 | Meta: visitor id external_id on all events, PageView server copy (dedup by event_id), visitor id in Purchase | tests/meta.test.ts |
+| Free delivery: fee 0 shows "Free", total = pieces only, other areas keep fees, browser fee ignored, stale bag refused, e-mail/WhatsApp say Free | tests/checkout.test.ts, tests/orders.test.ts, tests/fuzz.test.ts; stress totals read the fee from the DB |

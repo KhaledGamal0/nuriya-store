@@ -27,3 +27,5 @@ Source image: `brand-assets/reference/direction-courier-pricelist.jpg`. Fees in 
 - Fee shown at checkout by governorate (+ area for Cairo/Giza/new cities) — editable in admin, never hard-coded
 - Same-day can become a paid option later for Cairo zones
 - Batch "ready to ship" orders into pickups of ≥3
+
+**Free delivery (Oct 26 2026, Khaled):** customers in Cairo & Giza pay 0 (until Khaled says stop). The table above stays Direction's price to Nuriya (Nuriya still pays 75 per Cairo order). Change: Admin tasks → set-delivery-fee.
