@@ -89,3 +89,4 @@
 
 - **Oct 26 2026 (Khaled):** lab JS 183 KB vs 180 budget after the Next.js/React security updates (not caused by free delivery). Real live speed fine (HTML ~0.2 s, all photos < 0.9 s on 4G). Decision: no code churn while the ad runs; trim our own client code back under 180 KB after Oct 29.
 - **Oct 26 2026 (Khaled, update):** keep the 183 KB as is (caused by the framework update, customers do not feel it); touch it only if it grows above 183 KB or the real live speed drops.
+- **Oct 26 2026 (Khaled):** offer count-from moved to **Thu 29 Oct 2026, 11:59 pm Cairo** (the ad runs until 11:59 pm, so the site matches "17% off" to the end). Done with admin task start-offer (1000 / 1200 / 7 / 2026-10-29 23:59).
