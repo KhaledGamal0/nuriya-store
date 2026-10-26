@@ -4,7 +4,7 @@ import { track } from "@/lib/track";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatEgp } from "@/lib/money";
-import { freeDeliveryLabel } from "@/lib/shipping";
+import { freeDeliveryLabel } from "@/lib/delivery";
 import { percentOff } from "@/lib/catalog";
 import { Dialog, CloseButton } from "./Dialog";
 import { useStore } from "./StoreProvider";

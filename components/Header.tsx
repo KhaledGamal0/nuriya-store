@@ -9,7 +9,7 @@ import { Dialog, CloseButton } from "./Dialog";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
 import { formatEgp } from "@/lib/money";
-import { deliveryLine } from "@/lib/shipping";
+import { deliveryLine } from "@/lib/delivery";
 import { useStore } from "./StoreProvider";
 
 const INSTAGRAM = "https://www.instagram.com/nuriya.eg";
