@@ -182,6 +182,6 @@ test("free delivery: fee 0 shows as Free, the total adds nothing, other areas ke
   assert.ok(gizaCountry.ok && gizaCountry.order.shippingPiasters === 9_000, "Giza countryside still pays 90");
   const capital = validateCheckout({ ...good, areaId: "new-administrative-capital", cart }, ctx);
   assert.ok(capital.ok && capital.order.shippingPiasters === 13_500, "New Capital still pays 135");
-  const tampered = validateCheckout({ ...good, areaId: "alexandria", cart, shippingPiasters: 0 } as typeof good, ctx);
+  const tampered = validateCheckout({ ...good, areaId: "alexandria", cart, shippingPiasters: 0 } as unknown as Parameters<typeof validateCheckout>[0], ctx);
   assert.ok(tampered.ok && tampered.order.shippingPiasters === 9_000, "a fee sent by the browser is ignored");
 });

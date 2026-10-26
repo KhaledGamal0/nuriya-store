@@ -198,7 +198,7 @@ test("free delivery: order e-mail and WhatsApp message say Free, totals unchange
     number: "NUR-FREE01", customer_name: "Nour", customer_phone: "01012345678", area_name: "Cairo & Giza", address: "12 Tahrir St",
     payment_method: "cod", subtotal_piasters: 200000, shipping_piasters: 0, total_piasters: 200000,
     items: [{ product_name: "Quiet Confidence", color_name: "White", size: "S/M", qty: 2, line_piasters: 200000 }],
-  } as const;
+  } as Parameters<typeof whatsappLink>[0];
   const msg = decodeURIComponent(whatsappLink(o).split("?text=")[1]!);
   assert.ok(msg.includes("Delivery (Cairo & Giza): Free"), msg);
   assert.ok(msg.includes("*Total: 2,000 EGP*"));
