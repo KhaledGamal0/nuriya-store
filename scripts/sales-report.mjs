@@ -15,10 +15,11 @@ const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const LOW = 3;
 
+// Every report names its exact period in Cairo time, never "yesterday" alone (Khaled, Oct 27 2026).
 const NAMES = {
-  daily: { title: "Daily sales", period: "yesterday", prev: "the day before", when: `yesterday, ${d.from}` },
-  weekly: { title: "Weekly sales", period: "the last 7 days", prev: "the 7 days before", when: `${d.from} – ${d.to}` },
-  monthly: { title: "Monthly sales", period: d.month, prev: "the month before", when: d.month },
+  daily: { title: "Daily sales report", period: d.from, prev: "the day before", when: `${d.from} · 00:00 – 23:59 Cairo time` },
+  weekly: { title: "Weekly sales report", period: "these 7 days", prev: "the 7 days before", when: `${d.from} – ${d.to} · 7 full days, Cairo time` },
+  monthly: { title: "Monthly sales report", period: d.month, prev: "the month before", when: `${d.month} · full month, Cairo time` },
 };
 const N = NAMES[mode];
 
@@ -34,7 +35,7 @@ function change(now, before, money = false) {
 const low = d.stock.filter((s) => s.tracked && s.available <= LOW);
 const best = d.byItem[0];
 const subject =
-  `Nuriya ${mode} · ${N.when} · ${plural(C.orders, "order")} · ${egp(C.total)}` +
+  `Nuriya ${mode} report · ${mode === "daily" ? d.from : mode === "weekly" ? `${d.from} – ${d.to}` : d.month} · ${plural(C.orders, "order")} · ${egp(C.total)}` +
   (d.waiting.count ? ` · ${d.waiting.count} to confirm` : "") +
   (low.length ? ` · low stock` : "");
 
@@ -54,7 +55,7 @@ s.push(`<table role="presentation" width="100%" cellspacing="6" style="margin:0 
 if (d.waiting.count) s.push(note(`<b>${plural(d.waiting.count, "order")} waiting for confirmation.</b> Call or WhatsApp each customer: ${esc(d.waiting.numbers.join(", "))}`));
 if (low.length) s.push(note(`<b>Low stock (${LOW} or fewer):</b> ${esc(low.map((x) => `${x.color} ${x.size}: ${x.available <= 0 ? "SOLD OUT" : `${x.available} left`}`).join(" · "))}`));
 // Daily: today's orders so far, so a "0 orders yesterday" report never hides today's orders (Khaled, Oct 27 2026).
-if (d.today) s.push(note(`<b>Today so far (until ${esc(d.today.until)}):</b> ${plural(d.today.orders, "order")} · ${egp(d.today.total)}. ${mode === "daily" ? "Full details in tomorrow's report." : "Not counted above (this report covers full days only)."}`, "#F3F0E8"));
+if (d.today) s.push(note(`<b>Today, ${esc(d.today.date ?? "")} (00:00 – ${esc(d.today.until)}):</b> ${plural(d.today.orders, "order")} · ${egp(d.today.total)}. ${mode === "daily" ? "Full details in tomorrow's report." : "Not counted above (this report covers full days only)."}`, "#F3F0E8"));
 if (!C.orders) s.push(note(`No orders ${N.period}. Check the ad is running (Meta Ads Manager) and visitors are arriving (Vercel → Analytics).`, "#F3F0E8"));
 
 s.push(`<div style="${card}">${h(`Summary · ${N.period}`)}${table([
@@ -79,13 +80,13 @@ s.push(`<div style="${card}">${h("Since the shop opened")}${table([row("Orders",
 s.push(`<p style="${F}font-size:12px;color:#683A46;text-align:center;line-height:1.6">Visitors and the shop steps (viewed → added to bag → checkout → order): Vercel → nuriya-store → Analytics → Events.<br>Ad results: Meta Ads Manager. Daily at 9:00 · weekly on Sunday · monthly on the 1st.</p>`);
 
 const html = `<!doctype html><html><body style="margin:0;background:#FFF0F6;padding:16px"><div style="max-width:560px;margin:auto">
-<h2 style="${F}font-weight:600;color:#3C0E18;margin:4px 0 2px">${esc(N.title)}</h2><p style="${F}margin:0 0 14px;color:#683A46;font-size:13px">${esc(N.when)} · Cairo time</p>
+<h2 style="${F}font-weight:600;color:#3C0E18;margin:4px 0 2px">${esc(N.title)}</h2><p style="${F}margin:0 0 14px;color:#683A46;font-size:13px">Period: ${esc(N.when)}</p>
 ${s.join("\n")}</div></body></html>`;
 
 const text = [
   subject, "",
   `${N.period.toUpperCase()}: ${plural(C.orders, "order")} · ${C.pieces} pcs · ${egp(C.total)}  (${N.prev}: ${P.orders} · ${egp(P.total)})`,
-  ...(d.today ? [`TODAY SO FAR (until ${d.today.until}): ${plural(d.today.orders, "order")} · ${egp(d.today.total)}`] : []),
+  ...(d.today ? [`TODAY, ${d.today.date ?? ""} (00:00 – ${d.today.until}): ${plural(d.today.orders, "order")} · ${egp(d.today.total)}`] : []),
   d.waiting.count ? `TO CONFIRM: ${d.waiting.numbers.join(", ")}` : "TO CONFIRM: none",
   low.length ? `LOW STOCK: ${low.map((x) => `${x.color} ${x.size} ${x.available}`).join(", ")}` : "LOW STOCK: none", "",
   "WHAT SOLD", ...(d.byItem.length ? d.byItem.map((r) => `  ${r.color} ${r.size}: ${r.qty} pcs`) : ["  —"]), "",
