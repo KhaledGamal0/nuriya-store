@@ -43,7 +43,7 @@ SELECT json_build_object(
       SELECT o.created_at AS at, to_char(o.created_at AT TIME ZONE 'Africa/Cairo', 'Dy HH24:MI') AS time, o.number, o.area_name AS area, o.total_piasters AS total, o.status,
              (SELECT string_agg(qty || '× ' || color_name || ' ' || size, ', ') FROM order_items y WHERE y.order_id = o.id) AS items
       FROM o) x), '[]'),
-  'today', (SELECT json_build_object('orders', count(*), 'total', coalesce(sum(total_piasters), 0), 'until', to_char(now() AT TIME ZONE 'Africa/Cairo', 'HH24:MI'))
+  'today', (SELECT json_build_object('orders', count(*), 'total', coalesce(sum(total_piasters), 0), 'until', to_char(now() AT TIME ZONE 'Africa/Cairo', 'HH24:MI'), 'date', to_char(now() AT TIME ZONE 'Africa/Cairo', 'Dy DD Mon'))
             FROM ok, t WHERE ok.created_at >= (t.today AT TIME ZONE 'Africa/Cairo')),
   'waiting', (SELECT json_build_object('count', count(*), 'numbers', coalesce(json_agg(number ORDER BY created_at), '[]'))
       FROM orders WHERE status = 'CONFIRMATION_NEEDED'),
