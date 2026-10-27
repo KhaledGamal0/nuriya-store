@@ -1,0 +1,55 @@
+name: Reports clock
+
+# Sends every report on time in Cairo time (Khaled, Oct 27 2026). Runs every hour at :19 (GitHub delays jobs set
+# on the hour by hours) and works in Africa/Cairo time, so summer/winter clock changes need no edits.
+# Each report goes out once: the first run at or after its time records it in report_runs; later runs skip it.
+#   08:00  health early warning (e-mails only if something is wrong) — every day except Sunday
+#   09:00  daily sales (yesterday + today so far) · Sunday 09:00 weekly sales + weekly health · 1st 09:00 monthly sales
+on:
+  schedule:
+    - cron: "19 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency: reports-clock
+
+jobs:
+  clock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        run: node scripts/neon.mjs env production
+      - name: Send what is due (Cairo time)
+        run: |
+          H=$(TZ=Africa/Cairo date +%-H); D=$(TZ=Africa/Cairo date +%F); DOW=$(TZ=Africa/Cairo date +%u); DOM=$(TZ=Africa/Cairo date +%-d)
+          echo "Cairo now: $(TZ=Africa/Cairo date '+%a %d %b %H:%M')"
+          due=()
+          [ "$H" -ge 8 ] && [ "$DOW" != 7 ] && due+=("health-daily")
+          [ "$H" -ge 9 ] && due+=("sales-daily")
+          [ "$H" -ge 9 ] && [ "$DOW" = 7 ] && due+=("sales-weekly" "health-weekly")
+          [ "$H" -ge 9 ] && [ "$DOM" = 1 ] && due+=("sales-monthly")
+          q() { docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" "$@"; }
+          for k in "${due[@]}"; do
+            new=$(q -tA -c "INSERT INTO report_runs (kind, period) VALUES ('$k', '$D') ON CONFLICT DO NOTHING RETURNING 1")
+            [ "$new" = "1" ] || { echo "$k for $D: already sent"; continue; }
+            case "$k" in
+              sales-daily)   ok=$(gh workflow run sales-report.yml -f report=daily && echo y) ;;
+              sales-weekly)  ok=$(gh workflow run sales-report.yml -f report=weekly && echo y) ;;
+              sales-monthly) ok=$(gh workflow run sales-report.yml -f report=monthly && echo y) ;;
+              health-daily)  ok=$(gh workflow run health-report.yml -f weekly=false && echo y) ;;
+              health-weekly) ok=$(gh workflow run health-report.yml -f weekly=true && echo y) ;;
+            esac
+            if [ "$ok" = "y" ]; then echo "::notice::$k for $D sent"; sleep 20
+            else q -q -c "DELETE FROM report_runs WHERE kind = '$k' AND period = '$D'"; echo "::error::$k could not start; will retry next hour"; exit 1; fi
+          done
