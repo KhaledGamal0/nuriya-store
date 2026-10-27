@@ -34,6 +34,8 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 ## Running it
 `npm ci` · `npm run dev` · `npm test` (business rules + database tests when `DATABASE_URL` is set) · `npm run db:migrate` · `npm run db:seed` · `npm run build` · `npm run typecheck`. CI (`.github/workflows/ci.yml`) starts a real Postgres and runs all of them on every push; its logs are on the `ci-logs` branch. Env vars: see `.env.example`.
 - Photos: a changed photo always gets a NEW file name (prepared photos are cached 1 year). After adding photos run `python3 scripts/make-images.py && python3 scripts/make-blur.py` (every size made ahead of time + loading previews; a test fails if forgotten).
+- From this workspace use the GitHub REST API (`gh api repos/KhaledGamal0/nuriya-store/...`), never `gh pr create` / `gh workflow run` (GraphQL is blocked). Run a workflow: `gh api -X POST repos/KhaledGamal0/nuriya-store/actions/workflows/<file>/dispatches -f ref=main -f "inputs[x]=y"`. Results of admin tasks: the run's check-run annotations.
+- Reports: `reports-clock.yml` (hourly :19, Cairo time) sends each report once via `report_runs`; never add UTC crons to report workflows.
 - Schema changes = a NEW file `db/migrations/000N_name.sql` (never edit an applied one) + matching `lib/db/schema.ts` columns. After any data change call `refreshStorefront()`.
 
 ## Stack
