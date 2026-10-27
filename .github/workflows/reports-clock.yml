@@ -40,15 +40,17 @@ jobs:
           [ "$H" -ge 9 ] && [ "$DOW" = 7 ] && due+=("sales-weekly" "health-weekly")
           [ "$H" -ge 9 ] && [ "$DOM" = 1 ] && due+=("sales-monthly")
           q() { docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" "$@"; }
+          # Start a report workflow through the REST API (same as Actions → Run workflow).
+          d() { gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/$1/dispatches" -f ref=main -f "$2" >/dev/null; }
           for k in "${due[@]}"; do
             new=$(q -tA -c "INSERT INTO report_runs (kind, period) VALUES ('$k', '$D') ON CONFLICT DO NOTHING RETURNING 1")
             [ "$new" = "1" ] || { echo "$k for $D: already sent"; continue; }
             case "$k" in
-              sales-daily)   ok=$(gh workflow run sales-report.yml -f report=daily && echo y) ;;
-              sales-weekly)  ok=$(gh workflow run sales-report.yml -f report=weekly && echo y) ;;
-              sales-monthly) ok=$(gh workflow run sales-report.yml -f report=monthly && echo y) ;;
-              health-daily)  ok=$(gh workflow run health-report.yml -f weekly=false && echo y) ;;
-              health-weekly) ok=$(gh workflow run health-report.yml -f weekly=true && echo y) ;;
+              sales-daily)   ok=$(d sales-report.yml "inputs[report]=daily" && echo y) ;;
+              sales-weekly)  ok=$(d sales-report.yml "inputs[report]=weekly" && echo y) ;;
+              sales-monthly) ok=$(d sales-report.yml "inputs[report]=monthly" && echo y) ;;
+              health-daily)  ok=$(d health-report.yml "inputs[weekly]=false" && echo y) ;;
+              health-weekly) ok=$(d health-report.yml "inputs[weekly]=true" && echo y) ;;
             esac
             if [ "$ok" = "y" ]; then echo "::notice::$k for $D sent"; sleep 20
             else q -q -c "DELETE FROM report_runs WHERE kind = '$k' AND period = '$D'"; echo "::error::$k could not start; will retry next hour"; exit 1; fi
