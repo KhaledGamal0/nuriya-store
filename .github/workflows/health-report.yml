@@ -7,9 +7,6 @@ name: Health report
 # Something to act on also opens a GitHub issue labelled "alert" (phone notification), closed by itself when fixed.
 # When Neon is upgraded to the Launch plan, set the repository VARIABLE NEON_PLAN=launch.
 on:
-  schedule:
-    - cron: "0 5 * * *" # daily early warning, 08:00 Cairo
-    - cron: "0 6 * * 0" # weekly report, Sunday 09:00 Cairo
   workflow_dispatch:
     inputs:
       weekly:
@@ -34,7 +31,7 @@ jobs:
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       ORDER_ALERT_EMAIL: ${{ secrets.ORDER_ALERT_EMAIL }}
       GH_TOKEN: ${{ github.token }}
-      WEEKLY: ${{ (github.event_name == 'workflow_dispatch' && inputs.weekly) && '1' || (github.event.schedule == '0 6 * * 0' && '1' || '0') }}
+      WEEKLY: ${{ inputs.weekly && '1' || '0' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5

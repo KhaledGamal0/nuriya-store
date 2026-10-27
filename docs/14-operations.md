@@ -80,6 +80,9 @@ Every migration pushed to `main` runs `db-deploy.yml`: it applies the change, wa
 - Warning levels: Neon ≥ 70% of free running time or storage; domain < 30 days (or auto-renew off and < 60 days); certificate < 14 days; backup older than 36 h; 45+ days without a code change; any stock ≤ 3; Resend ≥ 80% of the free monthly e-mails.
 - After upgrading Neon to Launch, set the repository variable `NEON_PLAN=launch` (the free limits then no longer apply).
 
+## Report timing (Oct 27 2026)
+`reports-clock.yml` runs hourly at :19 and works in Cairo time (no edits when Egypt changes clocks). It sends each report once (table `report_runs`): health warning 08:00 (Mon–Sat, only if something is wrong), daily sales 09:00 (yesterday + today so far), Sunday 09:00 weekly sales + weekly health, the 1st 09:00 monthly sales. A missed hour is caught up by the next run. Manual runs (Actions → Sales report / Health report → Run workflow) send at once and don't affect the schedule.
+
 ## Sales report
 `sales-report.yml` + `scripts/sales.sql` + `scripts/sales-report.mjs` (Oct 10 2026, Khaled: best-practice schedule). Cairo times; cron is UTC so in winter (UTC+2) each arrives an hour earlier.
 - **Daily ~9:00:** yesterday vs the day before · orders waiting for confirmation (by number) · low stock (≤3) · what sold · areas · hours · stock · since opening.
