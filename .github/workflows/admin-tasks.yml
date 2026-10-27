@@ -11,7 +11,7 @@ on:
       task:
         description: "What to do"
         type: choice
-        options: ["set-stock", "take-out-stock", "confirm-orders", "mark-delivered", "start-offer", "start-sale", "end-offers", "set-delivery-fee", "reset-test-orders", "refresh-site"]
+        options: ["set-stock", "take-out-stock", "confirm-orders", "cancel-order", "mark-delivered", "start-offer", "start-sale", "end-offers", "set-delivery-fee", "reset-test-orders", "refresh-site"]
         default: "set-stock"
       cream_sm:
         description: "set-stock: Cream S/M pieces available now · take-out-stock: Cream S/M pieces to remove (gift, damaged)"
@@ -24,6 +24,9 @@ on:
         default: ""
       burgundy_lxl:
         description: "set-stock: Burgundy L/XL pieces available now · take-out-stock: Burgundy L/XL pieces to remove (gift, damaged)"
+        default: ""
+      order:
+        description: "cancel-order: the order number, e.g. NUR-TRAYQS (its pieces go back to stock)"
         default: ""
       confirm:
         description: 'reset-test-orders: type DELETE ALL ORDERS to confirm'
@@ -66,6 +69,7 @@ jobs:
       BURGUNDY_SM: ${{ inputs.burgundy_sm }}
       BURGUNDY_LXL: ${{ inputs.burgundy_lxl }}
       CONFIRM: ${{ inputs.confirm }}
+      ORDER: ${{ inputs.order }}
       PRICE: ${{ inputs.price }}
       WAS: ${{ inputs.was }}
       PIECES: ${{ inputs.pieces }}
@@ -90,6 +94,10 @@ jobs:
             [ -z "$PIECES" ] || [ -n "$WAS" ] || { echo "::error::A piece limit needs the old price (the price after the offer pieces run out)."; exit 1; }
             [ -z "$ENDS" ] || [[ "$ENDS" =~ ^20[0-9]{2}-[01][0-9]-[0-3][0-9]\ [0-2][0-9]:[0-5][0-9]$ ]] || { echo "::error::Count-from time must look like 2026-10-29 21:00 (Cairo), or be blank for now."; exit 1; }
             [ -z "$ENDS" ] || [ -n "$PIECES" ] || { echo "::error::A count-from time only makes sense with a piece limit."; exit 1; }
+          elif [ "$TASK" = "cancel-order" ]; then
+            ORDER=$(echo "$ORDER" | tr '[:lower:]' '[:upper:]' | tr -d ' ')
+            [[ "$ORDER" =~ ^NUR-[A-Z0-9]{6}$ ]] || { echo "::error::Order number must look like NUR-TRAYQS."; exit 1; }
+            echo "ORDER=$ORDER" >> "$GITHUB_ENV"
           elif [ "$TASK" = "set-delivery-fee" ]; then
             [[ "$AREA" =~ ^[a-z0-9-]{2,40}$ ]] || { echo "::error::Area must be an area id like cairo or alexandria."; exit 1; }
             [[ "$PRICE" =~ ^[0-9]{1,3}$ ]] && [ "$PRICE" -le 500 ] || { echo "::error::Delivery fee must be a whole number of EGP from 0 (free) to 500."; exit 1; }
@@ -229,6 +237,31 @@ jobs:
             FROM done RETURNING order_id)
           INSERT INTO audit_log (actor, action, entity, entity_id, after)
           SELECT 'khaled', 'mark_delivered', 'order', number, '{"status":"DELIVERED"}' FROM done;
+          COMMIT;
+          SQL
+          elif [ "$TASK" = "cancel-order" ]; then
+            # One open order → CANCELLED (Khaled, Oct 27 2026). Its pieces go back to stock, history + audit line.
+            # Refused if the order is unknown or already delivered / with the courier / cancelled. Cancelled orders never
+            # count toward the limited-pieces offer, so an offer piece is freed too.
+            cat > task.sql <<SQL
+          BEGIN;
+          DO \$\$
+          DECLARE st text;
+          BEGIN
+            SELECT status INTO st FROM orders WHERE number = '${ORDER}' FOR UPDATE;
+            IF st IS NULL THEN RAISE EXCEPTION 'order ${ORDER} not found'; END IF;
+            IF st NOT IN ('PENDING_PAYMENT', 'CONFIRMATION_NEEDED', 'CONFIRMED', 'PACKED') THEN
+              RAISE EXCEPTION 'order ${ORDER} is % and cannot be cancelled here', st;
+            END IF;
+          END \$\$;
+          UPDATE variants v SET stock_on_hand = v.stock_on_hand + i.qty
+          FROM (SELECT variant_id, sum(qty)::int AS qty FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.number = '${ORDER}' GROUP BY variant_id) i
+          WHERE v.id = i.variant_id AND v.track_inventory;
+          INSERT INTO order_events (order_id, type, data, actor)
+          SELECT id, 'status_changed', jsonb_build_object('from', status, 'to', 'CANCELLED', 'how', 'cancelled by Khaled; pieces back in stock'), 'khaled' FROM orders WHERE number = '${ORDER}';
+          INSERT INTO audit_log (actor, action, entity, entity_id, before, after)
+          SELECT 'khaled', 'cancel_order', 'order', number, jsonb_build_object('status', status), '{"status":"CANCELLED"}' FROM orders WHERE number = '${ORDER}';
+          UPDATE orders SET status = 'CANCELLED', updated_at = now() WHERE number = '${ORDER}';
           COMMIT;
           SQL
           elif [ "$TASK" = "confirm-orders" ]; then
