@@ -54,7 +54,7 @@ s.push(`<table role="presentation" width="100%" cellspacing="6" style="margin:0 
 if (d.waiting.count) s.push(note(`<b>${plural(d.waiting.count, "order")} waiting for confirmation.</b> Call or WhatsApp each customer: ${esc(d.waiting.numbers.join(", "))}`));
 if (low.length) s.push(note(`<b>Low stock (${LOW} or fewer):</b> ${esc(low.map((x) => `${x.color} ${x.size}: ${x.available <= 0 ? "SOLD OUT" : `${x.available} left`}`).join(" · "))}`));
 // Daily: today's orders so far, so a "0 orders yesterday" report never hides today's orders (Khaled, Oct 27 2026).
-if (mode === "daily" && d.today) s.push(note(`<b>Today so far (until ${esc(d.today.until)}):</b> ${plural(d.today.orders, "order")} · ${egp(d.today.total)}. Full details in tomorrow's report.`, "#F3F0E8"));
+if (d.today) s.push(note(`<b>Today so far (until ${esc(d.today.until)}):</b> ${plural(d.today.orders, "order")} · ${egp(d.today.total)}. ${mode === "daily" ? "Full details in tomorrow's report." : "Not counted above (this report covers full days only)."}`, "#F3F0E8"));
 if (!C.orders) s.push(note(`No orders ${N.period}. Check the ad is running (Meta Ads Manager) and visitors are arriving (Vercel → Analytics).`, "#F3F0E8"));
 
 s.push(`<div style="${card}">${h(`Summary · ${N.period}`)}${table([
@@ -85,7 +85,7 @@ ${s.join("\n")}</div></body></html>`;
 const text = [
   subject, "",
   `${N.period.toUpperCase()}: ${plural(C.orders, "order")} · ${C.pieces} pcs · ${egp(C.total)}  (${N.prev}: ${P.orders} · ${egp(P.total)})`,
-  ...(mode === "daily" && d.today ? [`TODAY SO FAR (until ${d.today.until}): ${plural(d.today.orders, "order")} · ${egp(d.today.total)}`] : []),
+  ...(d.today ? [`TODAY SO FAR (until ${d.today.until}): ${plural(d.today.orders, "order")} · ${egp(d.today.total)}`] : []),
   d.waiting.count ? `TO CONFIRM: ${d.waiting.numbers.join(", ")}` : "TO CONFIRM: none",
   low.length ? `LOW STOCK: ${low.map((x) => `${x.color} ${x.size} ${x.available}`).join(", ")}` : "LOW STOCK: none", "",
   "WHAT SOLD", ...(d.byItem.length ? d.byItem.map((r) => `  ${r.color} ${r.size}: ${r.qty} pcs`) : ["  —"]), "",

@@ -44,7 +44,10 @@ jobs:
           docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -q -c "INSERT INTO refresh_tokens (token) VALUES ('$TOKEN')"
           echo "REPORT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
       - name: Write and e-mail the report
-        run: node scripts/sales-report.mjs
+        run: |
+          node scripts/sales-report.mjs
+          # Trace: the report's first lines stay on the run page (Actions → Sales report → this run).
+          head -4 report.txt | grep -v '^$' | while read -r l; do echo "::notice title=${MODE} report::$l"; done
       - name: Keep the latest report on the sales-report branch (never deployed)
         run: |
           mkdir -p out && cp report.txt out/ && cd out && echo '{"git":{"deploymentEnabled":false}}' > vercel.json
