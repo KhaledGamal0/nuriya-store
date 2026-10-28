@@ -66,6 +66,8 @@ Act as Khaled's senior expert: engineering, UI/UX, security, business logic, e-c
 8. **After every change (Khaled, Oct 26 2026):** update this file, `docs/02-decisions.md` and memory with what changed and what was learned, then tell him "live — start checking" with what to look at.
 9. **Speed first, planned before coding (Khaled, Oct 26 2026: "most speed and performed e-commerce website"):** before touching any client component, plan what it adds to the phone download. Client components import only small, data-free modules (`lib/delivery.ts`, never `lib/shipping.ts` or JSON data); new display logic goes in server components when possible. Lesson Oct 26: importing the price list into the popup/bag pushed JS to 183 KB (budget 180). Never let the customer see a half-done state: build and test fully on a branch, switch the live data last.
 
+10. **UI changes (Khaled, Oct 29 2026):** change only what he asked; keep the approved look (one accent: plum buttons; pink-tint boxes; no new colours, boxes, lines or button styles). Before publishing, review the screen as a whole like a senior UI/UX designer: clear order (offer → extras → countdown → button), nothing duplicated, nothing extra. If something else would improve it, ask first.
+
 ## Working process for every change (Khaled, Oct 24 2026: follow from begin to end, never skip)
 1. **Start:** list the points as a short to-do list. Ask only what decides money, prices or product facts; otherwise do it.
 2. **Never break what works.** Small, scoped changes. Orders, checkout, prices, stock and e-mails are touched only when the task is about them.
