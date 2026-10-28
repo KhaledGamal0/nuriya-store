@@ -178,3 +178,4 @@ Update this file in the same commit as the work. Last update: 2026-10-25.
 | Meta external_id for every visitor (random first-party id) + PageView via Conversions API | DONE | Oct 25: `lib/pixel.ts`, `lib/meta-capi.ts` |
 | Free delivery in Cairo & Giza (until Khaled says stop), shown as "Free" everywhere, popup line; admin task set-delivery-fee | DONE | Oct 26: migration 0015, `lib/shipping.ts` deliveryLine/freeDeliveryLabel, `lib/money.ts` formatFee |
 | Client JS 183 KB (after Next.js 16.4.2 / React 19.3.1; budget 180) | ACCEPTED | Khaled Oct 26: keep as is; act only if it grows above 183 KB or real speed drops |
+| Delivery promo with an end time; offer countdown in popup | DONE | Oct 29: migration 0017/0018, `lib/delivery.ts` areasAt, `components/LaunchOffer.tsx` |

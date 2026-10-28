@@ -185,3 +185,17 @@ test("free delivery: fee 0 shows as Free, the total adds nothing, other areas ke
   const tampered = validateCheckout({ ...good, areaId: "alexandria", cart, shippingPiasters: 0 } as unknown as Parameters<typeof validateCheckout>[0], ctx);
   assert.ok(tampered.ok && tampered.order.shippingPiasters === 9_000, "a fee sent by the browser is ignored");
 });
+
+// Oct 29 2026: free delivery until Sat 31 Oct 23:59 Cairo (21:59 UTC, winter time), then 75 EGP by itself.
+test("delivery promo: free until its end second, then the normal fee; next end is found", async () => {
+  const { areasAt, nextPromoEnd } = await import("../lib/delivery.ts");
+  const end = "2026-10-31T21:59:00.000Z";
+  const list = AREAS.map((a) => (a.id === "cairo" ? { ...a, feePiasters: 0, promoUntil: end, afterPromoPiasters: 7_500 } : a));
+  const before = areasAt(list, Date.parse("2026-10-31T21:58:59Z"));
+  assert.equal(before.find((a) => a.id === "cairo")?.feePiasters, 0, "11:58:59 pm Cairo: still free");
+  const after = areasAt(list, Date.parse(end));
+  assert.equal(after.find((a) => a.id === "cairo")?.feePiasters, 7_500, "11:59 pm Cairo: 75 EGP");
+  assert.equal(after.find((a) => a.id === "alexandria")?.feePiasters, 9_000, "other areas unchanged");
+  assert.equal(nextPromoEnd(list, Date.parse("2026-10-30T00:00:00Z")), Date.parse(end));
+  assert.equal(nextPromoEnd(list, Date.parse(end) + 1), null);
+});

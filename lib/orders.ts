@@ -122,7 +122,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
         if (recent >= LIMITS.ordersPerPhonePerDay) throw new Refusal("phone_limit");
 
         const [area] = await tx<{ id: number; name_en: string; fee: number; cod_allowed: boolean }[]>`
-          SELECT a.id, a.name_en, z.fee_piasters AS fee, z.cod_allowed
+          SELECT a.id, a.name_en, CASE WHEN z.promo_fee_piasters IS NOT NULL AND now() < z.promo_until THEN z.promo_fee_piasters ELSE z.fee_piasters END AS fee, z.cod_allowed
           FROM shipping_areas a JOIN shipping_zones z ON z.id = a.zone_id
           WHERE a.slug = ${order.area.id} AND a.is_active AND z.is_active`;
         if (!area) throw new Refusal("area_unavailable");

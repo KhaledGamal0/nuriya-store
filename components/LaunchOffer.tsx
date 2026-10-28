@@ -30,7 +30,16 @@ export function LaunchOffer() {
   const path = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const left = useCountdown(sale?.endsAt, open);
+  // Countdown: to the sale end, or to the moment "1,000 for everyone + free delivery" ends (Khaled, Oct 29 2026:
+  // Sat 31 Oct 11:59 pm Cairo). The end is a fixed instant from the server, so the visitor's own clock zone and
+  // Egypt's summer/winter change can't shift it.
+  const offerEnd = !sale && catalog.offerCountsFrom && Date.parse(catalog.offerCountsFrom) > Date.now() ? catalog.offerCountsFrom : undefined;
+  const endsAt = sale?.endsAt ?? offerEnd;
+  const left = useCountdown(endsAt, open);
+  const timed = Boolean(endsAt) && (left === null || left.ms > 0);
+  const endLabel = endsAt
+    ? new Date(endsAt).toLocaleString("en-GB", { timeZone: "Africa/Cairo", weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true }).replace(",", "")
+    : "";
 
   useEffect(() => {
     if (!active || path.startsWith("/checkout")) return;
@@ -79,10 +88,13 @@ export function LaunchOffer() {
             )}
             <b>{formatEgp(catalog.pricePiasters)}</b>
           </p>
-          {sale ? (
+          {timed ? (
+            <>
             <p className="lo-t" role="timer" aria-live="off">
               Ends in <b>{left ? left.text : " "}</b>
             </p>
+              {!sale && <p className="small">Until {endLabel} (Cairo time)</p>}
+            </>
           ) : (
             <p className="lo-t">Limited pieces left at this price</p>
           )}

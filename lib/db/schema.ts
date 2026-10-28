@@ -74,6 +74,8 @@ export const shippingZones = pgTable("shipping_zones", {
   code: text("code").notNull(),
   labelEn: text("label_en").notNull(),
   feePiasters: integer("fee_piasters").notNull(),
+  promoFeePiasters: integer("promo_fee_piasters"),
+  promoUntil: timestamp("promo_until", { withTimezone: true }),
   codAllowed: boolean("cod_allowed").notNull(),
   isActive: boolean("is_active").notNull(),
   position: integer("position").notNull(),

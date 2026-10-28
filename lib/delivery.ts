@@ -1,6 +1,29 @@
 // Delivery helpers with NO price-list data in them, so phone pages that only need "is delivery free?" stay small
 // (lib/shipping.ts imports the whole Direction list; client components import this file instead).
-export type Area = { id: string; nameEn: string; nameAr: string; feePiasters: number; zoneId: string };
+export type Area = {
+  id: string; nameEn: string; nameAr: string; feePiasters: number; zoneId: string;
+  /** A promotional fee (e.g. free delivery) that ends at this moment (ISO); after it the fee is afterPromoPiasters. */
+  promoUntil?: string; afterPromoPiasters?: number;
+};
+
+/**
+ * Areas as they are at `now`: a promo that has ended takes its normal fee (Khaled, Oct 29 2026: free delivery in
+ * Cairo & Giza ends Sat 31 Oct 23:59 Cairo). The bag and checkout switch on that second without a reload; the
+ * server applies the same rule from the database at checkout.
+ */
+export function areasAt(list: readonly Area[], now: number = Date.now()): Area[] {
+  return list.map((a) =>
+    a.promoUntil && a.afterPromoPiasters != null && Date.parse(a.promoUntil) <= now
+      ? { ...a, feePiasters: a.afterPromoPiasters, promoUntil: undefined, afterPromoPiasters: undefined }
+      : a,
+  );
+}
+
+/** The earliest moment a delivery promo ends (ms), or null. */
+export function nextPromoEnd(list: readonly Area[], now: number = Date.now()): number | null {
+  const ends = list.map((a) => (a.promoUntil ? Date.parse(a.promoUntil) : NaN)).filter((t) => t > now);
+  return ends.length ? Math.min(...ends) : null;
+}
 
 const GROUP_LABELS: Record<string, string> = {
   "cairo-giza": "Cairo & Giza",
