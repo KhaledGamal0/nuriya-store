@@ -37,9 +37,6 @@ export function LaunchOffer() {
   const endsAt = sale?.endsAt ?? offerEnd;
   const left = useCountdown(endsAt, open);
   const timed = Boolean(endsAt) && (left === null || left.ms > 0);
-  const endLabel = endsAt
-    ? new Date(endsAt).toLocaleString("en-GB", { timeZone: "Africa/Cairo", weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true }).replace(",", "")
-    : "";
 
   useEffect(() => {
     if (!active || path.startsWith("/checkout")) return;
@@ -93,7 +90,6 @@ export function LaunchOffer() {
             <p className="lo-t" role="timer" aria-live="off">
               Ends in <b>{left ? left.text : " "}</b>
             </p>
-              {!sale && <p className="small">Until {endLabel} (Cairo time)</p>}
             </>
           ) : (
             <p className="lo-t">Limited pieces left at this price</p>
