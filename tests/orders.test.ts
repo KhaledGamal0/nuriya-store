@@ -421,3 +421,23 @@ test("free delivery in Cairo & Giza: order saved with 0 delivery; a bag priced b
     await sql!`UPDATE shipping_zones SET fee_piasters = ${before} WHERE id = ${zone}`;
   }
 });
+
+test("delivery promo: checkout charges the promo fee until promo_until, then the normal fee (database clock)", { skip }, async () => {
+  const [{ zone } = noRow()] = await sql!`SELECT zone_id AS zone FROM shipping_areas WHERE slug = 'cairo'`;
+  const [before = noRow()] = await sql!`SELECT fee_piasters, promo_fee_piasters, promo_until FROM shipping_zones WHERE id = ${zone}`;
+  const fee = async (n: string) => (await sql!`SELECT shipping_piasters AS f FROM orders WHERE number = ${n}`)[0]?.f;
+  try {
+    await sql!`UPDATE shipping_zones SET fee_piasters = 7500, promo_fee_piasters = 0, promo_until = now() + interval '1 hour' WHERE id = ${zone}`;
+    const free = await place(await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 1 }], "cairo"));
+    assert.ok(free.ok);
+    assert.equal(await fee(free.ok ? free.number : ""), 0, "free while the promo runs");
+    const stale = await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 1 }], "cairo"); // priced free
+    await sql!`UPDATE shipping_zones SET promo_until = now() - interval '1 second' WHERE id = ${zone}`;
+    assert.deepEqual(await place(stale), { ok: false, reason: "price_changed" }, "a bag priced free is refused after the end");
+    const paid = await place(await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 1 }], "cairo"));
+    assert.ok(paid.ok);
+    assert.equal(await fee(paid.ok ? paid.number : ""), 7_500, "75 EGP after the promo");
+  } finally {
+    await sql!`UPDATE shipping_zones SET fee_piasters = ${before.fee_piasters}, promo_fee_piasters = ${before.promo_fee_piasters}, promo_until = ${before.promo_until} WHERE id = ${zone}`;
+  }
+});

@@ -5,8 +5,7 @@ name: Sale end refresh
 # charges the database price; this only keeps the pre-built pages tidy. Does nothing on other nights.
 on:
   schedule:
-    - cron: "3 21 * * *"  # 00:03 Cairo
-    - cron: "25 21 * * *" # backup run, 00:25 Cairo
+    - cron: "21 * * * *" # every hour; refreshes only right after a price or delivery change ends
   workflow_dispatch:
 
 permissions:
@@ -29,8 +28,8 @@ jobs:
       - name: Did a sale just end?
         run: |
           n=$(docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -tA -c \
-            "SELECT count(*) FROM products WHERE sale_ends_at BETWEEN now() - interval '3 hours' AND now()")
-          echo "sales ended in the last 3 hours: $n"
+            "SELECT (SELECT count(*) FROM products WHERE sale_ends_at BETWEEN now() - interval '3 hours' AND now() OR offer_started_at BETWEEN now() - interval '3 hours' AND now()) + (SELECT count(*) FROM shipping_zones WHERE promo_until BETWEEN now() - interval '3 hours' AND now())")
+          echo "sale / offer / delivery promo changes in the last 3 hours: $n"
           echo "ENDED=$n" >> "$GITHUB_ENV"
       - name: Refresh the live site
         if: env.ENDED != '0'

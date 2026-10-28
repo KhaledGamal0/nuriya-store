@@ -109,6 +109,8 @@ async function loadAreas(): Promise<Area[]> {
       nameEn: shippingAreas.nameEn,
       nameAr: shippingAreas.nameAr,
       fee: shippingZones.feePiasters,
+      promoFee: shippingZones.promoFeePiasters,
+      promoUntil: shippingZones.promoUntil,
       zone: shippingZones.code,
       position: shippingZones.position,
     })
@@ -116,7 +118,16 @@ async function loadAreas(): Promise<Area[]> {
     .innerJoin(shippingZones, eq(shippingAreas.zoneId, shippingZones.id))
     .where(and(eq(shippingAreas.isActive, true), eq(shippingZones.isActive, true)))
     .orderBy(asc(shippingZones.position), asc(shippingAreas.id));
-  return rows.map((r) => ({ id: r.slug, nameEn: r.nameEn, nameAr: r.nameAr, feePiasters: r.fee, zoneId: r.zone }));
+  const now = Date.now();
+  return rows.map((r) => {
+    const until = r.promoUntil ? new Date(r.promoUntil).getTime() : NaN;
+    const promo = r.promoFee != null && until > now; // same rule as lib/orders.ts (database clock there)
+    return {
+      id: r.slug, nameEn: r.nameEn, nameAr: r.nameAr, zoneId: r.zone,
+      feePiasters: promo ? r.promoFee! : r.fee,
+      ...(promo && { promoUntil: new Date(until).toISOString(), afterPromoPiasters: r.fee }),
+    };
+  });
 }
 
 // Neon pauses an idle database after 5 minutes; the first query wakes it (well under a second).

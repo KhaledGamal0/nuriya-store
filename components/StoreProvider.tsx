@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { afterSale, priceFor, type CatalogData, type ColorId, type SizeId } from "@/lib/catalog";
-import type { Area } from "@/lib/delivery";
+import { areasAt, nextPromoEnd, type Area } from "@/lib/delivery";
 
 type Store = {
   catalog: CatalogData;
@@ -15,7 +15,7 @@ type Store = {
 const Ctx = createContext<Store | null>(null);
 
 /** Shares the catalog and delivery areas (loaded on the server) with interactive components. */
-export function StoreProvider({ catalog: built, areas, children }: { catalog: CatalogData; areas: readonly Area[]; children: ReactNode }) {
+export function StoreProvider({ catalog: built, areas: builtAreas, children }: { catalog: CatalogData; areas: readonly Area[]; children: ReactNode }) {
   // A timed sale switches off on the second it ends, even if the page was opened before (no reload needed).
   const [ended, setEnded] = useState(false);
   useEffect(() => {
@@ -26,6 +26,15 @@ export function StoreProvider({ catalog: built, areas, children }: { catalog: Ca
     return () => window.clearTimeout(t);
   }, [built]);
   const catalog = useMemo(() => (ended ? afterSale(built) : built), [built, ended]);
+  // A delivery promo (free delivery) ends on its second too: fees switch without a reload, matching checkout.
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const end = nextPromoEnd(builtAreas);
+    if (end === null) return;
+    const t = window.setTimeout(() => setTick((n) => n + 1), Math.min(end - Date.now() + 50, 2_147_000_000));
+    return () => window.clearTimeout(t);
+  }, [builtAreas, tick]);
+  const areas = useMemo(() => areasAt(builtAreas), [builtAreas, tick]);
   const value = useMemo<Store>(
     () => ({
       catalog,
