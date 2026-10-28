@@ -24,7 +24,11 @@ export function Dialog({ open, onClose, variant, labelledBy, children }: Props) 
     if (!dialog) return;
     if (open) {
       dialog.removeAttribute("data-closing");
-      if (!dialog.open) dialog.showModal();
+      if (!dialog.open) {
+        dialog.showModal();
+        // Focus the title, not the close button (no focus square on X when a panel opens; UI standards).
+        dialog.querySelector<HTMLElement>("h2[tabindex='-1'], [data-autofocus]")?.focus({ preventScroll: true });
+      }
       return;
     }
     if (!dialog.open) return;
