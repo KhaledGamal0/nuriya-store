@@ -85,10 +85,10 @@ export function LaunchOffer() {
             )}
             <b>{formatEgp(catalog.pricePiasters)}</b>
           </p>
-          {free && <p className="lo-f">+ Free delivery in {free}</p>}
+          {free && <p className="lo-f">Free delivery in {free}</p>}
           {timed ? (
             <p className="lo-t" role="timer" aria-live="off">
-              {free && !sale ? "Both offers end in" : "Ends in"} <b>{left ? left.text : " "}</b>
+              Ends in <b>{left ? left.text : " "}</b>
             </p>
           ) : (
             <p className="lo-t">Limited pieces left at this price</p>
