@@ -1,10 +1,10 @@
 {
   "courier": "Direction",
   "currency": "EGP",
-  "source": "Direction price list image, received 2026-10-07. Cairo, Giza and the new cities (all 75 EGP) are one checkout option since Oct 8 2026.",
+  "source": "Direction price list image, received 2026-10-07. Cairo and Giza are two governorates (same 75 EGP fee); the area inside them (incl. the new cities) is picked from lib/districts.ts since Oct 29 2026.",
   "zones": [
     { "id": "cairo-giza", "fee": 75, "areas": [
-      { "id": "cairo", "en": "Cairo & Giza", "ar": "القاهرة والجيزة" } ] },
+      { "id": "cairo", "en": "Cairo", "ar": "القاهرة" }, { "id": "giza", "en": "Giza", "ar": "الجيزة" } ] },
     { "id": "delta-canal", "fee": 90, "areas": [
       { "en": "Giza countryside", "ar": "أرياف الجيزة" }, { "en": "Alexandria", "ar": "الإسكندرية" }, { "en": "Beheira", "ar": "البحيرة" },
       { "en": "Gharbia", "ar": "الغربية" }, { "en": "Dakahlia", "ar": "الدقهلية" }, { "en": "Qalyubia", "ar": "القليوبية" },

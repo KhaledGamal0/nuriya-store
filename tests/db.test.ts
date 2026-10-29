@@ -18,7 +18,7 @@ test("seed created the catalog and all delivery areas", { skip }, async () => {
     SELECT (SELECT count(*) FROM products)::int AS products, (SELECT count(*) FROM colorways)::int AS colorways,
            (SELECT count(*) FROM variants)::int AS variants, (SELECT count(*) FROM shipping_areas)::int AS areas,
            (SELECT count(*) FROM media)::int AS media`;
-  assert.deepEqual({ ...c }, { products: 1, colorways: 2, variants: 4, areas: 28, media: 6 });
+  assert.deepEqual({ ...c }, { products: 1, colorways: 2, variants: 4, areas: 29, media: 6 });
 });
 
 test("storefront reads price, photos and fees from the database", { skip }, async () => {
@@ -31,7 +31,7 @@ test("storefront reads price, photos and fees from the database", { skip }, asyn
   assert.equal(catalog.colors.burgundy.images.length, 3);
   assert.ok(catalog.colors.cream.sizes.every((s) => s.available));
   const areas = await getAreas();
-  assert.equal(areas.length, 28);
+  assert.equal(areas.length, 29);
   assert.equal(areas.find((a) => a.id === "alexandria")?.feePiasters, 9_000);
 });
 
@@ -41,7 +41,7 @@ test("a price change in the database is what checkout charges", { skip }, async 
   await sql!`UPDATE products SET price_piasters = 125000 WHERE slug = 'quiet-confidence'`;
   try {
     const r = validateCheckout(
-      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "burgundy", size: "L/XL", qty: 2 }] },
+      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", district: "Nasr City", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "burgundy", size: "L/XL", qty: 2 }] },
       { catalog: await getCatalog(), areas: await getAreas() },
     );
     assert.ok(r.ok);
@@ -61,7 +61,7 @@ test("a size with no stock shows sold out and cannot be ordered", { skip }, asyn
     assert.equal(catalog.colors.cream.sizes.find((s) => s.size === "S/M")?.available, false);
     assert.equal(catalog.colors.cream.sizes.find((s) => s.size === "L/XL")?.available, true);
     const r = validateCheckout(
-      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "cream", size: "S/M", qty: 1 }] },
+      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", district: "Nasr City", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "cream", size: "S/M", qty: 1 }] },
       { catalog, areas: await getAreas() },
     );
     assert.equal(r.ok, false);
@@ -107,5 +107,5 @@ test("seeding twice changes nothing", { skip }, async () => {
   const { execFileSync } = await import("node:child_process");
   execFileSync(process.execPath, ["--experimental-strip-types", "scripts/db-seed.ts"], { env: process.env, stdio: "ignore" });
   const [c] = await sql!`SELECT (SELECT count(*) FROM variants)::int AS v, (SELECT count(*) FROM media)::int AS m, (SELECT count(*) FROM shipping_areas)::int AS a`;
-  assert.deepEqual({ ...c }, { v: 4, m: 6, a: 28 });
+  assert.deepEqual({ ...c }, { v: 4, m: 6, a: 29 });
 });

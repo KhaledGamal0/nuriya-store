@@ -97,3 +97,4 @@ Every push to `main` runs two workflows. Nothing ships if they fail.
 | Meta: visitor id external_id on all events, PageView server copy (dedup by event_id), visitor id in Purchase | tests/meta.test.ts |
 | Free delivery: fee 0 shows "Free", total = pieces only, other areas keep fees, browser fee ignored, stale bag refused, e-mail/WhatsApp say Free | tests/checkout.test.ts, tests/orders.test.ts, tests/fuzz.test.ts; stress totals read the fee from the DB |
 | Delivery promo: free until its end second then normal fee (client + database clock), stale bag refused | tests/checkout.test.ts, tests/orders.test.ts |
+| Area inside Cairo/Giza required from the list, ignored elsewhere, saved as "Cairo · Nasr City" | tests/checkout.test.ts, tests/orders.test.ts |

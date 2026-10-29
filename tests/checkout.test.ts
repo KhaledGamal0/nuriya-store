@@ -62,9 +62,10 @@ test("shipping table matches the Direction price list", () => {
   assert.equal(getArea("cairo")?.feePiasters, 7_500);
   assert.equal(getArea("sharm-el-sheikh")?.feePiasters, 16_500);
   assert.equal(getArea("new-administrative-capital")?.feePiasters, 13_500);
-  assert.equal(AREAS.length, 28);
-  assert.equal(getArea("cairo")?.nameEn, "Cairo & Giza");
-  assert.equal(getArea("sheikh-zayed"), undefined, "new cities are part of Cairo & Giza");
+  assert.equal(AREAS.length, 29); // Oct 29 2026: Cairo and Giza are two governorates
+  assert.equal(getArea("cairo")?.nameEn, "Cairo");
+  assert.equal(getArea("giza")?.zoneId, getArea("cairo")?.zoneId, "Cairo and Giza share one fee");
+  assert.equal(getArea("sheikh-zayed"), undefined, "new cities are areas inside Giza / Cairo (lib/districts.ts)");
   assert.equal(new Set(AREAS.map((a) => a.id)).size, AREAS.length);
   // Every fee, checked against the Direction price list image.
   const fees: Record<string, number> = {
@@ -165,7 +166,7 @@ test("free delivery: fee 0 shows as Free, the total adds nothing, other areas ke
   const { staticCatalog } = await import("../lib/catalog.ts");
   assert.equal(formatFee(0), "Free");
   assert.equal(formatFee(9_000), "90 EGP");
-  const free = AREAS.map((a) => (a.id === "cairo" ? { ...a, feePiasters: 0 } : a));
+  const free = AREAS.map((a) => (a.zoneId === "cairo-giza" ? { ...a, feePiasters: 0 } : a));
   assert.equal(freeDeliveryLabel(free), "Cairo & Giza");
   assert.equal(freeDeliveryLabel(AREAS), null, "no free area: nothing says free");
   assert.equal(minPaidFee(free), 9_000);
@@ -174,7 +175,7 @@ test("free delivery: fee 0 shows as Free, the total adds nothing, other areas ke
   assert.equal(areasForPicker(free)[0]?.feePiasters, 0, "Cairo & Giza stays first in the picker");
   const ctx = { catalog: { ...staticCatalog(), pricePiasters: 100_000 }, areas: free };
   const cart = [{ color: "cream", size: "S/M", qty: 2 }];
-  const cairo = validateCheckout({ ...good, areaId: "cairo", cart }, ctx);
+  const cairo = validateCheckout({ ...good, areaId: "cairo", district: "Nasr City", cart }, ctx);
   assert.ok(cairo.ok && cairo.order.shippingPiasters === 0 && cairo.order.totalPiasters === cairo.order.subtotalPiasters, "Cairo & Giza: total = pieces only");
   const alex = validateCheckout({ ...good, areaId: "alexandria", cart }, ctx);
   assert.ok(alex.ok && alex.order.shippingPiasters === 9_000, "Alexandria still pays 90");
@@ -198,4 +199,19 @@ test("delivery promo: free until its end second, then the normal fee; next end i
   assert.equal(after.find((a) => a.id === "alexandria")?.feePiasters, 9_000, "other areas unchanged");
   assert.equal(nextPromoEnd(list, Date.parse("2026-10-30T00:00:00Z")), Date.parse(end));
   assert.equal(nextPromoEnd(list, Date.parse(end) + 1), null);
+});
+
+// Oct 29 2026 (Khaled, option B): governorate → area (Cairo / Giza, from a list) → address.
+test("area inside Cairo / Giza: required from the list there, ignored elsewhere; fee from the governorate", async () => {
+  const { DISTRICTS } = await import("../lib/districts.ts");
+  const cart = [{ color: "cream", size: "S/M", qty: 1 }];
+  const noArea = validateCheckout({ ...good, areaId: "cairo", cart });
+  assert.ok(!noArea.ok && noArea.errors.district, "Cairo without an area is refused");
+  const madeUp = validateCheckout({ ...good, areaId: "giza", district: "<script>", cart });
+  assert.ok(!madeUp.ok && madeUp.errors.district, "an area not in the list is refused");
+  const ok = validateCheckout({ ...good, areaId: "giza", district: "Sheikh Zayed", cart });
+  assert.ok(ok.ok && ok.order.district === "Sheikh Zayed" && ok.order.shippingPiasters === getArea("giza")!.feePiasters);
+  const alex = validateCheckout({ ...good, areaId: "alexandria", district: "Nasr City", cart });
+  assert.ok(alex.ok && alex.order.district === null, "outside Cairo / Giza the area list is not used");
+  assert.ok(DISTRICTS.cairo!.includes("Other") && DISTRICTS.giza!.includes("Other"), "anyone can still order");
 });

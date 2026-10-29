@@ -77,7 +77,7 @@ for (const path of ["/quiet-confidence/burgundy", "/quiet-confidence/white", "/"
   rows.push(`events on product page: ${onProduct.join(" | ") || "none"}`);
   await page.goto(SITE + "/checkout", { waitUntil: "networkidle" });
   await page.waitForTimeout(800);
-  await page.getByLabel("Area").selectOption("alexandria");
+  await page.getByLabel("Governorate").selectOption("alexandria");
   // Typing phone + name sends InitiateCheckout with Advanced Matching (test number; caught below, never sent to Meta).
   await page.getByLabel("Mobile number", { exact: true }).fill("01000000000");
   await page.getByLabel("Full name").fill("Live Check");

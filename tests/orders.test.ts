@@ -46,7 +46,7 @@ async function valid(phone: string, cart: Cart = [{ color: "cream", size: "S/M",
   const { getCatalog, getAreas } = await import("../lib/store.ts");
   const { validateCheckout } = await import("../lib/checkout.ts");
   const r = validateCheckout(
-    { phone, name: "Nour Ahmed", areaId, address: "12 El Horreya Rd, building 4, floor 3", payment, cart },
+    { phone, name: "Nour Ahmed", areaId, district: areaId === "cairo" ? "Nasr City" : areaId === "giza" ? "Dokki" : undefined, address: "12 El Horreya Rd, building 4, floor 3", payment, cart },
     { catalog: await getCatalog(), areas: await getAreas() },
   );
   assert.ok(r.ok, JSON.stringify(!r.ok && r.errors));
@@ -149,7 +149,7 @@ test("a refused order leaves no trace: no order, no reservation", { skip }, asyn
   // Validated while both were in stock (stale view), then one sold out before saving.
   await sql!`UPDATE variants SET stock_on_hand = 3 WHERE sku = 'NUR-QC-BRG-LXL'`;
   const r0 = validateCheckout(
-    { phone, name: "Nour Ahmed", areaId: "cairo", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "cream", size: "S/M", qty: 2 }, { color: "burgundy", size: "L/XL", qty: 1 }] },
+    { phone, name: "Nour Ahmed", areaId: "cairo", district: "Nasr City", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "cream", size: "S/M", qty: 2 }, { color: "burgundy", size: "L/XL", qty: 1 }] },
     { catalog: await getCatalog(), areas: await getAreas() },
   );
   assert.ok(r0.ok);
@@ -440,4 +440,11 @@ test("delivery promo: checkout charges the promo fee until promo_until, then the
   } finally {
     await sql!`UPDATE shipping_zones SET fee_piasters = ${before.fee_piasters}, promo_fee_piasters = ${before.promo_fee_piasters}, promo_until = ${before.promo_until} WHERE id = ${zone}`;
   }
+});
+
+test("area inside Cairo is saved with the order and shown as 'Cairo · Nasr City' (e-mail, WhatsApp, reports)", { skip }, async () => {
+  const r = await place(await valid(nextPhone(), [{ color: "cream", size: "S/M", qty: 1 }], "cairo"));
+  assert.ok(r.ok);
+  const [o = noRow()] = await sql!`SELECT area_name, district FROM orders WHERE number = ${r.ok ? r.number : ""}`;
+  assert.deepEqual({ ...o }, { area_name: "Cairo · Nasr City", district: "Nasr City" });
 });

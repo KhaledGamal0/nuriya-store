@@ -9,13 +9,14 @@ import { placeOrder, type CheckoutState } from "@/app/checkout/actions";
 import { useBag } from "./BagProvider";
 import { BagLineItem } from "./BagLineItem";
 import { formatEgp, formatFee } from "@/lib/money";
-import { AREA_NOTES, areasForPicker } from "@/lib/delivery";
+import { areasForPicker } from "@/lib/delivery";
+import { DISTRICTS } from "@/lib/districts";
 import { useStore } from "./StoreProvider";
 import { keepReceipt } from "@/lib/receipt";
 import { fieldError, formatPhoneInput, normalizePhone, type FieldErrors } from "@/lib/checkout";
 import { prettyPhone } from "@/lib/receipt";
 
-const FIELDS = ["phone", "phone2", "name", "area", "address"] as const;
+const FIELDS = ["phone", "phone2", "name", "area", "district", "address"] as const;
 type Field = (typeof FIELDS)[number];
 
 function Field({ id, label, error, optional, children }: { id: string; label: string; error?: string; optional?: boolean; children: ReactNode }) {
@@ -82,6 +83,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
   const picker = areasForPicker(areas);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(submitOrder, null);
   const [areaId, setAreaId] = useState("");
+  const [district, setDistrict] = useState("");
   // Phone numbers are shown grouped as they are typed (010 1234 5678), so a missing digit is easy to spot.
   const [phone, setPhone] = useState("");
   const [phone2, setPhone2] = useState("");
@@ -159,7 +161,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
 
   // Check a field when the shopper leaves it; clear its error as soon as it becomes valid.
   function check(field: Field, value: string, onlyClear = false, main: string = phone) {
-    const msg = fieldError(field, value, main);
+    const msg = fieldError(field, value, main, areaId);
     setErrors((prev) => {
       if (onlyClear && !prev[field]) return prev;
       return { ...prev, [field]: onlyClear && msg ? prev[field] : msg };
@@ -208,7 +210,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
           const form = new FormData(e.currentTarget);
           const next: FieldErrors = {};
           for (const f of FIELDS) {
-            const msg = fieldError(f, form.get(f), form.get("phone"));
+            const msg = fieldError(f, form.get(f), form.get("phone"), form.get("area"));
             if (msg) next[f] = msg;
           }
           if (Object.keys(next).length) {
@@ -298,7 +300,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
 
         <fieldset className="fs">
           <legend>Delivery</legend>
-          <Field id="area" label="Area" error={errors.area}>
+          <Field id="area" label="Governorate" error={errors.area}>
             <select
               id="area"
               name="area"
@@ -307,12 +309,14 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               {...live("area")}
               onChange={(e) => {
                 setAreaId(e.target.value);
+                setDistrict("");
+                setErrors((prev) => ({ ...prev, district: undefined }));
                 const chosen = areas.find((a) => a.id === e.target.value);
                 if (chosen) track("Checkout · area chosen", chosen.nameEn);
                 check("area", e.target.value, true);
               }}
             >
-              <option value="">Choose your area</option>
+              <option value="">Choose your governorate</option>
               {picker.map((g) => (
                 <optgroup key={g.feePiasters} label={`${g.label} · ${g.feePiasters === 0 ? "Free delivery" : formatEgp(g.feePiasters)}`}>
                   {g.areas.map((a) => (
@@ -323,10 +327,31 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
                 </optgroup>
               ))}
             </select>
-            {areaId === "cairo" && AREA_NOTES.cairo && <p className="f-hint">{AREA_NOTES.cairo}</p>}
           </Field>
+          {DISTRICTS[areaId] && (
+            <Field id="district" label="Area" error={errors.district}>
+              <select
+                id="district"
+                name="district"
+                required
+                value={district}
+                {...live("district")}
+                onChange={(e) => {
+                  setDistrict(e.target.value);
+                  check("district", e.target.value, true);
+                }}
+              >
+                <option value="">Choose your area</option>
+                {DISTRICTS[areaId]!.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
           <Field id="address" label="Address" error={errors.address}>
-            <textarea id="address" name="address" autoComplete="street-address" placeholder="Street, building, floor, apartment" required {...live("address")} />
+            <textarea id="address" name="address" autoComplete="street-address" placeholder="Street and building number, floor, apartment, landmark" required {...live("address")} />
           </Field>
         </fieldset>
 

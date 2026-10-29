@@ -58,6 +58,7 @@ export async function placeOrder(_prev: CheckoutState, form: FormData): Promise<
       phone2: form.get("phone2"),
       name: form.get("name"),
       areaId: form.get("area"),
+      district: form.get("district"),
       address: form.get("address"),
       payment: form.get("payment"),
       cart: form.get("cart"),

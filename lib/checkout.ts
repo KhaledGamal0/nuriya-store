@@ -1,5 +1,6 @@
 // Server-side checkout rules. The browser only sends WHAT the customer wants (color, size, quantity);
 // every price, fee and total is computed here from the catalog and the shipping table.
+import { DISTRICTS, districtError } from "./districts.ts";
 import { isColor, isSize, priceBag, staticCatalog, type CatalogData, type ColorId, type SizeId } from "./catalog.ts";
 import { AREAS, type Area } from "./shipping.ts";
 
@@ -19,6 +20,8 @@ export type CheckoutInput = {
   phone2?: unknown;
   name: unknown;
   areaId: unknown;
+  /** Area inside Cairo / Giza (from lib/districts.ts); required there, ignored elsewhere. */
+  district?: unknown;
   address: unknown;
   payment: unknown;
   cart: unknown;
@@ -32,6 +35,8 @@ export type ValidOrder = {
   altPhone: string | null;
   name: string;
   area: Area;
+  /** Area inside Cairo / Giza, or null. */
+  district: string | null;
   address: string;
   payment: PaymentMethod;
   lines: PricedLine[];
@@ -40,7 +45,7 @@ export type ValidOrder = {
   totalPiasters: number;
 };
 
-export type FieldErrors = Partial<Record<"phone" | "phone2" | "name" | "area" | "address" | "payment" | "cart", string>>;
+export type FieldErrors = Partial<Record<"phone" | "phone2" | "name" | "area" | "district" | "address" | "payment" | "cart", string>>;
 
 export type CheckoutResult = { ok: true; order: ValidOrder } | { ok: false; errors: FieldErrors };
 
@@ -110,15 +115,15 @@ export const MESSAGES = {
   phone2: "Enter another Egyptian mobile number, or leave this empty.",
   phone2Same: "This is the same as your main number. Add a different one, or leave it empty.",
   name: "Enter your full name.",
-  area: "Choose your area.",
-  address: "Add your street, building and floor.",
+  area: "Choose your governorate.",
+  address: "Add your street, building number and floor.",
   payment: "Choose how you want to pay.",
   cart: "Your bag is empty or has an item we could not find.",
   soldOut: "Sorry, one of the sizes in your bag has just sold out. Please update your bag.",
 } as const;
 
 /** Check one field. Used live in the browser and again on the server. */
-export function fieldError(field: "phone" | "phone2" | "name" | "area" | "address", value: unknown, main?: unknown): string | undefined {
+export function fieldError(field: "phone" | "phone2" | "name" | "area" | "district" | "address", value: unknown, main?: unknown, areaId?: unknown): string | undefined {
   switch (field) {
     case "phone":
       return normalizePhone(value) ? undefined : MESSAGES.phone;
@@ -133,6 +138,8 @@ export function fieldError(field: "phone" | "phone2" | "name" | "area" | "addres
     case "area":
       // The browser only checks that an area was chosen; the server checks it exists and is active.
       return typeof value === "string" && value.length > 0 ? undefined : MESSAGES.area;
+    case "district":
+      return districtError(areaId, value);
     case "address":
       return cleanText(value, 300).length >= 10 ? undefined : MESSAGES.address;
   }
@@ -152,6 +159,9 @@ export function validateCheckout(input: CheckoutInput, ctx: CheckoutContext = ST
 
   const area = typeof input.areaId === "string" ? ctx.areas.find((a) => a.id === input.areaId) : undefined;
   if (!area) errors.area = MESSAGES.area;
+  const districtMsg = area ? districtError(area.id, input.district) : undefined;
+  if (districtMsg) errors.district = districtMsg;
+  const district = area && DISTRICTS[area.id] && !districtMsg ? (input.district as string) : null;
 
   const address = cleanText(input.address, 300);
   if (address.length < 10) errors.address = MESSAGES.address;
@@ -178,6 +188,7 @@ export function validateCheckout(input: CheckoutInput, ctx: CheckoutContext = ST
       altPhone,
       name,
       area,
+      district,
       address,
       payment,
       lines,

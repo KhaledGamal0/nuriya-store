@@ -38,7 +38,7 @@ async function ctx() {
 
 async function order(p: string, cart: unknown, c: Awaited<ReturnType<typeof ctx>>) {
   const { validateCheckout } = await import("../lib/checkout.ts");
-  const r = validateCheckout({ phone: p, name: "Load Test", areaId: "cairo", address: "1 Load Test St, floor 2", payment: "cod", cart }, c);
+  const r = validateCheckout({ phone: p, name: "Load Test", areaId: "cairo", district: "Nasr City", address: "1 Load Test St, floor 2", payment: "cod", cart }, c);
   assert.ok(r.ok);
   return r.order;
 }

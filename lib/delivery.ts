@@ -73,9 +73,7 @@ export function deliveryLine(list: readonly Area[]): string {
 }
 
 /** Which places one checkout option covers, shown under the area picker and on the delivery page. */
-export const AREA_NOTES: Record<string, string> = {
-  cairo: "Includes October, Sheikh Zayed, Madinaty, El Shorouk and El Obour.",
-};
+export const AREA_NOTES: Record<string, string> = {}; // Oct 29 2026: the area inside Cairo / Giza is a list (lib/districts.ts).
 
 /** Checkout picker: one group per region with its fee in the heading (cheapest first), places A to Z inside. */
 export function areasForPicker(list: readonly Area[]): { label: string; feePiasters: number; areas: Area[] }[] {
