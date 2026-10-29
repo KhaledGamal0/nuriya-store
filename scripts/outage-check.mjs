@@ -29,7 +29,7 @@ try {
   await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
   await page.getByLabel("Mobile number", { exact: true }).fill("010 1234 5678");
   await page.getByLabel("Full name").fill("Nour Ahmed");
-  await page.getByLabel("Area").selectOption("alexandria");
+  await page.getByLabel("Governorate").selectOption("alexandria");
   await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");
   await page.getByRole("button", { name: /Place order/ }).click();
   const msg = page.getByText("We couldn't place your order just now", { exact: false });
