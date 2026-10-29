@@ -96,3 +96,4 @@
 - **Oct 29 2026 (Khaled):** popup: countdown in a plum box (white, bold numbers), free delivery in a pink-tint box (burgundy); no end-date line; focus goes to the title on open (no square around X).
 - **Oct 29 2026 (Khaled):** popup back to the original look; order = kicker → 17% off → 1,200 → 1,000 → "+ Free delivery in Cairo & Giza" → one countdown box "Both offers end in …" (pink tint) → button. No date line.
 - **Oct 29 2026 (Khaled):** Giza countryside hidden (shipping_areas.is_active = false, migration 0019) until he decides; checkout refuses it.
+- **Oct 29 2026 (Khaled):** checkout lists the Cairo & Giza areas by name under one heading "Cairo & Giza · Free delivery": Cairo, Giza, then 6th of October, El Obour, El Shorouk, Hadayek October, Madinaty, New Cairo, Sheikh Zayed (same zone, same fee/promo; migration 0020). No notes or descriptions. Address placeholder: "District, street and building no., floor, apartment, landmark". Reports show each area by name.

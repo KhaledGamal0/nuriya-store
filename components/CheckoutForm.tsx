@@ -326,7 +326,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
             {areaId === "cairo" && AREA_NOTES.cairo && <p className="f-hint">{AREA_NOTES.cairo}</p>}
           </Field>
           <Field id="address" label="Address" error={errors.address}>
-            <textarea id="address" name="address" autoComplete="street-address" placeholder="Street, building, floor, apartment" required {...live("address")} />
+            <textarea id="address" name="address" autoComplete="street-address" placeholder="District, street and building no., floor, apartment, landmark" required {...live("address")} />
           </Field>
         </fieldset>
 

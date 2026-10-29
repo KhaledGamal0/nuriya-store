@@ -111,7 +111,7 @@ export const MESSAGES = {
   phone2Same: "This is the same as your main number. Add a different one, or leave it empty.",
   name: "Enter your full name.",
   area: "Choose your area.",
-  address: "Add your street, building and floor.",
+  address: "Add your district, street, building number and floor.",
   payment: "Choose how you want to pay.",
   cart: "Your bag is empty or has an item we could not find.",
   soldOut: "Sorry, one of the sizes in your bag has just sold out. Please update your bag.",
