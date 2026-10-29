@@ -73,12 +73,12 @@ export function deliveryLine(list: readonly Area[]): string {
 }
 
 /** Which places one checkout option covers, shown under the area picker and on the delivery page. */
-export const AREA_NOTES: Record<string, string> = {
-  cairo: "Includes October, Sheikh Zayed, Madinaty, El Shorouk and El Obour.",
-};
+export const AREA_NOTES: Record<string, string> = {}; // Oct 29 2026 (Khaled): no notes; each area is listed by name.
 
 /** Checkout picker: one group per region with its fee in the heading (cheapest first), places A to Z inside. */
 export function areasForPicker(list: readonly Area[]): { label: string; feePiasters: number; areas: Area[] }[] {
-  return areasByFee(list).map((g) => ({ ...g, areas: [...g.areas].sort((a, b) => a.nameEn.localeCompare(b.nameEn)) }));
+  // Main cities first (Cairo, Giza), then the rest A to Z.
+  const rank = (a: Area) => (a.id === "cairo" ? 0 : a.id === "giza" ? 1 : 2);
+  return areasByFee(list).map((g) => ({ ...g, areas: [...g.areas].sort((a, b) => rank(a) - rank(b) || a.nameEn.localeCompare(b.nameEn)) }));
 }
 

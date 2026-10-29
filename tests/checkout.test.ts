@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateCheckout, normalizePhone, parseCart, newOrderNumber } from "../lib/checkout.ts";
-import { AREAS, getArea } from "../lib/shipping.ts";
+import { AREAS, areasForPicker, getArea } from "../lib/shipping.ts";
 import { formatEgp } from "../lib/money.ts";
 import { sizeForWeight } from "../lib/catalog.ts";
 
@@ -62,9 +62,11 @@ test("shipping table matches the Direction price list", () => {
   assert.equal(getArea("cairo")?.feePiasters, 7_500);
   assert.equal(getArea("sharm-el-sheikh")?.feePiasters, 16_500);
   assert.equal(getArea("new-administrative-capital")?.feePiasters, 13_500);
-  assert.equal(AREAS.length, 28);
-  assert.equal(getArea("cairo")?.nameEn, "Cairo & Giza");
-  assert.equal(getArea("sheikh-zayed"), undefined, "new cities are part of Cairo & Giza");
+  assert.equal(AREAS.length, 36); // Oct 29 2026: Cairo & Giza listed by name (9 areas)
+  assert.equal(getArea("cairo")?.nameEn, "Cairo");
+  for (const id of ["giza", "new-cairo", "6th-of-october", "sheikh-zayed", "madinaty", "el-shorouk", "el-obour", "hadayek-october"])
+    assert.equal(getArea(id)?.zoneId, getArea("cairo")?.zoneId, `${id} shares the Cairo & Giza fee`);
+  assert.deepEqual(areasForPicker()[0]?.areas.slice(0, 2).map((a) => a.nameEn), ["Cairo", "Giza"], "Cairo and Giza first");
   assert.equal(new Set(AREAS.map((a) => a.id)).size, AREAS.length);
   // Every fee, checked against the Direction price list image.
   const fees: Record<string, number> = {
@@ -165,7 +167,7 @@ test("free delivery: fee 0 shows as Free, the total adds nothing, other areas ke
   const { staticCatalog } = await import("../lib/catalog.ts");
   assert.equal(formatFee(0), "Free");
   assert.equal(formatFee(9_000), "90 EGP");
-  const free = AREAS.map((a) => (a.id === "cairo" ? { ...a, feePiasters: 0 } : a));
+  const free = AREAS.map((a) => (a.zoneId === "cairo-giza" ? { ...a, feePiasters: 0 } : a));
   assert.equal(freeDeliveryLabel(free), "Cairo & Giza");
   assert.equal(freeDeliveryLabel(AREAS), null, "no free area: nothing says free");
   assert.equal(minPaidFee(free), 9_000);
