@@ -495,7 +495,7 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     where = "checkout-filled";
     await page.getByLabel("Mobile number", { exact: true }).fill(PHONES[vp]);
     await page.getByLabel("Full name").fill("Nour Ahmed");
-    await page.getByLabel("Area").selectOption("alexandria");
+    await page.getByLabel("Governorate").selectOption("alexandria");
     await page.getByLabel("Address").fill("12 El Horreya Rd, building 4, floor 3");
     if (await page.locator(".f-err").count()) add(vp, where, "flow", "errors still showing after every field was fixed");
     if (!(await page.evaluate(() => document.body.innerText.includes("1,090 EGP")))) add(vp, where, "flow", "total did not update to 1,090 EGP for Alexandria");

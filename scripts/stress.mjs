@@ -61,7 +61,8 @@ async function fillCheckout(page, phone, { name = "Stress Buyer", area = "cairo"
   await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
   await page.getByLabel("Mobile number", { exact: true }).fill(phone);
   await page.getByLabel("Full name").fill(name);
-  await page.getByLabel("Area").selectOption(area);
+  await page.getByLabel("Governorate").selectOption(area);
+  if (area === "cairo" || area === "giza") await page.getByLabel("Area", { exact: true }).selectOption(area === "cairo" ? "Nasr City" : "Dokki");
   await page.getByLabel("Address").fill(address);
 }
 

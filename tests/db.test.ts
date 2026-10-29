@@ -41,7 +41,7 @@ test("a price change in the database is what checkout charges", { skip }, async 
   await sql!`UPDATE products SET price_piasters = 125000 WHERE slug = 'quiet-confidence'`;
   try {
     const r = validateCheckout(
-      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "burgundy", size: "L/XL", qty: 2 }] },
+      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", district: "Nasr City", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "burgundy", size: "L/XL", qty: 2 }] },
       { catalog: await getCatalog(), areas: await getAreas() },
     );
     assert.ok(r.ok);
@@ -61,7 +61,7 @@ test("a size with no stock shows sold out and cannot be ordered", { skip }, asyn
     assert.equal(catalog.colors.cream.sizes.find((s) => s.size === "S/M")?.available, false);
     assert.equal(catalog.colors.cream.sizes.find((s) => s.size === "L/XL")?.available, true);
     const r = validateCheckout(
-      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "cream", size: "S/M", qty: 1 }] },
+      { phone: "01012345678", name: "Nour Ahmed", areaId: "cairo", district: "Nasr City", address: "12 Tahrir St, floor 2", payment: "cod", cart: [{ color: "cream", size: "S/M", qty: 1 }] },
       { catalog, areas: await getAreas() },
     );
     assert.equal(r.ok, false);
