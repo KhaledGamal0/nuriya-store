@@ -30,6 +30,8 @@ const securityHeaders = [
 
 const config: NextConfig = {
   reactStrictMode: true,
+  // The sales SQL is read by the reports cron at run time (app/api/cron/reports), so ship it with that function.
+  outputFileTracingIncludes: { "/api/cron/reports": ["./scripts/sales.sql"] },
   experimental: {
     // Put the (small) stylesheet inside the HTML so the first paint does not wait for a CSS download.
     inlineCss: true,
