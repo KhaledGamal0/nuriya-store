@@ -321,3 +321,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: scripts/alert.sh open "Admin task failed" "The '${{ inputs.task }}' task stopped. The database change is all-or-nothing, so nothing was half-applied. A backup was taken first."
+      - name: Clear an old failure alert after a successful task
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/alert.sh close "Admin task failed" "The next admin task ran successfully."
