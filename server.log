@@ -1,0 +1,570 @@
+▲ Next.js 16.4.2
+- Local:         http://localhost:3000
+- Network:       http://10.1.0.185:3000
+✓ Ready in 140ms
+✓ Running next.config.ts took 41ms
+[store] catalog start
+[store] areas start
+[store] areas done in 56ms
+[store] catalog done in 73ms
+[store] catalog start
+[store] areas start
+[store] areas done in 15ms
+[store] catalog done in 24ms
+order.saved { number: 'NUR-65WNWT', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 17ms
+[store] catalog done in 27ms
+[store] catalog start
+[store] areas start
+[store] areas done in 13ms
+[store] catalog done in 23ms
+order.saved { number: 'NUR-XAHPAB', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 15ms
+[store] catalog done in 26ms
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] areas done in 11ms
+[store] catalog done in 17ms
+[store] areas done in 20ms
+[store] catalog done in 62ms
+[store] catalog start
+[store] areas start
+[store] areas done in 8ms
+[store] catalog done in 11ms
+[store] catalog start
+[store] areas start
+[store] areas done in 5ms
+[store] catalog start
+[store] areas start
+[store] catalog done in 18ms
+[store] areas done in 8ms
+[store] catalog done in 29ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 8ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 6ms
+[store] catalog start
+[store] areas start
+[store] areas done in 5ms
+[store] catalog done in 15ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 5ms
+[store] catalog start
+[store] areas start
+[store] areas done in 5ms
+[store] catalog done in 6ms
+[store] catalog start
+[store] areas start
+[store] areas done in 4ms
+[store] catalog done in 12ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 6ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 4ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 5ms
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] areas done in 9ms
+[store] areas done in 6ms
+[store] catalog done in 16ms
+[store] catalog done in 17ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 6ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 5ms
+[store] catalog start
+[store] areas start
+[store] areas done in 4ms
+[store] catalog done in 6ms
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] areas done in 5ms
+[store] areas done in 10ms
+[store] catalog done in 13ms
+[store] catalog done in 14ms
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] areas done in 6ms
+[store] areas done in 4ms
+[store] catalog done in 10ms
+[store] catalog done in 11ms
+[store] catalog start
+[store] areas start
+[store] areas done in 14ms
+[store] catalog done in 25ms
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] areas done in 308ms
+[store] areas done in 318ms
+[store] areas done in 272ms
+[store] areas done in 213ms
+[store] areas done in 159ms
+[store] areas done in 133ms
+[store] areas done in 125ms
+[store] areas done in 131ms
+[store] areas done in 121ms
+[store] areas done in 117ms
+[store] areas done in 113ms
+[store] areas done in 102ms
+[store] areas done in 86ms
+[store] areas done in 95ms
+[store] areas done in 85ms
+[store] areas done in 84ms
+[store] areas done in 82ms
+[store] areas done in 81ms
+[store] areas done in 73ms
+[store] areas done in 76ms
+[store] areas done in 74ms
+[store] areas done in 72ms
+[store] areas done in 69ms
+[store] areas done in 67ms
+[store] areas done in 70ms
+[store] areas done in 67ms
+[store] areas done in 63ms
+[store] areas done in 57ms
+[store] areas done in 56ms
+[store] catalog start
+[store] areas start
+[store] catalog done in 401ms
+[store] catalog done in 460ms
+[store] catalog done in 355ms
+[store] catalog done in 271ms
+[store] catalog done in 469ms
+[store] catalog done in 274ms
+[store] catalog done in 315ms
+[store] catalog done in 260ms
+[store] catalog done in 275ms
+[store] catalog done in 270ms
+[store] catalog done in 266ms
+[store] catalog done in 258ms
+[store] catalog done in 246ms
+[store] catalog done in 244ms
+[store] catalog done in 257ms
+[store] areas done in 83ms
+[store] catalog done in 246ms
+[store] catalog done in 251ms
+[store] catalog done in 237ms
+[store] catalog done in 251ms
+[store] catalog done in 244ms
+[store] catalog done in 243ms
+[store] catalog done in 239ms
+[store] catalog done in 238ms
+[store] catalog done in 238ms
+[store] catalog done in 231ms
+[store] catalog done in 225ms
+[store] catalog done in 243ms
+[store] catalog done in 234ms
+[store] catalog done in 229ms
+[store] catalog done in 140ms
+order.saved { number: 'NUR-NY5QS7', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-2RPCQB', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-Y6RRQ6', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-F46A89', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-DJUYFU', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-JX8D3B', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-8MJD5V', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-EA44TP', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-477KCV', existing: false, payment: 'cod' }
+order.saved { number: 'NUR-PFS4Y4', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+[store] areas done in 324ms
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+[store] areas done in 302ms
+[store] areas done in 289ms
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+[store] areas done in 267ms
+[store] catalog start
+[store] areas start
+[store] areas done in 263ms
+[store] areas done in 248ms
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+[store] areas done in 231ms
+[store] areas done in 224ms
+[store] areas done in 214ms
+[store] areas done in 199ms
+[store] areas done in 162ms
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+[store] areas done in 155ms
+[store] areas done in 117ms
+[store] areas done in 98ms
+[store] areas done in 87ms
+[store] areas done in 82ms
+[store] areas done in 72ms
+[store] areas done in 61ms
+[store] areas done in 52ms
+[store] areas done in 49ms
+[store] areas done in 36ms
+[store] catalog done in 424ms
+checkout.refused sold_out
+[store] catalog start
+[store] areas start
+[store] catalog done in 404ms
+[store] catalog done in 357ms
+[store] catalog done in 389ms
+[store] catalog done in 354ms
+[store] catalog done in 344ms
+[store] catalog done in 337ms
+[store] catalog done in 336ms
+[store] catalog done in 272ms
+[store] catalog done in 331ms
+[store] catalog done in 353ms
+[store] catalog done in 293ms
+[store] catalog done in 264ms
+[store] catalog done in 232ms
+[store] catalog done in 257ms
+[store] catalog done in 240ms
+[store] areas done in 129ms
+[store] catalog done in 232ms
+[store] catalog done in 233ms
+[store] catalog done in 231ms
+[store] catalog done in 249ms
+[store] catalog done in 232ms
+[store] catalog done in 257ms
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 7ms
+[store] catalog start
+[store] areas start
+[store] areas done in 7ms
+[store] catalog done in 10ms
+[store] catalog start
+[store] areas start
+[store] catalog start
+[store] areas start
+[store] areas done in 7ms
+[store] areas done in 4ms
+[store] catalog done in 11ms
+[store] catalog done in 16ms
+[store] catalog start
+[store] areas start
+[store] areas done in 25ms
+[store] catalog done in 42ms
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-6LE7NM', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-XVKYGN', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-XVKYGN', existing: true, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 5ms
+[store] catalog done in 8ms
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-7B7BGL', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-6YLVBC', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-Q495GS', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-8AVEJU', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-T9HRG7', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-6YFH5L', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-EEZYX4', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 3ms
+order.saved { number: 'NUR-96RGH8', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-9RGNMQ', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-D5Q3WE', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 6ms
+order.saved { number: 'NUR-FCMJ3A', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 7ms
+order.saved { number: 'NUR-BLX3QH', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 1ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-RJSPGY', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-TWWHRF', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-QBVQSZ', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-JS8CWC', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-7TMW2B', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-ADQMKC', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 9ms
+order.saved { number: 'NUR-3VXJWC', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 3ms
+order.saved { number: 'NUR-HP4JNL', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-4HV6VJ', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 3ms
+order.saved { number: 'NUR-7TMYB3', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-XKH2BE', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 4ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-F7JFRZ', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 1ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-6J9B69', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-2YXN8H', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-F2QT28', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-JSGYJ6', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-APJS9J', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-98H5SC', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 1ms
+[store] catalog done in 4ms
+order.saved { number: 'NUR-EQ7A98', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 3ms
+order.saved { number: 'NUR-JSVYC9', existing: false, payment: 'cod' }
+[store] catalog start
+[store] areas start
+[store] areas done in 2ms
+[store] catalog done in 4ms
+checkout.refused rate_limited
+[store] catalog start
+[store] areas start
+[store] areas done in 3ms
+[store] catalog done in 5ms
+order.saved { number: 'NUR-R4QSU6', existing: false, payment: 'cod' }

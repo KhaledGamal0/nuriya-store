@@ -1,0 +1,68 @@
+[
+  {
+    "vp": "mobile",
+    "where": "/",
+    "kind": "lighthouse",
+    "detail": "performance 93 (budget 95)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/",
+    "kind": "lighthouse",
+    "detail": "LCP 3.19s (budget 2.0s)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/",
+    "kind": "lighthouse",
+    "detail": "JavaScript 183 KB transferred (budget 180)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/white",
+    "kind": "lighthouse",
+    "detail": "performance 93 (budget 95)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/white",
+    "kind": "lighthouse",
+    "detail": "LCP 3.12s (budget 2.0s)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/white",
+    "kind": "lighthouse",
+    "detail": "JavaScript 183 KB transferred (budget 180)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/burgundy",
+    "kind": "lighthouse",
+    "detail": "performance 92 (budget 95)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/burgundy",
+    "kind": "lighthouse",
+    "detail": "LCP 3.31s (budget 2.0s)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/quiet-confidence/burgundy",
+    "kind": "lighthouse",
+    "detail": "JavaScript 183 KB transferred (budget 180)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/checkout",
+    "kind": "lighthouse",
+    "detail": "JavaScript 190 KB transferred (budget 180)"
+  },
+  {
+    "vp": "mobile",
+    "where": "/returns",
+    "kind": "lighthouse",
+    "detail": "JavaScript 182 KB transferred (budget 180)"
+  }
+]
