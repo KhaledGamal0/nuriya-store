@@ -11,5 +11,11 @@
       "health-report": false,
       "sales-report": false
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/reports",
+      "schedule": "*/10 * * * *"
+    }
+  ]
 }
