@@ -1,13 +1,13 @@
 name: Reports clock
 
-# Sends every report on time in Cairo time (Khaled, Oct 27 2026). Runs every hour at :19 (GitHub delays jobs set
-# on the hour by hours) and works in Africa/Cairo time, so summer/winter clock changes need no edits.
+# Sends every report on time in Cairo time (Khaled, Oct 27 2026). Runs every 10 minutes (GitHub delays and skips
+# scheduled jobs) and works in Africa/Cairo time, so summer/winter clock changes need no edits.
 # Each report goes out once: the first run at or after its time records it in report_runs; later runs skip it.
 #   08:00  health early warning (e-mails only if something is wrong) — every day except Sunday
 #   09:00  daily sales (yesterday + today so far) · Sunday 09:00 weekly sales + weekly health · 1st 09:00 monthly sales
 on:
   schedule:
-    - cron: "19 * * * *"
+    - cron: "*/10 * * * *" # every 10 min: GitHub skips many scheduled runs; report_runs keeps each report to one send
   workflow_dispatch:
 
 permissions:
@@ -43,7 +43,8 @@ jobs:
           # Start a report workflow through the REST API (same as Actions → Run workflow).
           d() { gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/$1/dispatches" -f ref=main -f "$2" >/dev/null; }
           for k in "${due[@]}"; do
-            new=$(q -tA -c "INSERT INTO report_runs (kind, period) VALUES ('$k', '$D') ON CONFLICT DO NOTHING RETURNING 1")
+            new=$(q -qtA -c "INSERT INTO report_runs (kind, period) VALUES ('$k', '$D') ON CONFLICT DO NOTHING RETURNING 1")
+            # Oct 30 2026 fix: psql printed "INSERT 0 1" after the 1 (no -q), so every report was recorded but never sent.
             [ "$new" = "1" ] || { echo "$k for $D: already sent"; continue; }
             case "$k" in
               sales-daily)   ok=$(d sales-report.yml "inputs[report]=daily" && echo y) ;;
