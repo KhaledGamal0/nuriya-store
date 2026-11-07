@@ -1,0 +1,7 @@
+▲ Next.js 16.4.2
+- Local:         http://localhost:3001
+- Network:       http://10.1.0.185:3001
+✓ Ready in 109ms
+✓ Running next.config.ts took 33ms
+checkout.unavailable Failed query: select "shipping_areas"."slug", "shipping_areas"."name_en", "shipping_areas"."name_ar", "shipping_zones"."fee_piasters", "shipping_zones"."promo_fee_piasters", "shipping_zones"."promo_until", "shipping_zones"."code", "shipping_zones"."position" from "shipping_areas" inner join "shipping_zones" on "shipping_areas"."zone_id" = "shipping_zones"."id" where ("shipping_areas"."is_active" = $1 and "shipping_zones"."is_active" = $2) order by "shipping_zones"."position" asc, "shipping_areas"."id" asc
+params: true,true
