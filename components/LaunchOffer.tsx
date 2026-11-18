@@ -21,6 +21,14 @@ const SEEN = "nuriya-sale-seen";
  * or blocks the first photo), never on checkout. Native dialog: focus moves inside, Escape and the
  * backdrop close it, the page behind is inert. Disappears by itself when the sale ends.
  */
+/** Days / hours / mins / secs for the countdown boxes ("--" before the first tick). */
+function units(ms: number | undefined): [string, string][] {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (ms === undefined) return [["--", "Days"], ["--", "Hours"], ["--", "Mins"], ["--", "Secs"]];
+  const s = Math.floor(ms / 1000);
+  return [[pad(Math.floor(s / 86400)), "Days"], [pad(Math.floor(s / 3600) % 24), "Hours"], [pad(Math.floor(s / 60) % 60), "Mins"], [pad(s % 60), "Secs"]];
+}
+
 export function LaunchOffer() {
   const { catalog, areas } = useStore();
   const free = freeDeliveryLabel(areas);
@@ -70,11 +78,22 @@ export function LaunchOffer() {
         <div className="lo-x">
           <CloseButton onClick={() => setOpen(false)} label="Close offer" />
         </div>
+        {sale && (
+          // Black Friday hero (Nov 2026): plum band, pink serif title — the style of Nuriya's own Instagram stories.
+          <div className="lo-hero">
+            <p className="lo-hk">Limited time</p>
+            <h2 id="lo-title" tabIndex={-1} autoFocus>
+              Black Friday
+            </h2>
+          </div>
+        )}
         <div className="lo-b">
           {!sale && <p className="lo-k">Limited launch offer</p>}
-          <h2 id="lo-title" tabIndex={-1} autoFocus>
-            {sale ? "Black Friday" : `${pct}% off`}
-          </h2>
+          {!sale && (
+            <h2 id="lo-title" tabIndex={-1} autoFocus>
+              {`${pct}% off`}
+            </h2>
+          )}
           {sale && was && <p className="lo-o">Save {formatEgp(was - catalog.pricePiasters)}</p>}
           <p className="lo-p">
             {was && (
@@ -87,7 +106,16 @@ export function LaunchOffer() {
             <b>{formatEgp(catalog.pricePiasters)}</b>
           </p>
           {free && <p className="lo-f">Free delivery in {free}</p>}
-          {timed ? (
+          {timed && sale ? (
+            <div className="lo-cd" role="timer" aria-live="off" aria-label={left ? `Ends in ${left.text}` : "Ends soon"}>
+              {units(left?.ms).map(([n, label]) => (
+                <span key={label}>
+                  <b>{n}</b>
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : timed ? (
             <p className="lo-t" role="timer" aria-live="off">
               Ends in <b>{left ? left.text : " "}</b>
             </p>

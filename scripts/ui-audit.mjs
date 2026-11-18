@@ -174,8 +174,8 @@ async function saleCheck(browser) {
     if (await dlg.isVisible()) {
       await page.waitForTimeout(1300);
       const text = await dlg.innerText();
-      for (const want of ["Black Friday", "Save 300 EGP", "900 EGP", "1,200 EGP", "Ends in", "Shop the offer"]) if (!text.includes(want)) f(`popup does not show "${want}"`);
-      if (!/\d+h \d\dm \d\ds/.test(text)) f("popup countdown is not running");
+      for (const want of ["Black Friday", "Save 300 EGP", "900 EGP", "1,200 EGP", "Shop the offer"]) if (!text.includes(want)) f(`popup does not show "${want}"`);
+      if (!/\d\d\s*Secs/i.test(text)) f("popup countdown is not running");
       if (!(await page.evaluate(() => document.activeElement?.closest("dialog") !== null))) f("focus did not move into the popup", "a11y");
       await shot(page, "mobile-sale-popup");
       await page.keyboard.press("Escape");
