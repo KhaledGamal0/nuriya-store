@@ -44,7 +44,17 @@ export function BagLineItem({ line, onQty, onRemove }: Props) {
         )}
       </div>
       <div className="ln-r">
-        <span className="price">{formatEgp(totalPiasters)}</span>
+        {/* During an offer the full price shows crossed out above the bag price (Black Friday, Nov 2026). */}
+        <span className="price">
+          {catalog.compareAtPiasters != null && catalog.compareAtPiasters * line.qty > totalPiasters && (
+            <>
+              <span className="sr-only">Was </span>
+              <s className="was">{formatEgp(catalog.compareAtPiasters * line.qty)}</s>{" "}
+              <span className="sr-only">, now </span>
+            </>
+          )}
+          {formatEgp(totalPiasters)}
+        </span>
         {parts.length > 1 && (
           // The offer ran out inside this line: show how the price is made up.
           <small className="ln-split">{parts.map((p) => `${p.qty} × ${formatEgp(p.unitPiasters)}`).join(" + ")}</small>
