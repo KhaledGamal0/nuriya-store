@@ -36,7 +36,7 @@ After it succeeds, the Vercel token can be deleted (vercel.com → Tokens); it's
 | UI audit | every push | Any page, flow, accessibility, speed or database-down finding |
 | Database deploy | when a migration is pushed | A migration that doesn't apply |
 | **Uptime check** | every 15 min (pages), every 6 h (database) | A page that isn't 200, or `/api/health` not ok |
-| **Database backup** | daily 03:30 Cairo | A dump that can't be made **or can't be restored** |
+| **Database backup** | once per Cairo day (tries hourly at :17, skips once done) | A dump that can't be made **or can't be restored** |
 | **Order watch** | hourly | Any order saved but not e-mailed to the shop within 10 minutes (alert lists order numbers only) |
 
 A failure opens a GitHub issue labelled **alert** (the GitHub app pushes it to your phone) and closes it automatically when the next run passes. GitHub pauses scheduled workflows on a public repo after 60 days with no commits; a push or "Enable workflow" turns them back on.
