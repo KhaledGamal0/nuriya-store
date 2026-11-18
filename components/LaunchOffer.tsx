@@ -71,9 +71,9 @@ export function LaunchOffer() {
           <CloseButton onClick={() => setOpen(false)} label="Close offer" />
         </div>
         <div className="lo-b">
-          <p className="lo-k">{sale ? "Launch day offer" : "Limited launch offer"}</p>
+          <p className="lo-k">{sale ? "Black Friday" : "Limited launch offer"}</p>
           <h2 id="lo-title" tabIndex={-1} autoFocus>
-            {sale ? `${pct}% off everything` : `${pct}% off`}
+            {sale && was ? `Save ${formatEgp(was - catalog.pricePiasters)}` : `${pct}% off`}
           </h2>
           <p className="lo-p">
             {was && (
