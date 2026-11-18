@@ -174,7 +174,7 @@ async function saleCheck(browser) {
     if (await dlg.isVisible()) {
       await page.waitForTimeout(1300);
       const text = await dlg.innerText();
-      for (const want of ["BLACK FRIDAY", "Save 300 EGP", "900 EGP", "1,200 EGP", "Ends in", "Shop the offer"]) if (!text.includes(want)) f(`popup does not show "${want}"`);
+      for (const want of ["Black Friday", "Save 300 EGP", "900 EGP", "1,200 EGP", "Ends in", "Shop the offer"]) if (!text.includes(want)) f(`popup does not show "${want}"`);
       if (!/\d+h \d\dm \d\ds/.test(text)) f("popup countdown is not running");
       if (!(await page.evaluate(() => document.activeElement?.closest("dialog") !== null))) f("focus did not move into the popup", "a11y");
       await shot(page, "mobile-sale-popup");
@@ -198,7 +198,7 @@ async function saleCheck(browser) {
     if (await page.locator("dialog[open]:has(.lo)").count()) f("popup showed again in the same visit");
     const pdp = await page.evaluate(() => document.querySelector(".info")?.textContent ?? "");
     if (!pdp.includes("900 EGP")) f("product page does not show the 900 EGP sale price");
-    if (!/Launch day.*ends in/.test(pdp)) f("product page does not show the sale countdown line");
+    if (!/Black Friday.*ends in/.test(pdp)) f("product page does not show the sale countdown line");
     await shot(page, "mobile-sale-product");
     await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
