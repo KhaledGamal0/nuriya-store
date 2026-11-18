@@ -10,11 +10,14 @@ name: Database backup
 #   pg_restore --no-owner -d "<target database>" nuriya.dump
 on:
   schedule:
-    - cron: "30 0 * * *" # 03:30 Cairo, quietest hour
+    # GitHub delays and skips scheduled runs (only 4 backups in 7 days, Nov 2026), so try every hour:
+    # the first run of each Cairo day makes the backup, the rest see it and stop in seconds.
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
   issues: write
 
 jobs:
@@ -42,7 +45,19 @@ jobs:
             echo "::warning::NEON_API_KEY and BACKUP_PASSPHRASE secrets are needed. Nothing to back up yet."
             echo "SKIP=1" >> "$GITHUB_ENV"
           fi
+      - name: Already backed up today (Cairo date)?
+        if: env.SKIP != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          STAMP=$(TZ=Africa/Cairo date +%F)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            n=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=nuriya-db-$STAMP" --jq '[.artifacts[]|select(.expired==false)]|length')
+            if [ "$n" -gt 0 ]; then echo "Backup for $STAMP already exists."; echo "SKIP=1" >> "$GITHUB_ENV"; fi
+          fi
       - uses: actions/checkout@v5
+        if: env.SKIP != '1'
       - uses: actions/setup-node@v5
         if: env.SKIP != '1'
         with:
@@ -54,7 +69,6 @@ jobs:
       - name: Dump (Postgres 17 tools)
         if: env.SKIP != '1'
         run: |
-          echo "STAMP=$(date -u +%F)" >> "$GITHUB_ENV"
           # Run as the runner's own user so the next steps can read and delete the file.
           docker run --rm --network host --user "$(id -u):$(id -g)" -e DATABASE_URL -v "$PWD:/out" postgres:17 \
             sh -c 'pg_dump --format=custom --no-owner --no-privileges -d "$DATABASE_URL" -f /out/nuriya.dump'
