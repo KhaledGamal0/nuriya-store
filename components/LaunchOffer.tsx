@@ -71,10 +71,11 @@ export function LaunchOffer() {
           <CloseButton onClick={() => setOpen(false)} label="Close offer" />
         </div>
         <div className="lo-b">
-          <p className="lo-k">{sale ? "Black Friday" : "Limited launch offer"}</p>
+          {!sale && <p className="lo-k">Limited launch offer</p>}
           <h2 id="lo-title" tabIndex={-1} autoFocus>
-            {sale && was ? `Save ${formatEgp(was - catalog.pricePiasters)}` : `${pct}% off`}
+            {sale ? "Black Friday" : `${pct}% off`}
           </h2>
+          {sale && <p className="lo-o">{pct}% off</p>}
           <p className="lo-p">
             {was && (
               <>
@@ -132,7 +133,7 @@ export function SaleNote() {
   if (!catalog.sale) return null;
   return (
     <p className="sale-note">
-      Launch day · {percentOff(catalog.pricePiasters, catalog.compareAtPiasters)}% off · ends in{" "}
+      Black Friday · {percentOff(catalog.pricePiasters, catalog.compareAtPiasters)}% off · ends in{" "}
       <span className="sale-t">{left ? left.text : " "}</span>
     </p>
   );
