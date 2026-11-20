@@ -42,8 +42,8 @@ export const PRODUCT = {
   ],
   /** The model in the photos, both colours (Khaled, Oct 11 2026). Shown next to the size buttons. */
   model: { heightCm: 160, weightKg: 50, wears: "S/M" as SizeId },
-  // TODO(khaled): fabric composition, weight and care instructions.
-  fabric: null as string | null,
+  /** Material (Khaled, Nov 20 2026). TODO(khaled): care instructions. */
+  fabric: "Melton fabric on the outside, lined inside with a soft toweling material for warmth and comfort." as string | null,
   sizeChart: [
     { size: "S/M" as SizeId, shoulderCm: 56, chestCm: 112, lengthCm: 64, weightKg: [45, 65] as const },
     { size: "L/XL" as SizeId, shoulderCm: 60, chestCm: 120, lengthCm: 67, weightKg: [66, 80] as const },

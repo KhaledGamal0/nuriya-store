@@ -202,6 +202,13 @@ async function saleCheck(browser) {
     // Nov 20 2026: small "Sale" label on the photos (top-right) while the sale runs.
     const tag = (await page.locator(".gal-wrap > .tag").textContent().catch(() => "")) ?? "";
     if (!/^sale$/i.test(tag.trim())) f("product photos do not show the Sale label");
+    // Nov 20 2026: Material section (asked often by customers) opens and shows the fabric.
+    const mat = page.locator(".acc summary", { hasText: "Material" });
+    if (!(await mat.count())) f("product page has no Material section");
+    else {
+      await mat.click();
+      if (!(await page.getByText(/Melton fabric/).isVisible())) f("Material section does not show the fabric");
+    }
     await shot(page, "mobile-sale-product");
     await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);

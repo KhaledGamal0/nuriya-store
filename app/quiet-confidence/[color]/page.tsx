@@ -86,6 +86,14 @@ export default async function ProductPage({ params }: Params) {
               <p>{c.detail}</p>
             </div>
           </details>
+          {catalog.fabric && (
+            <details>
+              <summary>Material</summary>
+              <div className="acc-in">
+                <p>{catalog.fabric}</p>
+              </div>
+            </details>
+          )}
           <details>
             <summary>Size and fit</summary>
             <div className="acc-in">
