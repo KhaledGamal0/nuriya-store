@@ -456,6 +456,8 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     await page.waitForTimeout(1000);
     if (!(await page.locator("dialog[open]").count())) add(vp, where, "flow", "bag did not open after adding");
     await checks(page, vp, where);
+    // Nov 20 2026: during an offer the bag shows the saving under the subtotal.
+    if ((await page.locator("dialog[open] s.was").count()) && !(await page.locator("dialog[open]").getByText(/You save \d/).isVisible())) add(vp, where, "flow", "bag shows an offer price but no \"You save\" line");
     await page.screenshot({ path: `${OUT}/shots/${vp}-bag-open.png` });
     await photoCheck(page, vp, where, { scroll: false, scope: "dialog[open]" });
   });

@@ -16,7 +16,9 @@ const INSTAGRAM = "https://www.instagram.com/nuriya.eg";
 
 export function Header() {
   const bag = useBag();
-  const { areas } = useStore();
+  const { areas, catalog } = useStore();
+  // During an offer: what the bag saves against the full price (shown under the subtotal).
+  const saved = catalog.compareAtPiasters != null ? catalog.compareAtPiasters * bag.count - bag.subtotalPiasters : 0;
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
   const pathname = usePathname();
@@ -158,6 +160,7 @@ export function Header() {
               <span>Subtotal</span>
               <span>{formatEgp(bag.subtotalPiasters)}</span>
             </div>
+            {saved > 0 && <p className="sale-note" style={{ marginTop: "calc(-1 * var(--s1))" }}>You save {formatEgp(saved)}</p>}
             <p className="small">{deliveryLine(areas)}, added at checkout.</p>
             <Link className="btn" href="/checkout" onClick={bag.closeBag}>
               Checkout
