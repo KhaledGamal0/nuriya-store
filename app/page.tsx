@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCatalog } from "@/lib/store";
 import { productPath } from "@/lib/catalog";
 import { preview } from "@/lib/blur";
+import { SaleTag } from "@/components/SaleTag";
 import { LivePrice } from "@/components/LivePrice";
 import { PHONE_FULL } from "@/lib/sizes";
 
@@ -53,6 +54,7 @@ export default async function Home() {
                 <div className="pc-ph" style={preview(first.src)}>
                   <Image src={first.src} alt={first.alt} fill quality={65} sizes="(min-width: 900px) 600px, 50vw" loading="eager" fetchPriority="low" decoding="sync" />
                   <Image src={second.src} alt="" fill quality={65} sizes="(min-width: 900px) 600px, 50vw" />
+                  {color.sizes.some((s) => s.available) && <SaleTag />}
                 </div>
                 <div className="pc-t">
                   <b>

@@ -6,6 +6,7 @@ import { COLORS, colorFromSlug, productPath, COLOR_SLUG } from "@/lib/catalog";
 import { getAreas, getCatalog } from "@/lib/store";
 import { formatEgp } from "@/lib/money";
 import { deliveryLine, freeDeliveryLabel, minFee } from "@/lib/shipping";
+import { SaleTag } from "@/components/SaleTag";
 import { Gallery } from "@/components/Gallery";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { SizeTable } from "@/components/SizeTable";
@@ -59,7 +60,7 @@ export default async function ProductPage({ params }: Params) {
   return (
     <div className="wrap pdp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <Gallery images={c.images} label={`${catalog.name}, ${c.name}`} />
+      <Gallery images={c.images} label={`${catalog.name}, ${c.name}`} tag={inStock ? <SaleTag /> : null} />
       <div className="info">
         <div>
           <div className="t-row">
