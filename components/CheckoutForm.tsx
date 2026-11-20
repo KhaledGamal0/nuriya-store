@@ -229,7 +229,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
       >
         <h1>Checkout</h1>
         <p className="small" style={{ marginTop: "var(--s1)" }}>
-          No account needed. We confirm every order on WhatsApp.
+          No account needed. We confirm every order before it ships.
         </p>
         <input type="hidden" name="cart" value={JSON.stringify(bag.lines)} />
         {/* Left empty by people; bots that fill every field are refused. */}

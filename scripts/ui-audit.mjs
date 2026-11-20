@@ -536,6 +536,8 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     for (const [what, text] of [["greeting", "Thank you, Nour."], ["total", "1,090 EGP"], ["area", "Alexandria"], ["next steps", "What happens next"], ["phone", PHONES[vp]]]) {
       if (!shown.includes(text)) add(vp, where, "flow", `confirmation page does not show the ${what} ("${text}")`);
     }
+    // Khaled, Nov 20 2026: customers never see WhatsApp on the site (shop e-mails and reports keep it).
+    if (/whatsapp/i.test(shown)) add(vp, where, "flow", "confirmation page mentions WhatsApp");
     if (!db) return;
     const phone = PHONES[vp].replace(/\s/g, "");
     const rows = await db`SELECT number, status, total_piasters FROM orders WHERE customer_phone = ${phone}`;
