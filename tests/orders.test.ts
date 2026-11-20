@@ -236,7 +236,7 @@ test("order lookup needs the right number AND phone, and says the same thing oth
   const found = await findOrder(getSql(), r.number.toLowerCase(), `+2${phone}`);
   assert.equal(found?.number, r.number);
   assert.equal(found?.totalPiasters, 129_000);
-  assert.match(found!.statusText, /confirm/i);
+  assert.match(found!.statusText, /received/i);
   assert.equal(JSON.stringify(found).includes("Horreya"), false, "lookup must not reveal the address");
   assert.equal(await findOrder(getSql(), r.number, "01000000000"), null);
   assert.equal(await findOrder(getSql(), "NUR-ZZZZZZ", phone), null);
