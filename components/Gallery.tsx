@@ -2,7 +2,7 @@
 
 import { track } from "@/lib/track";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { ProductImage } from "@/lib/catalog";
 import { Dialog, CloseButton } from "./Dialog";
 import { preview } from "@/lib/blur";
@@ -17,7 +17,7 @@ function Arrow({ dir }: { dir: "prev" | "next" }) {
 }
 
 /** Product photos: swipe on phones, grid on desktop. Tap any photo to open it full screen. */
-export function Gallery({ images, label }: { images: readonly ProductImage[]; label: string }) {
+export function Gallery({ images, label, tag }: { images: readonly ProductImage[]; label: string; tag?: ReactNode }) {
   const strip = useRef<HTMLDivElement>(null);
   const viewer = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
@@ -85,6 +85,7 @@ export function Gallery({ images, label }: { images: readonly ProductImage[]; la
           </button>
         ))}
       </div>
+      {tag}
       <span className="gal-count" aria-hidden="true">
         {active + 1} / {total}
       </span>

@@ -199,6 +199,9 @@ async function saleCheck(browser) {
     const pdp = await page.evaluate(() => document.querySelector(".info")?.textContent ?? "");
     if (!pdp.includes("900 EGP")) f("product page does not show the 900 EGP sale price");
     if (!/Black Friday.*ends in/.test(pdp)) f("product page does not show the sale countdown line");
+    // Nov 20 2026: offer label on the photos (top-right) while the sale runs.
+    const tag = (await page.locator(".gal-wrap > .tag").textContent().catch(() => "")) ?? "";
+    if (!/black friday/i.test(tag)) f("product photos do not show the Black Friday label");
     await shot(page, "mobile-sale-product");
     await page.goto(BASE + "/checkout", { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
@@ -250,6 +253,7 @@ async function offerCheck(browser) {
     await p3.goto(BASE + "/", { waitUntil: "networkidle" });
     await p3.waitForTimeout(1800);
     if (await p3.locator("dialog[open]:has(.lo)").count()) f("offer popup shows although the offer has ended");
+    if (await p3.locator(".pc-ph .tag").count()) f("sale label still on the photos although the offer has ended");
     await c3.close();
   } finally {
     await sql`UPDATE products SET price_piasters = ${before.price_piasters}, compare_at_piasters = ${before.compare_at_piasters},

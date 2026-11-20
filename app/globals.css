@@ -190,11 +190,15 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .gal-i { display: block; width: 100%; padding: 0; position: relative; aspect-ratio: 4 / 5; scroll-snap-align: start; scroll-snap-stop: always; background: var(--stone); cursor: zoom-in; overflow: hidden; }
 .gal-i img { object-fit: cover; transition: transform 0.8s var(--ease); }
 @media (hover: hover) { .gal-i:hover img { transform: scale(1.02); } }
-.gal-count { position: absolute; top: var(--s2); right: 0; background: color-mix(in srgb, var(--paper) 88%, transparent); border-radius: var(--r); padding: 4px 10px; font-size: 12px; font-variant-numeric: tabular-nums; pointer-events: none; }
+.gal-count { position: absolute; top: var(--s2); left: 0; background: color-mix(in srgb, var(--paper) 88%, transparent); border-radius: var(--r); padding: 4px 10px; font-size: 12px; font-variant-numeric: tabular-nums; pointer-events: none; }
 @media (min-width: 900px) {
   .gal { grid-auto-flow: row; grid-template-columns: 1fr 1fr; gap: var(--s1); overflow: visible; margin: 0; }
   .gal-i:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
 }
+/* Offer label on product photos (Khaled, Nov 20 2026): plum + pink like the sale popup, top-right. */
+.tag { position: absolute; top: var(--s2); right: var(--s2); z-index: 1; background: var(--ink); color: var(--pink); border-radius: var(--r); padding: 4px 10px; font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; pointer-events: none; }
+.gal-wrap > .tag { right: 0; }
+@media (min-width: 900px) { .gal-wrap > .tag { right: var(--s2); } }
 .gal-bar { display: flex; justify-content: center; margin-top: var(--s1); }
 .gal-bar button { width: 44px; height: 44px; display: grid; place-items: center; }
 .gal-bar i { height: 2px; width: 24px; background: var(--line); transition: background 0.3s; }
