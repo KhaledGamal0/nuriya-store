@@ -73,6 +73,8 @@ Act as Khaled's senior expert: engineering, UI/UX, security, business logic, e-c
 
 10. **UI changes (Khaled, Oct 29 2026):** change only what he asked; keep the approved look (one accent: plum buttons; pink-tint boxes; no new colours, boxes, lines or button styles). Before publishing, review the screen as a whole like a senior UI/UX designer: clear order (offer → extras → countdown → button), nothing duplicated, nothing extra. If something else would improve it, ask first.
 
+12. **Expert decisions (Khaled, Nov 20 2026):** plan every change first, compare it with how top fashion stores do it (his references + known best practice), take the decision yourself as the expert, then build, check it on a real 390 px phone screenshot before calling it done, and write the lesson here. Lesson Nov 20: a label over a photo must never cover the face or the product: keep it short ("Sale") and tucked into the corner; long uppercase chips look heavy on phones.
+
 ## Working process for every change (Khaled, Oct 24 2026: follow from begin to end, never skip)
 1. **Start:** list the points as a short to-do list. Ask only what decides money, prices or product facts; otherwise do it.
 2. **Never break what works.** Small, scoped changes. Orders, checkout, prices, stock and e-mails are touched only when the task is about them.
