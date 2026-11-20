@@ -38,6 +38,7 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 - From this workspace use the GitHub REST API (`gh api repos/KhaledGamal0/nuriya-store/...`), never `gh pr create` / `gh workflow run` (GraphQL is blocked). Run a workflow: `gh api -X POST repos/KhaledGamal0/nuriya-store/actions/workflows/<file>/dispatches -f ref=main -f "inputs[x]=y"`. Results of admin tasks: the run's check-run annotations.
 - Reports: sales reports by Vercel Cron (`/api/cron/reports`, every 10 min, Cairo time); `reports-clock.yml` (GitHub, unreliable timing) is the backup and sends health reports; both send each report once via `report_runs`. Never add UTC crons to report workflows.
 - Customers never see "WhatsApp" or a "we will confirm/contact you" promise on the site (Khaled, Nov 20 2026, until WhatsApp Business exists): placing the order is final; we contact only if something needs attention. Shop e-mails/reports keep the WhatsApp link. Guarded by `tests/customer-copy.test.ts`.
+- Product page sections: Details · Material · Size and fit · Delivery and returns. Material text = `products.fabric_en` (Khaled's wording, Nov 20 2026); care instructions TODO(khaled).
 - Backups: `db-backup.yml` tries hourly, one encrypted backup per Cairo day (artifact `nuriya-db-YYYY-MM-DD`); manual runs always make one.
 - Schema changes = a NEW file `db/migrations/000N_name.sql` (never edit an applied one) + matching `lib/db/schema.ts` columns. After any data change call `refreshStorefront()`.
 
