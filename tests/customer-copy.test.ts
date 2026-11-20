@@ -19,7 +19,15 @@ test("no customer-facing page or component mentions WhatsApp", () => {
   }
 });
 
+test("no customer screen promises a confirmation call or message (Khaled, Nov 20 2026)", () => {
+  for (const f of [...files("app"), ...files("components")]) {
+    if (f.startsWith(join("app", "api"))) continue;
+    const s = readFileSync(f, "utf8").replace(/&apos;/g, "'");
+    assert.ok(!/we'll (confirm|contact you to)|we confirm (every|your) order/i.test(s), `${f} promises to confirm the order`);
+  }
+});
+
 test("order status shown to customers does not mention WhatsApp", async () => {
   const { STATUS_TEXT } = await import("../lib/orders.ts");
-  for (const [k, v] of Object.entries(STATUS_TEXT)) assert.ok(!/whatsapp/i.test(v), `${k}: ${v}`);
+  for (const [k, v] of Object.entries(STATUS_TEXT)) assert.ok(!/whatsapp|contact you|confirm with you/i.test(v), `${k}: ${v}`);
 });

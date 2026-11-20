@@ -229,7 +229,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
       >
         <h1>Checkout</h1>
         <p className="small" style={{ marginTop: "var(--s1)" }}>
-          No account needed. We confirm every order before it ships.
+          No account needed. Please check your number and address before you place your order.
         </p>
         <input type="hidden" name="cart" value={JSON.stringify(bag.lines)} />
         {/* Left empty by people; bots that fill every field are refused. */}
@@ -270,7 +270,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
                   <path d="M5 12.5l4.5 4.5L19 7.5" />
                 </svg>
-                We&apos;ll confirm on <b>{prettyPhone(phoneOk)}</b>
+                Delivery number: <b>{prettyPhone(phoneOk)}</b>
               </p>
             )}
           </Field>

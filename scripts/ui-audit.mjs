@@ -538,6 +538,8 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     }
     // Khaled, Nov 20 2026: customers never see WhatsApp on the site (shop e-mails and reports keep it).
     if (/whatsapp/i.test(shown)) add(vp, where, "flow", "confirmation page mentions WhatsApp");
+    // Nov 20 2026: placing the order is final; the shop only contacts customers if something needs attention.
+    if (/we.ll (confirm|contact you to)/i.test(shown)) add(vp, where, "flow", "confirmation page promises a confirmation contact");
     if (!db) return;
     const phone = PHONES[vp].replace(/\s/g, "");
     const rows = await db`SELECT number, status, total_piasters FROM orders WHERE customer_phone = ${phone}`;

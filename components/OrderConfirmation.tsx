@@ -87,10 +87,10 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
         <p className="ok-lead">
           {receipt ? (
             <>
-              We&apos;ll contact you at <b>{prettyPhone(receipt.phone)}</b> to confirm it before it ships.
+              We&apos;re preparing it for delivery to <b>{receipt.area}</b>.
             </>
           ) : (
-            <>We&apos;ll contact you to confirm it before it ships.</>
+            <>We&apos;re preparing it for delivery.</>
           )}
         </p>
       </header>
@@ -99,10 +99,6 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
         <section className="ok-next" aria-labelledby="ok-next-h">
           <h2 id="ok-next-h">What happens next</h2>
           <ol>
-            <li>
-              <b>We confirm your order</b>
-              <span>A quick check of your order and address. Please keep your phone nearby.</span>
-            </li>
             <li>
               <b>We pack it and hand it to the courier</b>
               <span>Packed by hand in Cairo and sent with Direction.</span>
@@ -125,7 +121,8 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
             </Link>
           </div>
           <p className="small">
-            Questions? Message us on{" "}
+            Please check your number and address in your order. We&apos;ll only contact you if something needs attention.
+            Wrong details or a question? Message us on{" "}
             <a className="line-link" href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
               Instagram @nuriya.eg
             </a>
