@@ -187,7 +187,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .gal { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; margin-inline: calc(var(--g) * -1); }
 .gal::-webkit-scrollbar { display: none; }
 .gal-wrap { position: relative; }
-.gal-i { display: block; width: 100%; padding: 0; position: relative; aspect-ratio: 4 / 5; scroll-snap-align: start; background: var(--stone); cursor: zoom-in; overflow: hidden; }
+.gal-i { display: block; width: 100%; padding: 0; position: relative; aspect-ratio: 4 / 5; scroll-snap-align: start; scroll-snap-stop: always; background: var(--stone); cursor: zoom-in; overflow: hidden; }
 .gal-i img { object-fit: cover; transition: transform 0.8s var(--ease); }
 @media (hover: hover) { .gal-i:hover img { transform: scale(1.02); } }
 .gal-count { position: absolute; top: var(--s2); right: 0; background: color-mix(in srgb, var(--paper) 88%, transparent); border-radius: var(--r); padding: 4px 10px; font-size: 12px; font-variant-numeric: tabular-nums; pointer-events: none; }
@@ -209,7 +209,7 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .vw-h { display: flex; justify-content: space-between; align-items: center; height: var(--header); padding: 0 var(--s1) 0 var(--g); }
 .vw { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior: contain; }
 .vw::-webkit-scrollbar { display: none; }
-.vw-i { position: relative; scroll-snap-align: start; }
+.vw-i { position: relative; scroll-snap-align: start; scroll-snap-stop: always; }
 .vw-i img { object-fit: contain; }
 .vw-nav { position: absolute; top: 50%; width: 44px; height: 44px; display: grid; place-items: center; background: color-mix(in srgb, var(--paper) 90%, transparent); border-radius: var(--r); box-shadow: 0 0 0 1px var(--line); transition: opacity 0.2s; }
 .vw-nav:disabled { opacity: 0; pointer-events: none; }

@@ -281,7 +281,7 @@ export function CheckoutForm({ cardEnabled = false }: { cardEnabled?: boolean })
               type="tel"
               inputMode="tel"
               autoComplete="off"
-              placeholder="010 1234 5678"
+              placeholder="012 3456 7890"
               value={phone2}
               {...live("phone2")}
               aria-describedby={errors.phone2 ? "phone2-err" : undefined}
