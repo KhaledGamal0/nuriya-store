@@ -87,10 +87,10 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
         <p className="ok-lead">
           {receipt ? (
             <>
-              We&apos;ll message you on WhatsApp at <b>{prettyPhone(receipt.phone)}</b> to confirm it before it ships.
+              We&apos;ll contact you at <b>{prettyPhone(receipt.phone)}</b> to confirm it before it ships.
             </>
           ) : (
-            <>We&apos;ll message you on WhatsApp to confirm it before it ships.</>
+            <>We&apos;ll contact you to confirm it before it ships.</>
           )}
         </p>
       </header>
@@ -100,8 +100,8 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
           <h2 id="ok-next-h">What happens next</h2>
           <ol>
             <li>
-              <b>We confirm on WhatsApp</b>
-              <span>A quick message to check your order and address.</span>
+              <b>We confirm your order</b>
+              <span>A quick check of your order and address. Please keep your phone nearby.</span>
             </li>
             <li>
               <b>We pack it and hand it to the courier</b>
@@ -151,7 +151,17 @@ export function OrderConfirmation({ number, payment }: { number: string | null; 
                       <span>Qty {l.qty}</span>
                     </div>
                     <div className="ln-r">
-                      <span className="price">{formatEgp(l.linePiasters)}</span>
+                      {/* Same crossed-out full price as the bag while an offer runs. */}
+                      <span className="price">
+                        {catalog.compareAtPiasters != null && catalog.compareAtPiasters * l.qty > l.linePiasters && (
+                          <>
+                            <span className="sr-only">Was </span>
+                            <s className="was">{formatEgp(catalog.compareAtPiasters * l.qty)}</s>{" "}
+                            <span className="sr-only">, now </span>
+                          </>
+                        )}
+                        {formatEgp(l.linePiasters)}
+                      </span>
                     </div>
                   </div>
                 );
