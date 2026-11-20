@@ -252,7 +252,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
 
 export const STATUS_TEXT: Record<string, string> = {
   PENDING_PAYMENT: "Waiting for payment",
-  CONFIRMATION_NEEDED: "Received. We'll contact you to confirm it.",
+  CONFIRMATION_NEEDED: "Received. We're preparing it.",
   CONFIRMED: "Confirmed. We're preparing it.",
   PACKED: "Packed and ready for the courier.",
   WITH_COURIER: "With the courier, on its way to you.",

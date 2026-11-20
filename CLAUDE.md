@@ -36,7 +36,7 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 - Photos: a changed photo always gets a NEW file name (prepared photos are cached 1 year). After adding photos run `python3 scripts/make-images.py && python3 scripts/make-blur.py` (every size made ahead of time + loading previews; a test fails if forgotten).
 - From this workspace use the GitHub REST API (`gh api repos/KhaledGamal0/nuriya-store/...`), never `gh pr create` / `gh workflow run` (GraphQL is blocked). Run a workflow: `gh api -X POST repos/KhaledGamal0/nuriya-store/actions/workflows/<file>/dispatches -f ref=main -f "inputs[x]=y"`. Results of admin tasks: the run's check-run annotations.
 - Reports: sales reports by Vercel Cron (`/api/cron/reports`, every 10 min, Cairo time); `reports-clock.yml` (GitHub, unreliable timing) is the backup and sends health reports; both send each report once via `report_runs`. Never add UTC crons to report workflows.
-- Customers never see "WhatsApp" on the site (Khaled, Nov 20 2026, until a business WhatsApp exists); shop e-mails/reports keep the link. Guarded by `tests/customer-copy.test.ts`.
+- Customers never see "WhatsApp" or a "we will confirm/contact you" promise on the site (Khaled, Nov 20 2026, until WhatsApp Business exists): placing the order is final; we contact only if something needs attention. Shop e-mails/reports keep the WhatsApp link. Guarded by `tests/customer-copy.test.ts`.
 - Backups: `db-backup.yml` tries hourly, one encrypted backup per Cairo day (artifact `nuriya-db-YYYY-MM-DD`); manual runs always make one.
 - Schema changes = a NEW file `db/migrations/000N_name.sql` (never edit an applied one) + matching `lib/db/schema.ts` columns. After any data change call `refreshStorefront()`.
 
