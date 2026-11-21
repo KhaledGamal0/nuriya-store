@@ -278,6 +278,17 @@ export type TrackedOrder = {
 
 export const ORDER_NUMBER = /^NUR-[2-9A-HJ-NP-Z]{6}$/;
 
+/**
+ * The thank-you page opens only for an order that really exists (Khaled, Nov 22 2026): typing the address
+ * or reusing an old link must never show "order placed". Says nothing else about the order.
+ */
+export async function orderExists(sql: Sql, number: string): Promise<boolean> {
+  if (!ORDER_NUMBER.test(number)) return false;
+  const [row] = await sql<{ ok: number }[]>`
+    SELECT 1 AS ok FROM orders WHERE number = ${number} AND created_at > now() - interval '30 days' LIMIT 1`;
+  return Boolean(row);
+}
+
 /** Needs BOTH the order number and the phone used for it. Never says which one was wrong. */
 export async function findOrder(sql: Sql, rawNumber: unknown, rawPhone: unknown): Promise<TrackedOrder | null> {
   const number = typeof rawNumber === "string" ? rawNumber.trim().toUpperCase() : "";

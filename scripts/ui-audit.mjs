@@ -24,7 +24,6 @@ const PAGES = [
   ["size-guide", "/size-guide"],
   ["returns", "/returns"],
   ["checkout-empty", "/checkout"],
-  ["order-done", "/checkout/done?o=NUR-ABCDEF&p=cod"],
   ["not-found", "/this-page-does-not-exist"],
 ];
 
@@ -372,6 +371,13 @@ for (const [vp, opts] of Object.entries(VIEWPORTS)) {
     await shot(page, `${vp}-${name}`);
     await photoCheck(page, vp, name);
     await page.screenshot({ path: `${OUT}/shots/${vp}-${name}-full.png`, fullPage: true });
+  }
+
+  // Nov 22 2026: the thank-you page opens only for a real order; anything else lands on the home page.
+  for (const fake of ["/checkout/done", "/checkout/done?o=NUR-ABCDEF&p=cod", "/checkout/done?o=hello"]) {
+    where = "order-done-guard";
+    await page.goto(BASE + fake, { waitUntil: "domcontentloaded" });
+    if (new URL(page.url()).pathname !== "/") add(vp, where, "flow", `${fake} did not go to the home page (no order behind it)`);
   }
 
   // Header hides on scroll down and returns on scroll up
