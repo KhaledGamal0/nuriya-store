@@ -243,6 +243,18 @@ test("order lookup needs the right number AND phone, and says the same thing oth
   assert.equal(await findOrder(getSql(), "' OR 1=1 --", phone), null);
 });
 
+test("the thank-you page check: only a real, recent order number passes (Nov 22 2026)", { skip }, async () => {
+  const { orderExists } = await import("../lib/orders.ts");
+  const { getSql } = await import("../lib/db/index.ts");
+  const r = await place(await valid(nextPhone()));
+  assert.ok(r.ok);
+  if (!r.ok) return;
+  assert.equal(await orderExists(getSql(), r.number), true);
+  assert.equal(await orderExists(getSql(), "NUR-ZZZZZZ"), false);
+  assert.equal(await orderExists(getSql(), "' OR 1=1 --"), false);
+  assert.equal(await orderExists(getSql(), ""), false);
+});
+
 test("order e-mail: sent once, retried after a failure, and never blocks or loses the order", { skip }, async () => {
   const { sendPendingOrderEmails } = await import("../lib/notify.ts");
   const { getSql } = await import("../lib/db/index.ts");
