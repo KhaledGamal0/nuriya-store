@@ -1,0 +1,40 @@
+name: Checkout check
+
+# Read-only (Nov 22 2026): what happened when buyers pressed "Place order". Prints counts only —
+# no names, phones or addresses, because this repository is public. Changes nothing.
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "From (UTC), e.g. 2026-11-19T00:00:00Z"
+        default: "2026-11-19T00:00:00Z"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      SINCE: ${{ inputs.since }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Database address (masked)
+        run: node scripts/neon.mjs env production
+      - name: Orders and server-side Place-order attempts (counts only)
+        run: |
+          q() { docker run --rm --network host -e DATABASE_URL postgres:17 psql "$DATABASE_URL" -q -P pager=off -c "$1"; }
+          echo "=== Orders since $SINCE by day (Cairo) and status ==="
+          q "SELECT to_char(created_at AT TIME ZONE 'Africa/Cairo','Dy DD Mon') AS day, status, count(*) FROM orders WHERE created_at >= '$SINCE' GROUP BY 1,2,date_trunc('day',created_at AT TIME ZONE 'Africa/Cairo') ORDER BY date_trunc('day',created_at AT TIME ZONE 'Africa/Cairo')"
+          echo "=== Place-order requests that passed the form checks and reached saving (rate-limit counter, kept ~1 day) ==="
+          q "SELECT to_char(window_start AT TIME ZONE 'Africa/Cairo','Dy DD Mon HH24:MI') AS window, count(DISTINCT key) AS devices, sum(count) AS attempts FROM rate_limits WHERE key LIKE 'checkout:%' GROUP BY window_start ORDER BY window_start"
+          echo "=== Order events since $SINCE ==="
+          q "SELECT type, count(*) FROM order_events WHERE created_at >= '$SINCE' GROUP BY 1 ORDER BY 1" || true
+      - name: Vercel server logs (masked)
+        run: node scripts/checkout-diagnose.mjs
