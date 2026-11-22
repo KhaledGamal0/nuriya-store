@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { validateCheckout, normalizePhone, parseCart, newOrderNumber } from "../lib/checkout.ts";
 import { AREAS, getArea } from "../lib/shipping.ts";
 import { formatEgp } from "../lib/money.ts";
-import { sizeForWeight } from "../lib/catalog.ts";
+import { sizeForWeight, lowStockLeft, LOW_STOCK } from "../lib/catalog.ts";
 
 const good = {
   phone: "010 1234 5678",
@@ -214,4 +214,14 @@ test("area inside Cairo / Giza: required from the list there, ignored elsewhere;
   const alex = validateCheckout({ ...good, areaId: "alexandria", district: "Nasr City", cart });
   assert.ok(alex.ok && alex.order.district === null, "outside Cairo / Giza the area list is not used");
   assert.ok(DISTRICTS.cairo!.includes("Other") && DISTRICTS.giza!.includes("Other"), "anyone can still order");
+});
+
+test("\"Only X left\" shows from 5 pieces down, never for plenty, sold out or uncounted stock (Nov 22 2026)", () => {
+  assert.equal(LOW_STOCK, 5);
+  assert.equal(lowStockLeft(true, 5, 0), 5);
+  assert.equal(lowStockLeft(true, 1, 0), 1);
+  assert.equal(lowStockLeft(true, 7, 3), 4); // reserved pieces don't count
+  assert.equal(lowStockLeft(true, 6, 0), undefined); // plenty: the number never leaves the server
+  assert.equal(lowStockLeft(true, 0, 0), undefined); // sold out shows "Sold out" instead
+  assert.equal(lowStockLeft(false, 2, 0), undefined); // stock not counted
 });

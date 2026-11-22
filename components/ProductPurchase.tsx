@@ -87,14 +87,14 @@ export function ProductPurchase({ color }: { color: ColorId }) {
           </button>
         </div>
         <div className="opts" role="group" aria-labelledby="size-label" id="size-group">
-          {options.map(({ size: s, available }) => (
+          {options.map(({ size: s, available, left }) => (
             <button
               key={s}
               className="opt"
               type="button"
               aria-pressed={size === s}
               disabled={!available}
-              aria-label={available ? s : `${s}, sold out`}
+              aria-label={!available ? `${s}, sold out` : left ? `${s}, only ${left} left` : s}
               onClick={() => {
                 track("3 · Chose size", `${catalog.colors[color].name} · ${s}`);
                 setSize(s);
@@ -103,6 +103,7 @@ export function ProductPurchase({ color }: { color: ColorId }) {
             >
               {s}
               {!available && <span className="opt-note">Sold out</span>}
+              {available && left && <span className="opt-note low">Only {left} left</span>}
             </button>
           ))}
         </div>

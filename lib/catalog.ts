@@ -91,7 +91,16 @@ export function sizeForWeight(kg: number): { size: SizeId; note: string } {
 
 // ---------- Catalog as the storefront sees it (from the database, or from PRODUCT above as fallback) ----------
 
-export type SizeOption = { size: SizeId; available: boolean; pricePiasters: number };
+/** `left` is set only when 1–5 pieces remain (Khaled, Nov 22 2026), so larger stock counts never leave the server. */
+export type SizeOption = { size: SizeId; available: boolean; pricePiasters: number; left?: number };
+
+/** "Only X left" shows on a size from this many pieces down (Khaled, Nov 22 2026). */
+export const LOW_STOCK = 5;
+/** Pieces to show as "Only X left", or undefined when there is plenty, it is sold out, or stock isn't counted. */
+export function lowStockLeft(tracked: boolean, onHand: number, reserved: number): number | undefined {
+  const left = onHand - reserved;
+  return tracked && left > 0 && left <= LOW_STOCK ? left : undefined;
+}
 export type ColorwayData = Colorway & { sizes: readonly SizeOption[] };
 export type SizeChartRow = { size: SizeId; shoulderCm: number; chestCm: number; lengthCm: number; weightKg: readonly [number, number] };
 /** When the sale ends, and the prices that apply from that moment (so pages switch on time without a reload). */

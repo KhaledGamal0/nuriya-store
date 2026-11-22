@@ -4,6 +4,7 @@
 import { createHash } from "node:crypto";
 import type { Sql } from "./db/index.ts";
 import { newOrderNumber, normalizePhone, type ValidOrder } from "./checkout.ts";
+import { LOW_STOCK } from "./catalog.ts";
 
 const PRODUCT_SLUG = "quiet-confidence";
 
@@ -34,7 +35,7 @@ export type RefusalReason =
   | "bad_key";
 
 export type PlaceResult =
-  | { ok: true; number: string; payment: "cod" | "card"; existing: boolean; soldOutNow: boolean; offerEnded?: boolean; offerPiecesSold?: number }
+  | { ok: true; number: string; payment: "cod" | "card"; existing: boolean; soldOutNow: boolean; lowNow?: boolean; offerEnded?: boolean; offerPiecesSold?: number }
   | { ok: false; reason: RefusalReason };
 
 class Refusal extends Error {
@@ -172,6 +173,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
         let offerPiecesHere = 0;
 
         let soldOutNow = false;
+        let lowNow = false; // a size now has 5 or fewer: pages refresh so "Only X left" stays true
         const items = [];
         for (const line of order.lines) {
           const v = variants.find((x) => x.color === line.color && x.size === line.size);
@@ -192,6 +194,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
             RETURNING track_inventory AS tracked, stock_on_hand - stock_reserved AS left`;
           if (!left) throw new Refusal("sold_out");
           if (left.tracked && left.left === 0) soldOutNow = true;
+          else if (left.tracked && left.left <= LOW_STOCK) lowNow = true;
           items.push({ v, line });
         }
 
@@ -231,7 +234,7 @@ export async function placeOrder(sql: Sql, order: ValidOrder, opts: { key: strin
           offerEnded = true;
         }
 
-        return { ok: true as const, number, payment: order.payment, existing: false, soldOutNow, offerEnded, offerPiecesSold: offerPiecesHere };
+        return { ok: true as const, number, payment: order.payment, existing: false, soldOutNow, lowNow, offerEnded, offerPiecesSold: offerPiecesHere };
       });
     } catch (err) {
       if (err instanceof Refusal) return { ok: false, reason: err.reason };
