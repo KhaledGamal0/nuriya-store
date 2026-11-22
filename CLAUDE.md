@@ -39,6 +39,7 @@ You are building the custom e-commerce website + admin dashboard for **Nuriya**,
 - Reports: sales reports by Vercel Cron (`/api/cron/reports`, every 10 min, Cairo time); `reports-clock.yml` (GitHub, unreliable timing) is the backup and sends health reports; both send each report once via `report_runs`. Never add UTC crons to report workflows.
 - Customers never see "WhatsApp" or a "we will confirm/contact you" promise on the site (Khaled, Nov 20 2026, until WhatsApp Business exists): placing the order is final; we contact only if something needs attention. Shop e-mails/reports keep the WhatsApp link. Guarded by `tests/customer-copy.test.ts`.
 - Product page sections: Details · Material · Size and fit · Delivery and returns. Material text = `products.fabric_en` (Khaled's wording, Nov 20 2026); care instructions TODO(khaled).
+- Low stock: a size with 1–5 real pieces shows "Only X left" on its size button (`LOW_STOCK` in `lib/catalog.ts`, Nov 22 2026); counts above 5 are never sent to the browser.
 - Thank-you page `/checkout/done` opens only for a real order number (DB check), else home (Nov 22 2026). To see what buyers did at checkout: Actions → "Checkout check" (read-only, counts only).
 - Backups: `db-backup.yml` tries hourly, one encrypted backup per Cairo day (artifact `nuriya-db-YYYY-MM-DD`); manual runs always make one.
 - Schema changes = a NEW file `db/migrations/000N_name.sql` (never edit an applied one) + matching `lib/db/schema.ts` columns. After any data change call `refreshStorefront()`.

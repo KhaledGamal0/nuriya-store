@@ -272,6 +272,8 @@ button.u { min-height: 44px; display: inline-flex; align-items: center; }
 .opt[aria-pressed="true"], .opt[aria-current="true"] { box-shadow: inset 0 0 0 1.5px var(--ink); }
 .opt:disabled { color: var(--ink-2); background: var(--stone); box-shadow: none; cursor: not-allowed; }
 .opt-note { font-size: 11px; font-weight: 400; margin-left: 6px; }
+/* Real stock, 5 or fewer (Khaled, Nov 22 2026): same small note as "Sold out", in the sale burgundy. */
+.opt-note.low { color: var(--burg); font-weight: 500; }
 .dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(60, 14, 24, 0.2); }
 .sz-err { color: var(--error); font-size: 12.5px; margin-top: var(--s1); }
 .model-fit { font-size: 12.5px; color: var(--ink-2); margin-top: var(--s1); }

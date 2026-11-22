@@ -9,6 +9,7 @@ import {
   SIZES,
   isColor,
   isSize,
+  lowStockLeft,
   staticCatalog,
   type CatalogData,
   type ColorId,
@@ -71,7 +72,8 @@ async function loadCatalog(): Promise<CatalogData> {
       sizes: SIZES.map((size) => {
         const v = vars.find((x) => x.colorwayId === cw.id && x.size === size);
         const inStock = v ? !v.trackInventory || v.stockOnHand - v.stockReserved > 0 : false;
-        return { size, available: Boolean(v?.isActive) && inStock, pricePiasters: v?.priceOverridePiasters ?? price };
+        const left = v?.isActive ? lowStockLeft(v.trackInventory, v.stockOnHand, v.stockReserved) : undefined;
+        return { size, available: Boolean(v?.isActive) && inStock, pricePiasters: v?.priceOverridePiasters ?? price, ...(left && { left }) };
       }),
     };
   }

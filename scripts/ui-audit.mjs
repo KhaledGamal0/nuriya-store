@@ -156,6 +156,36 @@ async function shot(page, name) {
 
 // Launch-day sale: popup appears once, is accessible (focus inside, Escape closes), prices show the sale,
 // the product page shows the countdown line, and nothing shows once the sale is off.
+// Nov 22 2026: a size with 5 or fewer pieces shows "Only X left" on its size button; 6 or more shows nothing.
+async function lowStockCheck(browser) {
+  if (!process.env.DATABASE_URL) return;
+  const { default: postgres } = await import("postgres");
+  const sql = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
+  const refresh = () => fetch(BASE + "/api/revalidate", { method: "POST", headers: { authorization: `Bearer ${process.env.REVALIDATE_SECRET}` } });
+  const f = (detail) => add("mobile", "low-stock", "flow", detail);
+  const ctx = await browser.newContext({ ...VIEWPORTS.mobile, popup: false });
+  const page = await ctx.newPage();
+  const [v] = await sql`SELECT v.id, v.stock_on_hand, v.track_inventory FROM variants v JOIN colorways c ON c.id = v.colorway_id WHERE c.code = 'burgundy' AND v.size = 'L/XL'`;
+  if (!v) return f("test data has no Burgundy L/XL");
+  try {
+    await sql`UPDATE variants SET track_inventory = true, stock_on_hand = stock_reserved + 3 WHERE id = ${v.id}`;
+    await refresh();
+    await page.goto(BASE + "/quiet-confidence/burgundy", { waitUntil: "networkidle" });
+    await page.waitForTimeout(1500);
+    if (await page.locator("dialog[open]").count()) await page.keyboard.press("Escape"); // offer popup, if one runs
+    const btn = page.locator(".opt", { hasText: "L/XL" });
+    if (!/Only 3 left/.test((await btn.textContent()) ?? "")) f('size L/XL with 3 pieces does not show "Only 3 left"');
+    if (/left/i.test((await page.locator(".opt", { hasText: "S/M" }).textContent()) ?? "")) f("a size with plenty of stock shows a stock note");
+    await page.locator("#size-group").scrollIntoViewIfNeeded();
+    await shot(page, "mobile-low-stock");
+  } finally {
+    await sql`UPDATE variants SET stock_on_hand = ${v.stock_on_hand}, track_inventory = ${v.track_inventory} WHERE id = ${v.id}`;
+    await refresh();
+    await ctx.close();
+    await sql.end();
+  }
+}
+
 async function saleCheck(browser) {
   if (!process.env.DATABASE_URL) return;
   const { default: postgres } = await import("postgres");
@@ -611,6 +641,7 @@ await (async () => {
   await ctx.close();
 })().catch((e) => add("mobile", "loading", "audit-step-failed", String(e.message).slice(0, 160)));
 await saleCheck(browser).catch((e) => add("mobile", "sale", "audit-step-failed", String(e.message).slice(0, 160)));
+await lowStockCheck(browser).catch((e) => add("mobile", "low-stock", "audit-step-failed", String(e.message).slice(0, 160)));
 await offerCheck(browser).catch((e) => add("mobile", "offer", "audit-step-failed", String(e.message).slice(0, 160)));
 await refreshCheck(browser).catch((e) => add("mobile", "refresh", "audit-step-failed", String(e.message).slice(0, 160)));
 await browser.close();
